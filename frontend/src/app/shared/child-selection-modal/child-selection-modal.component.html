@@ -21,7 +21,7 @@
         <div class="flex flex-col items-start">
             <span class="text-sm font-medium">{{ selectedChildName() }}</span>
             <span *ngIf="selectedChild()" class="text-xs opacity-75">
-                Niveau {{ getLevelName(selectedChild()?.level?.id) }}
+                {{ getClasseName(selectedChild()?.classe) }}
             </span>
         </div>
 
@@ -133,9 +133,9 @@
                             </h3>
                             <div class="flex items-center space-x-2 mt-1">
                                 <span
-                                    [class]="'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ' + getLevelBadgeClass(child.level?.id)">
+                                    [class]="'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ' + getClasseBadgeClass(child.classe)">
                                     <i class="fa-solid fa-graduation-cap mr-1"></i>
-                                    {{ getLevelName(child.level?.id) }}
+                                    {{ getClasseName(child.classe) }}
                                 </span>
                             </div>
                         </div>

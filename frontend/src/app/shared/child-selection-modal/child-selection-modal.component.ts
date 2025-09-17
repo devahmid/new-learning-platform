@@ -14,6 +14,7 @@ import { ParentService } from '../../_children-context/_children-context/parent.
 import { User } from '../../models/user.model';
 import { ChildSelectionModalService } from './child-selection-modal.service';
 import { AuthService } from '../../auth/auth.service';
+import { ChildStatsService } from '../../services/child-stats.service';
 
 @Component({
   selector: 'app-child-selection-modal',
@@ -27,6 +28,7 @@ export class ChildSelectionModalComponent implements OnInit, OnDestroy {
   private parentService = inject(ParentService);
   private modalService = inject(ChildSelectionModalService);
   private authService = inject(AuthService);
+  private childStatsService = inject(ChildStatsService);
   router = inject(Router);
 
   // État du modal
@@ -34,6 +36,7 @@ export class ChildSelectionModalComponent implements OnInit, OnDestroy {
   isLoading = signal(false);
   children = signal<User[]>([]);
   selectedChild = this.childContext.selectedChild;
+  childrenProgress = signal<Map<number, number>>(new Map());
 
   // État du drag and drop
   isDragging = false;
@@ -85,13 +88,38 @@ export class ChildSelectionModalComponent implements OnInit, OnDestroy {
       const children = await this.parentService
         .getChildrenOfLoggedInParent()
         .toPromise();
+      console.log('[CHILD-MODAL] Enfants chargés:', children);
       this.children.set(children || []);
+      
+      // Charger les progressions pour chaque enfant
+      if (children && children.length > 0) {
+        await this.loadChildrenProgress(children);
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des enfants:', error);
       this.children.set([]);
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  private async loadChildrenProgress(children: User[]) {
+    const progressMap = new Map<number, number>();
+    
+    for (const child of children) {
+      try {
+        // Récupérer la vraie progression depuis l'API
+        const stats = await this.childStatsService.getChildStats(child.id).toPromise();
+        const progress = stats ? this.childStatsService.calculateProgress(stats) : 0;
+        progressMap.set(child.id, progress);
+      } catch (error) {
+        console.error(`Erreur lors du chargement de la progression pour l'enfant ${child.id}:`, error);
+        // Fallback vers une progression par défaut
+        progressMap.set(child.id, 0);
+      }
+    }
+    
+    this.childrenProgress.set(progressMap);
   }
 
   openModal() {
@@ -133,7 +161,7 @@ export class ChildSelectionModalComponent implements OnInit, OnDestroy {
         id: child.id,
         firstName: child.firstName,
         lastName: child.lastName,
-        level: child.level,
+        classe: child.classe,
       })
     );
   }
@@ -172,30 +200,36 @@ export class ChildSelectionModalComponent implements OnInit, OnDestroy {
     return `${child.firstName || ''} ${child.lastName || ''}`.trim();
   }
 
-  getLevelBadgeClass(levelId?: number): string {
-    switch (levelId) {
+  getClasseBadgeClass(classe?: any): string {
+    if (!classe) {
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+    
+    // Utiliser l'ID de la classe pour déterminer la couleur
+    const classeId = classe.id;
+    switch (classeId) {
       case 1:
-        return 'bg-green-100 text-green-800 border-green-200';
       case 2:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-green-100 text-green-800 border-green-200';
       case 3:
+      case 4:
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 5:
+      case 6:
         return 'bg-red-100 text-red-800 border-red-200';
+      case 7:
+      case 8:
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   }
 
-  getLevelName(levelId?: number): string {
-    switch (levelId) {
-      case 1:
-        return 'Débutant';
-      case 2:
-        return 'Intermédiaire';
-      case 3:
-        return 'Avancé';
-      default:
-        return 'Non défini';
+  getClasseName(classe?: any): string {
+    if (!classe) {
+      return 'Non définie';
     }
+    return classe.name || `Classe ${classe.id}`;
   }
 
   // Empêcher la fermeture du modal en cliquant sur le contenu
@@ -211,11 +245,10 @@ export class ChildSelectionModalComponent implements OnInit, OnDestroy {
     return child.id;
   }
 
-  // Générer une progression fixe basée sur l'ID de l'enfant
+  // Récupérer la vraie progression de l'enfant
   getChildProgress(child: User): number {
-    // Utiliser l'ID de l'enfant pour générer une valeur fixe entre 60 et 100
-    const seed = child.id || 1;
-    return ((seed * 7) % 40) + 60; // Valeur entre 60 et 99
+    const progressMap = this.childrenProgress();
+    return progressMap.get(child.id) || 0;
   }
 
   // Méthodes pour le drag and drop
