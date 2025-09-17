@@ -115,14 +115,24 @@ export class AdminService {
   // 📊 Charger les statistiques du dashboard
   loadDashboardStats(): Observable<DashboardStats> {
     return this.http
-      .get<{ success: boolean; data: DashboardStats }>(
+      .get<{ success: boolean; data: any }>(
         `${this.apiUrl}/dashboard/stats`
       )
       .pipe(
         map((response) => {
           if (response.success) {
-            this.statsSubject.next(response.data);
-            return response.data;
+            // Transformer les données de l'API vers le format attendu
+            const apiData = response.data;
+            const stats: DashboardStats = {
+              totalUsers: apiData.users?.total || 0,
+              activeUsers: apiData.users?.active || 0,
+              totalCourses: apiData.content?.courses || 0,
+              totalRevenue: 0, // Pas encore implémenté
+              newUsersThisMonth: apiData.users?.active || 0,
+              courseCompletionRate: 0 // Pas encore implémenté
+            };
+            this.statsSubject.next(stats);
+            return stats;
           }
           throw new Error('Erreur lors du chargement des statistiques');
         }),
@@ -146,12 +156,14 @@ export class AdminService {
   // 👥 Charger les utilisateurs récents
   loadRecentUsers(): Observable<User[]> {
     return this.http
-      .get<{ success: boolean; data: User[] }>(`${this.apiUrl}/users/stats`)
+      .get<{ success: boolean; data: any }>(`${this.apiUrl}/users/stats`)
       .pipe(
         map((response) => {
           if (response.success) {
-            this.usersSubject.next(response.data);
-            return response.data;
+            // Extraire les utilisateurs récents de la réponse
+            const recentUsers = response.data.recent || [];
+            this.usersSubject.next(recentUsers);
+            return recentUsers;
           }
           throw new Error('Erreur lors du chargement des utilisateurs');
         }),
@@ -167,12 +179,14 @@ export class AdminService {
   // 📚 Charger les cours populaires
   loadPopularCourses(): Observable<Course[]> {
     return this.http
-      .get<{ success: boolean; data: Course[] }>(`${this.apiUrl}/courses/stats`)
+      .get<{ success: boolean; data: any }>(`${this.apiUrl}/courses/stats`)
       .pipe(
         map((response) => {
           if (response.success) {
-            this.coursesSubject.next(response.data);
-            return response.data;
+            // Extraire les cours populaires de la réponse
+            const popularCourses = response.data.popular || [];
+            this.coursesSubject.next(popularCourses);
+            return popularCourses;
           }
           throw new Error('Erreur lors du chargement des cours');
         }),
@@ -188,14 +202,16 @@ export class AdminService {
   // 📈 Charger les activités récentes
   loadRecentActivities(): Observable<Activity[]> {
     return this.http
-      .get<{ success: boolean; data: Activity[] }>(
+      .get<{ success: boolean; data: any }>(
         `${this.apiUrl}/activities/recent`
       )
       .pipe(
         map((response) => {
           if (response.success) {
-            this.activitiesSubject.next(response.data);
-            return response.data;
+            // La réponse contient directement les activités
+            const activities = response.data || [];
+            this.activitiesSubject.next(activities);
+            return activities;
           }
           throw new Error('Erreur lors du chargement des activités');
         }),

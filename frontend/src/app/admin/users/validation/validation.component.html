@@ -1,0 +1,260 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Header -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            Gestion des Validations
+          </h1>
+          <p class="mt-2 text-gray-600 dark:text-gray-400">
+            Validez ou rejetez les utilisateurs en attente d'approbation
+          </p>
+        </div>
+        <button
+          (click)="refreshData()"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+        >
+          <i class="fa-solid fa-refresh mr-2"></i>
+          Actualiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <!-- Utilisateurs en attente -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-clock text-yellow-600 dark:text-yellow-400 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">En attente</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ validationStats.pending }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Utilisateurs approuvés -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-check text-green-600 dark:text-green-400 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Approuvés</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ validationStats.approved }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Utilisateurs rejetés -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-times text-red-600 dark:text-red-400 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rejetés</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ validationStats.rejected }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-users text-blue-600 dark:text-blue-400 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ validationStats.total }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des utilisateurs en attente -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+          Utilisateurs en Attente de Validation
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">
+          {{ pendingUsers.length }} utilisateur(s) en attente
+        </p>
+      </div>
+
+      <!-- Message si aucun utilisateur en attente -->
+      <div *ngIf="pendingUsers.length === 0" class="p-8 text-center">
+        <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fa-solid fa-check text-green-600 dark:text-green-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          Aucun utilisateur en attente
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400">
+          Tous les utilisateurs ont été validés ou aucun nouvel utilisateur n'est en attente.
+        </p>
+      </div>
+
+      <!-- Liste des utilisateurs -->
+      <div *ngIf="pendingUsers.length > 0" class="divide-y divide-gray-200 dark:divide-gray-700">
+        <div *ngFor="let user of pendingUsers" class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <!-- Avatar -->
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <span class="text-white font-semibold text-lg">
+                    {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Informations utilisateur -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-2">
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{ user.firstName }} {{ user.lastName }}
+                  </h3>
+                  <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getStatusBadgeClass(user.status)">
+                    {{ getStatusLabel(user.status) }}
+                  </span>
+                </div>
+                <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                  <span class="flex items-center">
+                    <i class="fa-solid fa-envelope mr-1"></i>
+                    {{ user.email }}
+                  </span>
+                  <span *ngIf="user.phoneNumber" class="flex items-center">
+                    <i class="fa-solid fa-phone mr-1"></i>
+                    {{ user.phoneNumber }}
+                  </span>
+                </div>
+                <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                  <span class="flex items-center">
+                    <i class="fa-solid fa-user mr-1"></i>
+                    {{ getTypeLabel(user.type) }} - {{ getRoleLabel(user.role) }}
+                  </span>
+                  <span class="flex items-center">
+                    <i class="fa-solid fa-calendar mr-1"></i>
+                    {{ formatDate(user.createdAt) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center space-x-2">
+              <button
+                (click)="openValidationDialog(user, 'approve')"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-600 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
+              >
+                <i class="fa-solid fa-check mr-2"></i>
+                Approuver
+              </button>
+              
+              <button
+                (click)="openValidationDialog(user, 'reject')"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
+              >
+                <i class="fa-solid fa-times mr-2"></i>
+                Rejeter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de validation -->
+<div *ngIf="displayValidationDialog" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10"
+               [class]="validationAction === 'approve' ? 'bg-green-100 dark:bg-green-900' : validationAction === 'reject' ? 'bg-red-100 dark:bg-red-900' : 'bg-yellow-100 dark:bg-yellow-900'">
+            <i *ngIf="validationAction === 'approve'" class="fa-solid fa-check text-green-600 dark:text-green-400"></i>
+            <i *ngIf="validationAction === 'reject'" class="fa-solid fa-times text-red-600 dark:text-red-400"></i>
+            <i *ngIf="validationAction === 'pending'" class="fa-solid fa-clock text-yellow-600 dark:text-yellow-400"></i>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="validation-modal-title">
+              {{ validationAction === 'approve' ? 'Approuver l\'utilisateur' : validationAction === 'reject' ? 'Rejeter l\'utilisateur' : 'Remettre en attente' }}
+            </h3>
+            <div class="mt-4" *ngIf="selectedUser">
+              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ selectedUser.firstName }} {{ selectedUser.lastName }}
+                </h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ selectedUser.email }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  {{ validationAction === 'approve' 
+                    ? 'Êtes-vous sûr de vouloir approuver cet utilisateur ? Il pourra alors accéder à toutes les fonctionnalités de la plateforme.' 
+                    : validationAction === 'reject'
+                    ? 'Êtes-vous sûr de vouloir rejeter cet utilisateur ? Il ne pourra plus accéder à la plateforme.'
+                    : 'Êtes-vous sûr de vouloir remettre cet utilisateur en attente ? Il devra attendre une nouvelle validation.' }}
+                </p>
+              </div>
+
+              <!-- Champ de raison pour les rejets -->
+              <div *ngIf="validationAction === 'reject'" class="mt-6">
+                <label for="rejection-reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Raison du rejet <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="rejection-reason"
+                  [(ngModel)]="rejectionReason"
+                  rows="3"
+                  class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Expliquez pourquoi cet utilisateur est rejeté..."
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button
+          type="button"
+          (click)="processValidation()"
+          [disabled]="processingValidation || (validationAction === 'reject' && !rejectionReason.trim())"
+          class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          [class]="validationAction === 'approve' ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : validationAction === 'reject' ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' : 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'"
+        >
+          <i *ngIf="processingValidation" class="fa-solid fa-spinner fa-spin mr-2"></i>
+          <i *ngIf="!processingValidation" class="fa-solid fa-check mr-2"></i>
+          {{ processingValidation ? 'Traitement...' : 'Confirmer' }}
+        </button>
+        <button
+          type="button"
+          (click)="closeValidationDialog()"
+          [disabled]="processingValidation"
+          class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

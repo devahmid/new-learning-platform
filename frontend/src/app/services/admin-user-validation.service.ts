@@ -65,4 +65,21 @@ export class AdminUserValidationService {
   getAllUsersWithStatus(): Observable<{ users: any[] }> {
     return this.http.get<{ users: any[] }>(`${this.apiUrl}/admin/users/with-status`);
   }
+
+  /**
+   * Obtenir les statistiques de validation
+   */
+  getValidationStats(): Observable<{
+    pending: number;
+    approved: number;
+    rejected: number;
+    total: number;
+  }> {
+    return this.http.get<{
+      pending: number;
+      approved: number;
+      rejected: number;
+      total: number;
+    }>(`${this.apiUrl}/admin/users/validation-stats`);
+  }
 }

@@ -1,0 +1,100 @@
+.validation-notifications {
+  .notification-item {
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    &.unread {
+      border-left: 4px solid #3b82f6;
+    }
+    
+    &.read {
+      opacity: 0.7;
+    }
+  }
+  
+  .notification-icon {
+    &.approval {
+      color: #10b981;
+    }
+    
+    &.rejection {
+      color: #ef4444;
+    }
+    
+    &.pending {
+      color: #f59e0b;
+    }
+  }
+  
+  .unread-indicator {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  .refresh-button {
+    transition: transform 0.3s ease;
+    
+    &:hover {
+      transform: rotate(180deg);
+    }
+  }
+  
+  .mark-all-button {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateX(2px);
+    }
+  }
+}
+
+// Dark mode adjustments
+.dark {
+  .validation-notifications {
+    .notification-item {
+      &.approval {
+        background-color: rgba(16, 185, 129, 0.1);
+        border-color: rgba(16, 185, 129, 0.3);
+        color: #6ee7b7;
+      }
+      
+      &.rejection {
+        background-color: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+      }
+      
+      &.pending {
+        background-color: rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.3);
+        color: #fcd34d;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .validation-notifications {
+    .notification-item {
+      padding: 0.75rem;
+      
+      .notification-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  }
+}

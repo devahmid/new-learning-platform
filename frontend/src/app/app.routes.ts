@@ -270,6 +270,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'users/validation',
+        loadComponent: () =>
+          import('./admin/users/validation/validation.component').then(
+            (m) => m.ValidationComponent
+          ),
+      },
+      {
         path: 'users/:id',
         loadComponent: () =>
           import('./admin/users/details/details.component').then(

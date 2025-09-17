@@ -231,6 +231,7 @@
             <p class="text-gray-500 mt-1">Utilisateurs en attente de validation par l'administrateur</p>
           </div>
           <button
+            (click)="navigateToValidation()"
             class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-xl hover:bg-yellow-200 transition-all duration-300 text-sm font-medium">
             <i class="fa-solid fa-eye mr-2"></i>Gérer les validations
           </button>
@@ -283,7 +284,7 @@
                   <div class="flex items-center">
                     <div
                       class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-bold mr-3">
-                      {{ user.name.charAt(0) }}
+                      {{ user.name?.charAt(0) || '?' }}
                     </div>
                     <span
                       class="text-sm font-semibold text-gray-900 group-hover:text-emerald-800 transition-colors duration-200">
@@ -304,8 +305,8 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full"
-                    [class]="user.status === 'actif' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'">
-                    {{ user.status }}
+                    [class]="getStatusBadgeClass(user.status || 'pending')">
+                    {{ getStatusLabel(user.status || 'pending') }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

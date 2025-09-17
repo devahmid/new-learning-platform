@@ -51,6 +51,15 @@ class Application {
         $this->routes['POST']['/api/admin/users/{id}/pending'] = ['App\Controllers\UserValidationController', 'setUserPending'];
         $this->routes['GET']['/api/admin/users/validation-stats'] = ['App\Controllers\UserValidationController', 'getValidationStats'];
         
+        // Routes de notifications de validation
+        $this->routes['POST']['/api/notifications/validation/approval'] = ['App\Controllers\ValidationNotificationController', 'sendApprovalNotification'];
+        $this->routes['POST']['/api/notifications/validation/rejection'] = ['App\Controllers\ValidationNotificationController', 'sendRejectionNotification'];
+        $this->routes['POST']['/api/notifications/validation/pending'] = ['App\Controllers\ValidationNotificationController', 'sendPendingNotification'];
+        $this->routes['GET']['/api/notifications/validation/user/{userId}'] = ['App\Controllers\ValidationNotificationController', 'getUserValidationNotifications'];
+        $this->routes['PUT']['/api/notifications/validation/{notificationId}/read'] = ['App\Controllers\ValidationNotificationController', 'markNotificationAsRead'];
+        $this->routes['GET']['/api/notifications/validation/user/{userId}/unread-count'] = ['App\Controllers\ValidationNotificationController', 'getUnreadNotificationCount'];
+        $this->routes['PUT']['/api/notifications/validation/user/{userId}/mark-all-read'] = ['App\Controllers\ValidationNotificationController', 'markAllNotificationsAsRead'];
+        
         $this->routes['GET']['/api/users/{id}'] = ['App\Controllers\UserController', 'findById'];
         $this->routes['GET']['/api/users/{id}/children'] = ['App\Controllers\UserController', 'getUserChildren'];
         $this->routes['GET']['/api/users/parents/{id}'] = ['App\Controllers\UserController', 'getParentProfile'];

@@ -19,24 +19,28 @@ class UserValidationController {
         JWT::requireRole(['admin']);
         
         try {
-            $users = User::where(['status' => 'pending']);
+            // Récupérer les utilisateurs en attente (status = 'pending' ou status = NULL)
+            $db = \DatabaseConfig::getInstance()->getConnection();
+            $stmt = $db->prepare("SELECT * FROM users WHERE status = 'pending' OR status IS NULL");
+            $stmt->execute();
+            $users = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             
             // Formater les données pour l'admin
             $formattedUsers = array_map(function($user) {
                 return [
-                    'id' => $user->id,
-                    'firstName' => $user->firstName,
-                    'lastName' => $user->lastName,
-                    'email' => $user->email,
-                    'phoneNumber' => $user->phoneNumber,
-                    'type' => $user->type,
-                    'role' => $user->role,
-                    'createdAt' => $user->createdAt,
-                    'status' => $user->status
+                    'id' => $user['id'],
+                    'firstName' => $user['firstName'],
+                    'lastName' => $user['lastName'],
+                    'email' => $user['email'],
+                    'phoneNumber' => $user['phoneNumber'],
+                    'type' => $user['type'],
+                    'role' => $user['role'],
+                    'createdAt' => $user['createdAt'],
+                    'status' => $user['status'] ?? 'pending' // Utiliser 'pending' si status est NULL
                 ];
             }, $users);
             
-            Response::json($formattedUsers, 200);
+            Response::json(['users' => $formattedUsers], 200);
             
         } catch (Exception $e) {
             error_log("GetPendingUsers - Erreur: " . $e->getMessage());
@@ -158,11 +162,26 @@ class UserValidationController {
         JWT::requireRole(['admin']);
         
         try {
+            // Compter les utilisateurs par statut (inclure NULL comme 'pending')
+            $db = \DatabaseConfig::getInstance()->getConnection();
+            
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM users WHERE status = 'pending' OR status IS NULL");
+            $stmt->execute();
+            $pending = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+            
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM users WHERE status = 'approved'");
+            $stmt->execute();
+            $approved = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+            
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM users WHERE status = 'rejected'");
+            $stmt->execute();
+            $rejected = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+            
             $stats = [
-                'pending' => User::countByStatus('pending'),
-                'approved' => User::countByStatus('approved'),
-                'rejected' => User::countByStatus('rejected'),
-                'total' => User::countByStatus('pending') + User::countByStatus('approved') + User::countByStatus('rejected')
+                'pending' => $pending,
+                'approved' => $approved,
+                'rejected' => $rejected,
+                'total' => $pending + $approved + $rejected
             ];
             
             Response::json($stats, 200);

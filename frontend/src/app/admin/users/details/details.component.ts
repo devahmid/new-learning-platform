@@ -47,8 +47,18 @@ export class DetailsComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        const idParam = this.route.snapshot.paramMap.get('id')!;
+        const idParam = this.route.snapshot.paramMap.get('id');
+        
+        // Vérifier que l'ID est valide
+        if (!idParam || isNaN(Number(idParam))) {
+            console.error('ID utilisateur invalide:', idParam);
+            this.showErrorNotification('ID utilisateur invalide');
+            this.router.navigate(['/admin/users']);
+            return;
+        }
+        
         const id = Number(idParam);
+        console.log('Chargement des détails pour l\'utilisateur ID:', id);
         this.loading = true;
         
         // Utiliser le service admin pour récupérer les détails
@@ -69,6 +79,7 @@ export class DetailsComponent implements OnInit {
             error: (error) => {
                 console.error('Erreur lors du chargement de l\'utilisateur:', error);
                 this.loading = false;
+                this.showErrorNotification('Erreur lors du chargement de l\'utilisateur');
             }
         });
     }

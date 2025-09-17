@@ -48,8 +48,8 @@ class AdminUserController {
                 }
                 
                 // Charger le niveau si présent
-                if ($user->levelId) {
-                    $userArray['level'] = $user->level()?->toArray();
+                if ($user->classeId) {
+                    $userArray['classe'] = $user->classe()?->toArray();
                 }
                 
                 return $userArray;
@@ -122,8 +122,8 @@ class AdminUserController {
                 }
                 
                 // Charger le niveau si présent
-                if ($user->levelId) {
-                    $userArray['level'] = $user->level()?->toArray();
+                if ($user->classeId) {
+                    $userArray['classe'] = $user->classe()?->toArray();
                 }
                 
                 return $userArray;
@@ -171,9 +171,9 @@ class AdminUserController {
                 $userArray['children'] = [];
             }
             
-            // Charger le niveau si présent
-            if ($user->levelId) {
-                $userArray['level'] = $user->level()?->toArray();
+            // Charger la classe si présente
+            if ($user->classeId) {
+                $userArray['classe'] = $user->classe()?->toArray();
             }
             
             Response::json($userArray, 200);
@@ -222,7 +222,7 @@ class AdminUserController {
             $user->type = $data['type'];
             $user->phoneNumber = $data['phoneNumber'] ?? null;
             $user->dateOfBirth = $data['dateOfBirth'] ?? null;
-            $user->levelId = $data['levelId'] ?? null;
+            $user->classeId = $data['classeId'] ?? null;
             $user->parentId = $data['parentId'] ?? null;
             $user->setPassword($data['password']);
             
@@ -327,7 +327,7 @@ class AdminUserController {
             $user->type = 'child';
             $user->parentId = $data['parentId'];
             $user->dateOfBirth = $data['dateOfBirth'];
-            $user->levelId = $data['levelId'] ?? null;
+            $user->classeId = $data['classeId'] ?? null;
             $user->email = $data['email'] ?? null;
             
             $user->save();
@@ -379,7 +379,7 @@ class AdminUserController {
             }
             
             // Mettre à jour tous les champs
-            $fillableFields = ['email', 'firstName', 'lastName', 'phoneNumber', 'dateOfBirth', 'type', 'levelId', 'parentId'];
+            $fillableFields = ['email', 'firstName', 'lastName', 'phoneNumber', 'dateOfBirth', 'type', 'classeId', 'parentId'];
             
             foreach ($fillableFields as $field) {
                 if (isset($data[$field])) {
@@ -442,7 +442,7 @@ class AdminUserController {
             }
             
             // Mettre à jour seulement les champs fournis
-            $fillableFields = ['email', 'firstName', 'lastName', 'phoneNumber', 'dateOfBirth', 'type', 'levelId', 'parentId', 'classeId', 'role'];
+            $fillableFields = ['email', 'firstName', 'lastName', 'phoneNumber', 'dateOfBirth', 'type', 'classeId', 'parentId', 'classeId', 'role'];
             
             foreach ($fillableFields as $field) {
                 if (isset($data[$field])) {
@@ -565,7 +565,7 @@ class AdminUserController {
             }
             
             // Mettre à jour les champs fournis
-            $fillableFields = ['firstName', 'lastName', 'dateOfBirth', 'levelId', 'email'];
+            $fillableFields = ['firstName', 'lastName', 'dateOfBirth', 'classeId', 'email'];
             
             foreach ($fillableFields as $field) {
                 if (isset($data[$field])) {
@@ -690,7 +690,7 @@ class AdminUserController {
         try {
             $query = $_GET['query'] ?? null;
             $type = $_GET['type'] ?? null;
-            $level = $_GET['level'] ?? null;
+            $classe = $_GET['classe'] ?? null;
             $dateFrom = $_GET['dateFrom'] ?? null;
             $dateTo = $_GET['dateTo'] ?? null;
             
@@ -704,9 +704,9 @@ class AdminUserController {
             }
             
             // Filtrage par niveau
-            if ($level) {
-                $users = array_filter($users, function($user) use ($level) {
-                    return $user->level && $user->level->name === $level;
+            if ($classe) {
+                $users = array_filter($users, function($user) use ($classe) {
+                    return $user->classe && $user->classe->name === $classe;
                 });
             }
             

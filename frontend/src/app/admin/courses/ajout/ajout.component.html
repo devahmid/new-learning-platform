@@ -1,4 +1,20 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Toast Messages -->
+  <p-toast></p-toast>
+  
+  <!-- Upload Progress Bar -->
+  <div *ngIf="isUploading" class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <i class="fa-solid fa-upload text-blue-600"></i>
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Upload en cours...</span>
+        </div>
+        <span class="text-sm text-gray-500 dark:text-gray-400">{{ uploadProgress }}%</span>
+      </div>
+      <p-progressBar [value]="uploadProgress" [showValue]="false" class="mt-2"></p-progressBar>
+    </div>
+  </div>
   <!-- Header -->
   <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

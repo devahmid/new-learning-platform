@@ -11,6 +11,10 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { AdminService } from '../../admin.service';
 import { ClasseService } from '../../../services/classe.service';
+import { UploadService } from '../../../services/upload.service';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 interface CourseForm {
   title: string;
@@ -65,7 +69,7 @@ interface ExerciseForm {
 @Component({
   selector: 'app-ajout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ToastModule, ProgressBarModule],
   templateUrl: './ajout.component.html',
   styleUrl: './ajout.component.scss',
 })
@@ -80,6 +84,10 @@ export class AjoutComponent implements OnInit {
   isEditMode = false;
   courseId: number | null = null;
   courseToEdit: any = null;
+  
+  // Upload properties
+  isUploading = false;
+  uploadProgress = 0;
 
   // Données de référence
   categories: any[] = [];
@@ -98,6 +106,8 @@ export class AjoutComponent implements OnInit {
     private fb: FormBuilder,
     private adminService: AdminService,
     private classeService: ClasseService,
+    private uploadService: UploadService,
+    private messageService: MessageService,
     public router: Router,
     private route: ActivatedRoute
   ) {
@@ -216,11 +226,7 @@ export class AjoutComponent implements OnInit {
   onFileSelected(event: any, field: 'videoUrl' | 'pdfUrl') {
     const file = event.target.files[0];
     if (file) {
-      // Ici vous pouvez implémenter l'upload vers votre serveur
-      // Pour l'instant, on simule avec une URL locale
-      const fileUrl = URL.createObjectURL(file);
-      this.courseForm.patchValue({ [field]: fileUrl });
-      console.log(`Fichier sélectionné pour ${field}:`, file.name);
+      this.uploadFile(file, this.courseForm.get(field)!, field === 'videoUrl' ? 'Vidéo' : 'PDF');
     }
   }
 
@@ -228,10 +234,100 @@ export class AjoutComponent implements OnInit {
   onLessonFileSelected(event: any, lessonIndex: number, field: 'videoUrl' | 'fileUrl') {
     const file = event.target.files[0];
     if (file) {
-      const fileUrl = URL.createObjectURL(file);
-      this.lessonsArray.at(lessonIndex).patchValue({ [field]: fileUrl });
-      console.log(`Fichier sélectionné pour leçon ${lessonIndex} ${field}:`, file.name);
+      const control = this.lessonsArray.at(lessonIndex).get(field)!;
+      this.uploadFile(file, control, field === 'videoUrl' ? 'Vidéo de leçon' : 'Fichier de leçon');
     }
+  }
+
+  /**
+   * Upload un fichier et retourne l'URL
+   */
+  uploadFile(file: File, targetControl: any, fileType: string = 'file'): void {
+    if (!file) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Aucun fichier',
+        detail: 'Veuillez sélectionner un fichier à uploader'
+      });
+      return;
+    }
+
+    // Validation du fichier
+    if (!this.validateFile(file)) {
+      return;
+    }
+
+    this.isUploading = true;
+    this.uploadProgress = 0;
+
+    // Utiliser le service d'upload réel
+    this.uploadService.uploadFile(file).subscribe({
+      next: (response) => {
+        console.log('✅ Fichier uploadé avec succès:', response.url);
+        
+        // Mettre à jour le contrôle du formulaire
+        targetControl.setValue(response.url);
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Upload réussi',
+          detail: `${fileType} uploadé avec succès`
+        });
+        
+        this.isUploading = false;
+        this.uploadProgress = 100;
+      },
+      error: (error) => {
+        console.error('❌ Erreur lors de l\'upload:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur d\'upload',
+          detail: `Impossible d'uploader le ${fileType.toLowerCase()}: ${error.message || 'Erreur inconnue'}`
+        });
+        
+        this.isUploading = false;
+        this.uploadProgress = 0;
+      }
+    });
+  }
+
+  /**
+   * Validation des fichiers
+   */
+  private validateFile(file: File): boolean {
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'video/mp4',
+      'video/avi',
+      'video/mov',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain'
+    ];
+
+    if (file.size > maxSize) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Fichier trop volumineux',
+        detail: 'La taille du fichier ne doit pas dépasser 50MB'
+      });
+      return false;
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Type de fichier non supporté',
+        detail: 'Veuillez sélectionner un fichier image, vidéo, PDF ou document'
+      });
+      return false;
+    }
+
+    return true;
   }
 
   // 📖 Charger un cours pour édition

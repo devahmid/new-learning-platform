@@ -118,6 +118,12 @@ export class ListComponent implements OnInit {
   }
 
   edit(user: User) {
+    if (!user.id) {
+      console.error('ID utilisateur manquant:', user);
+      this.notif.show('ID utilisateur manquant', 'error');
+      return;
+    }
+    console.log('Navigation vers les détails de l\'utilisateur ID:', user.id);
     this.router.navigate(['/admin/users', user.id]);
   }
 
@@ -306,6 +312,52 @@ export class ListComponent implements OnInit {
 
   canValidateUser(user: User): boolean {
     // Permettre la validation de tous les utilisateurs sauf l'admin connecté
+    return user.id !== this.currentUserId;
+  }
+
+  // Méthodes pour la suppression d'utilisateur
+  displayDeleteDialog = false;
+  deletingUser = false;
+
+  openDeleteDialog(user: User) {
+    this.selectedUser = user;
+    this.displayDeleteDialog = true;
+  }
+
+  closeDeleteDialog() {
+    this.displayDeleteDialog = false;
+    this.selectedUser = null;
+    this.deletingUser = false;
+  }
+
+  deleteUser() {
+    if (!this.selectedUser || !this.selectedUser.id) {
+      this.notif.show('Utilisateur non sélectionné', 'error');
+      return;
+    }
+
+    this.deletingUser = true;
+
+    this.adminUserService.deleteUser(this.selectedUser.id).subscribe({
+      next: (response) => {
+        this.notif.show(response.message || 'Utilisateur supprimé avec succès', 'success');
+        
+        // Retirer l'utilisateur de la liste
+        this.users = this.users.filter(u => u.id !== this.selectedUser!.id);
+        this.filteredUsers = this.filteredUsers.filter(u => u.id !== this.selectedUser!.id);
+        
+        this.closeDeleteDialog();
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression:', error);
+        this.notif.show('Erreur lors de la suppression de l\'utilisateur', 'error');
+        this.deletingUser = false;
+      }
+    });
+  }
+
+  canDeleteUser(user: User): boolean {
+    // Permettre la suppression de tous les utilisateurs sauf l'admin connecté
     return user.id !== this.currentUserId;
   }
 }

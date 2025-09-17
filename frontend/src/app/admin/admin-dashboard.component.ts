@@ -240,9 +240,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     return users.filter((user) => {
       const matchesSearch =
-        user.name.toLowerCase().includes(search) ||
-        user.email.toLowerCase().includes(search);
-      const matchesFilter = filter === 'all' || user.status === filter;
+        (user.name?.toLowerCase().includes(search) || false) ||
+        (user.email?.toLowerCase().includes(search) || false);
+      
+      // Gérer le statut (NULL = 'pending' par défaut)
+      const userStatus = user.status || 'pending';
+      const matchesFilter = filter === 'all' || userStatus === filter;
 
       return matchesSearch && matchesFilter;
     });
@@ -254,8 +257,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     return courses.filter(
       (course) =>
-        course.title.toLowerCase().includes(search) ||
-        course.subject.toLowerCase().includes(search)
+        (course.title?.toLowerCase().includes(search) || false) ||
+        (course.subject?.toLowerCase().includes(search) || false)
     );
   }
 
@@ -286,6 +289,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.loadAllData();
     this.checkUserPermissions();
     this.initTheme();
+    this.subscribeToData();
 
     // Logique métier basée sur les données
     if (this.systemAlerts.length > 0) {
@@ -354,6 +358,41 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.errorMessage = 'Erreur lors du chargement des données';
         this.isLoading = false;
       });
+  }
+
+  // 📊 S'abonner aux données du service
+  subscribeToData() {
+    // S'abonner aux statistiques
+    this.adminService.stats$.subscribe(stats => {
+      if (stats) {
+        this.stats = stats;
+      }
+    });
+
+    // S'abonner aux utilisateurs récents
+    this.adminService.users$.subscribe(users => {
+      this.recentUsers = users;
+    });
+
+    // S'abonner aux cours populaires
+    this.adminService.courses$.subscribe(courses => {
+      this.popularCourses = courses;
+    });
+
+    // S'abonner aux activités récentes
+    this.adminService.activities$.subscribe(activities => {
+      this.recentActivities = activities;
+    });
+
+    // S'abonner aux alertes système
+    this.adminService.alerts$.subscribe(alerts => {
+      this.systemAlerts = alerts;
+    });
+
+    // S'abonner aux statistiques de performance
+    this.adminService.performance$.subscribe(performance => {
+      this.performanceStats = performance;
+    });
   }
 
   // 🔒 Vérifier les permissions utilisateur
@@ -592,6 +631,39 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     ) {
       // Implémenter la suppression via l'API
       console.log('Suppression confirmée pour:', user.name);
+    }
+  }
+
+  // 🔐 Naviguer vers la page de validation des utilisateurs
+  navigateToValidation() {
+    this.router.navigate(['/admin/users/validation']);
+  }
+
+  // 🏷️ Obtenir la classe CSS pour le badge de statut
+  getStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  // 🏷️ Obtenir le libellé du statut
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'approved':
+        return 'Approuvé';
+      case 'pending':
+        return 'En attente';
+      case 'rejected':
+        return 'Rejeté';
+      default:
+        return 'Inconnu';
     }
   }
 }
