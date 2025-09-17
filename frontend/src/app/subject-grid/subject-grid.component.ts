@@ -54,19 +54,13 @@ export class SubjectGridComponent implements OnInit {
     return child ? `${child.firstName} ${child.lastName}` : 'Aucun enfant sélectionné';
   }
 
-  getLevelName(): string {
+  getClasseName(): string {
     const child = this.selectedChild();
-    const levelId = child?.level?.id;
-    switch (levelId) {
-      case 1:
-        return 'Débutant';
-      case 2:
-        return 'Intermédiaire';
-      case 3:
-        return 'Avancé';
-      default:
-        return 'Non défini';
+    const classe = child?.classe;
+    if (classe) {
+      return classe.name || `Classe ${classe.id}`;
     }
+    return 'Non définie';
   }
 
   onSubjectClick(subject: any, event: Event) {

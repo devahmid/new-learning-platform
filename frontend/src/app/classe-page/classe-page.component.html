@@ -1,0 +1,101 @@
+<main *ngIf="subjectData" class="py-12 bg-gray-50 min-h-screen">
+    <section class="container mx-auto py-16 px-4">
+        <!-- Breadcrumb et bouton de retour en haut -->
+        <div class="max-w-3xl mx-auto mb-6">
+            <!-- Breadcrumb -->
+            <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-4">
+                <a routerLink="/matières" class="hover:text-green-600 transition-colors">
+                    <i class="fa-solid fa-book mr-1"></i>Matières
+                </a>
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+                <span class="text-green-600 font-medium">{{ subjectData?.name }}</span>
+            </nav>
+            
+            <!-- Bouton de retour -->
+            <button (click)="goBack()" class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 hover:text-green-600 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md">
+                <i class="fa-solid fa-arrow-left text-sm"></i>
+                <span class="text-sm font-medium">Retour aux matières</span>
+            </button>
+        </div>
+        
+        <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-lg p-12">
+       
+            <div class="max-w-3xl mx-auto  rounded-3xl  p-12">
+
+                <!-- Carte principale -->
+                <div class="relative z-10 flex-1 flex flex-col justify-between px-2 pt-10 pb-4 rounded-2xl shadow-lg 
+            transition-transform duration-300 hover:scale-105" [ngClass]="subjectData.color">
+                    <i *ngIf="subjectData.icon"
+                        class="fa-solid absolute -top-10 left-1/2 -translate-x-1/2 text-3xl bg-white p-4 rounded-full shadow-lg z-10"
+                        [ngClass]="subjectData.iconColor + ' ' + subjectData.icon">
+                    </i>
+
+                    <!-- Bloc contenu avec bordure blanche -->
+                    <div class="rounded-xl bg-white p-1">
+                        <div class="rounded-lg px-6 py-5 flex justify-between items-center text-white"
+                            [ngClass]="subjectData.innerColor">
+                            <span class="text-lg font-semibold">{{ subjectData.name }}</span>
+                            <span class="text-xl">{{ subjectData.ar }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Description FR si différente -->
+                    <div class="text-white text-sm italic text-center mt-2 transition-all duration-300
+                   group-hover:opacity-100 group-hover:translate-y-1" [class.opacity-0]="subjectData.fr ">
+                        {{ subjectData.fr || '' }}
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <div *ngIf="classesLoading" class="space-y-6">
+                <div class="text-center py-8">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600">Chargement des classes...</p>
+                </div>
+            </div>
+
+            <!-- Classes list -->
+            <div *ngIf="!classesLoading" class="space-y-6">
+                <ng-container *ngFor="let classe of classes">
+                  <div [id]="'classe-' + classe.id + '-container'" class="transform hover:scale-105 transition-all">
+                    <button [routerLink]="['/cours', subjectData.name.toLowerCase(), classe.id]"
+                      class="w-full md:w-96 mx-auto py-5 rounded-full shadow-lg flex items-center justify-center gap-3 group transition-all"
+                      [disabled]="!isClasseUnlocked(classe)"
+                      [ngClass]="[
+                      !isClasseUnlocked(classe)
+                        ? 'cursor-not-allowed bg-gradient-to-r from-gray-200 to-gray-400' 
+                        : 'bg-gradient-to-r ' + getGradientClass(subjectData.color)
+                    ]"
+                    >
+                      <i
+                        class="fa-solid"
+                        [ngClass]="{
+                          'fa-star text-green-900 group-hover:text-yellow-400': classe.id === 1 && isClasseUnlocked(classe),
+                          'fa-lock text-gray-600': !isClasseUnlocked(classe)
+                        }"
+                      ></i>
+                      <span class="text-xl font-medium">{{ classe.name }}</span>
+                    </button>
+              
+                    <div class="text-center mt-2"
+                         [ngClass]="!isClasseUnlocked(classe) ? 'text-gray-500' : subjectData.iconColor">
+                      <i class="fa-solid" [ngClass]="!isClasseUnlocked(classe) ? 'fa-lock' : 'fa-unlock'"></i>
+                      <span class="text-sm ml-1">
+                        {{ getClasseStatus(classe) }}
+                      </span>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+              
+            <div class="mt-12 text-center">
+                <button (click)="goBack()" class="text-green-600 hover:text-green-800 flex items-center gap-2 mx-auto bg-transparent border-none cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Retour aux matières</span>
+                </button>
+            </div>
+        </div>
+    </section>
+</main>

@@ -136,8 +136,8 @@ export const routes: Routes = [
       {
         path: 'matières/:name',
         loadComponent: () =>
-          import('./level-page/level-page.component').then(
-            (m) => m.LevelPageComponent
+          import('./classe-page/classe-page.component').then(
+            (m) => m.ClassePageComponent
           ),
         canActivate: [childGuard],
       },

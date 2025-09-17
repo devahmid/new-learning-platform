@@ -1,0 +1,66 @@
+// Styles pour le composant classe-page
+// Reprend les styles du level-page avec des adaptations pour les classes dynamiques
+
+.classe-container {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.classe-button {
+  transition: all 0.3s ease;
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Styles pour les icônes de statut
+.status-icon {
+  transition: all 0.2s ease;
+  
+  &.unlocked {
+    color: #10b981; // green-500
+  }
+  
+  &.locked {
+    color: #6b7280; // gray-500
+  }
+}
+
+// Animation pour l'apparition des classes
+.classe-item {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
