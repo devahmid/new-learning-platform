@@ -11,9 +11,9 @@
 //     updatedAt: Date;
 
 import { Category } from "./category.model";
+import { Classe } from "./classe.model";
 import { Enrollment } from "./enrollment.model";
 import { Lesson } from "./lesson.model";
-import { Level } from "./level.model";
 import { Quiz } from "./quiz.model";
 import { User } from "./user.model";
 
@@ -26,7 +26,7 @@ export interface Course {
   pdfUrl?: string;
   instructor: User;
   category?: Category;
-  level: Level;
+  classe: Classe;  // ✅ Changé de level à classe
   enrollments: Enrollment[];
   quizzes: Quiz[];
   lessons: Lesson[];

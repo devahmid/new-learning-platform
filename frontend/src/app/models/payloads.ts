@@ -43,6 +43,6 @@ export type CreateChildPayload = {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  levelId: number;
+  classeId: number; // ✅ Changé de levelId à classeId
   childProfile: ChildProfilePayload;
 };

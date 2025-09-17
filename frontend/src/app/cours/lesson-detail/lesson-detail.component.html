@@ -20,7 +20,7 @@
             {{ getCourseTitle() }}
           </a>
           <i class="fa-solid fa-chevron-right text-xs"></i>
-          <span class="text-green-600 font-medium">{{ lesson?.title }}</span>
+                <span class="text-green-600 font-medium">{{ lesson.title }}</span>
         </nav>
       </div>
       
@@ -39,7 +39,7 @@
       <div class="text-center mb-12">
         <div class="inline-block rounded-2xl p-1" [ngClass]="subjectData.color">
           <div class="rounded-xl border-4 border-white px-8 py-4 text-white" [ngClass]="subjectData.innerColor">
-            <h1 class="text-2xl">{{ lesson?.title }} - {{ subjectData.ar }}</h1>
+            <h1 class="text-2xl">{{ lesson.title }} - {{ subjectData.ar }}</h1>
           </div>
         </div>
       </div>
@@ -139,7 +139,7 @@
           <!-- Contrôles vidéo -->
           <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 p-4">
             <div class="flex items-center justify-between text-white">
-              <span>{{ lesson?.title }}</span>
+              <span>{{ lesson.title }}</span>
               <div class="flex items-center gap-4">
                 <!-- Indicateur de progression vidéo -->
                 <div *ngIf="isVideoTracking" class="flex items-center gap-2 text-sm">
@@ -219,9 +219,9 @@
           <h2 class="text-xl font-bold mb-6">Votre progression</h2>
           <div class="flex items-center gap-4 mb-4">
             <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div class="h-full bg-green-500 rounded-full" [style.width.%]="lesson?.progress"></div>
+              <div class="h-full bg-green-500 rounded-full" [style.width.%]="lesson.progress"></div>
             </div>
-            <span class="text-green-600 font-bold">{{ lesson?.progress }}%</span>
+            <span class="text-green-600 font-bold">{{ lesson.progress }}%</span>
           </div>
           <p class="text-sm text-gray-600">14 sur 20 mots maîtrisés</p>
         </div>

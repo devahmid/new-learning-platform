@@ -5,36 +5,61 @@ import { map, Observable } from 'rxjs';
 import { ApiPaths } from '../shared/api-paths';
 import { Schedule } from '../models/schedule.model';
 
+// Export Classe pour les autres composants
+export { Classe } from '../models/classe.model';
+
 @Injectable({ providedIn: 'root' })
 export class ClasseService {
   private baseUrl = ApiPaths.classes;
 
   constructor(private http: HttpClient) {}
 
-  // findAll(): Observable<Classe[]> {
-  //   return this.http.get<Classe[]>(this.baseUrl);
-  // }
-// classe.service.ts
-findById(id: number): Observable<Classe> {
-  return this.http.get<Classe>(`${this.baseUrl}/${id}`).pipe(
-    map(classe => ({
-      ...classe,
-      schedules: this.formatSchedule(classe.schedules || [])
-    }))
-  );
-}
+  // Récupérer toutes les classes
+  findAll(): Observable<Classe[]> {
+    return this.getAllClasses();
+  }
 
-// Exemple de récupération des classes avec leurs emplois du temps
-findAll(): Observable<Classe[]> {
-  return this.http.get<Classe[]>(`${this.baseUrl}`).pipe(
-    map((classes: any[]) => {
-      return classes.map(classe => ({
+  // Alias pour compatibilité
+  getAllClasses(): Observable<Classe[]> {
+    return this.http.get<Classe[]>(`${this.baseUrl}`).pipe(
+      map((classes: any[]) => {
+        return classes.map(classe => ({
+          ...classe,
+          schedules: this.formatSchedule(classe.schedules), // Formatage des horaires
+        }));
+      })
+    );
+  }
+
+  // Récupérer une classe par ID
+  findById(id: number): Observable<Classe> {
+    return this.http.get<Classe>(`${this.baseUrl}/${id}`).pipe(
+      map(classe => ({
         ...classe,
-        schedules: this.formatSchedule(classe.schedules), // Formatage des horaires
-      }));
-    })
-  );
-}
+        schedules: this.formatSchedule(classe.schedules || [])
+      }))
+    );
+  }
+
+  // ✅ Récupérer les matières d'une classe
+  getCategoriesByClasse(classeId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/${classeId}/categories`);
+  }
+
+  // ✅ Récupérer les cours d'une classe
+  getCoursesByClasse(classeId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/${classeId}/courses`);
+  }
+
+  // ✅ Récupérer les cours d'une classe avec toutes les matières
+  getCoursesWithCategoriesByClasse(classeId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${classeId}/courses-with-categories`);
+  }
+
+  // ✅ Récupérer les étudiants d'une classe
+  getStudentsByClasse(classeId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/${classeId}/students`);
+  }
 
 // Exemple de formatage des créneaux horaires
 formatSchedule(schedule: any[]): Schedule[] {

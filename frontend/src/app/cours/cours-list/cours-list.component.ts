@@ -57,9 +57,18 @@ export class CoursListComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
 
-    this.courseService.getCoursesByLevel(this.level).subscribe({
+    // Récupérer l'enfant sélectionné pour obtenir sa classe
+    const selectedChild = this.childContext.selectedChild();
+    if (!selectedChild || !selectedChild.classeId) {
+      console.error('Aucun enfant sélectionné ou classe manquante');
+      this.error = 'Classe non trouvée';
+      this.isLoading = false;
+      return;
+    }
+
+    this.courseService.getCoursesByClasse(selectedChild.classeId).subscribe({
       next: (courses: any[]) => {
-        console.log("Cours récupérés depuis l'API:", courses);
+        console.log("Cours récupérés depuis l'API pour la classe:", selectedChild.classeId, courses);
         this.courses = courses;
         this.totalCourses = courses.length;
         this.isLoading = false;

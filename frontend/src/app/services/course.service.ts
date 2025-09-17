@@ -59,14 +59,44 @@ export interface QuizOption {
 export class CourseService {
   constructor(private http: HttpClient) {}
 
-  // Récupérer les cours par niveau
+  // ✅ Récupérer les cours par classe (remplace getCoursesByLevel)
+  getCoursesByClasse(classeId: number): Observable<Course[]> {
+    return this.http.get<Course[]>(
+      `${environment.apiUrl}/courses/classe/${classeId}`
+    );
+  }
+
+  // ✅ Récupérer les cours par catégorie et classe (remplace getCoursesByCategoryAndLevel)
+  getCoursesByCategoryAndClasse(
+    categoryId: number,
+    classeId: number
+  ): Observable<Course[]> {
+    return this.http.get<Course[]>(
+      `${environment.apiUrl}/courses/classe/${classeId}/category/${categoryId}`
+    );
+  }
+
+  // ✅ Récupérer les matières d'une classe
+  getCategoriesByClasse(classeId: number): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${environment.apiUrl}/classes/${classeId}/categories`
+    );
+  }
+
+  // ✅ Récupérer les cours d'une classe avec toutes les matières
+  getCoursesWithCategoriesByClasse(classeId: number): Observable<any> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/classes/${classeId}/courses-with-categories`
+    );
+  }
+
+  // 🔄 Garder les anciennes méthodes pour compatibilité temporaire
   getCoursesByLevel(levelId: number): Observable<Course[]> {
     return this.http.get<Course[]>(
       `${environment.apiUrl}/courses/level/${levelId}`
     );
   }
 
-  // Récupérer les cours par catégorie et niveau
   getCoursesByCategoryAndLevel(
     categoryId: number,
     levelId: number

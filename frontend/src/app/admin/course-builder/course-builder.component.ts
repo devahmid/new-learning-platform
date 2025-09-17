@@ -17,7 +17,7 @@ import {
   Category,
   Subcategory,
 } from '../../services/category.service';
-import { LevelService } from '../../services/level.service';
+import { ClasseService } from '../../services/classe.service';
 import { CoursService } from '../../cours/cours.service';
 import { UploadService } from '../../services/upload.service';
 import { MessageService } from 'primeng/api';
@@ -29,7 +29,7 @@ interface CourseForm {
   description: string;
   categoryId: number;
   subcategoryId: number;
-  levelId: number;
+  classeId: number;
   videoUrl?: string;
   pdfUrl?: string;
   lessons: LessonForm[];
@@ -88,7 +88,7 @@ export class CourseBuilderComponent implements OnInit {
   isLoading = false;
   categories: Category[] = [];
   subcategories: Subcategory[] = [];
-  levels: any[] = [];
+  classes: any[] = [];
   filteredSubcategories: Subcategory[] = [];
   
   // Upload properties
@@ -99,7 +99,7 @@ export class CourseBuilderComponent implements OnInit {
     private fb: FormBuilder,
     private adminService: AdminService,
     private categoryService: CategoryService,
-    private levelService: LevelService,
+    private classeService: ClasseService,
     private coursService: CoursService,
     private uploadService: UploadService,
     private messageService: MessageService,
@@ -118,7 +118,7 @@ export class CourseBuilderComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10)]],
       categoryId: [null, Validators.required],
       subcategoryId: [null, Validators.required],
-      levelId: [null, Validators.required],
+      classeId: [null, Validators.required],
       videoUrl: [''],
       pdfUrl: [''],
       lessons: this.fb.array([]),
@@ -147,8 +147,8 @@ export class CourseBuilderComponent implements OnInit {
       if (data.subcategories && Array.isArray(data.subcategories)) {
         return data.subcategories;
       }
-      if (data.levels && Array.isArray(data.levels)) {
-        return data.levels;
+      if (data.classes && Array.isArray(data.classes)) {
+        return data.classes;
       }
       
       // Si c'est un objet avec des propriétés numériques, le convertir en tableau
@@ -167,7 +167,7 @@ export class CourseBuilderComponent implements OnInit {
     forkJoin({
       categories: this.categoryService.getAllCategories(),
       subcategories: this.categoryService.getAllSubcategories(),
-      levels: this.levelService.getAll(),
+      classes: this.classeService.getAllClasses(),
     }).subscribe({
       next: (data) => {
         console.log('Données brutes de l\'API:', data);
@@ -175,17 +175,17 @@ export class CourseBuilderComponent implements OnInit {
         // Gérer les différents formats de données de l'API
         this.categories = this.extractArrayFromApiData(data.categories);
         this.subcategories = this.extractArrayFromApiData(data.subcategories);
-        this.levels = Array.isArray(data.levels) ? data.levels : [];
+        this.classes = Array.isArray(data.classes) ? data.classes : [];
 
         console.log('Données chargées:', {
           categories: this.categories.length,
           subcategories: this.subcategories.length,
-          levels: this.levels.length,
+          classes: this.classes.length,
         });
         
         console.log('Première catégorie:', this.categories[0]);
         console.log('Première sous-catégorie:', this.subcategories[0]);
-        console.log('Premier niveau:', this.levels[0]);
+        console.log('Première classe:', this.classes[0]);
 
         // Maintenant que toutes les données sont chargées, configurer le listener
         this.setupCategoryListener();
@@ -194,7 +194,7 @@ export class CourseBuilderComponent implements OnInit {
         console.error('Erreur lors du chargement des données:', error);
         this.categories = [];
         this.subcategories = [];
-        this.levels = [];
+        this.classes = [];
       },
     });
   }

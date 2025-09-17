@@ -48,13 +48,13 @@
                 </div>
             </div>
             <div class="space-y-6">
-                <ng-container *ngFor="let level of [1, 2, 3]">
-                  <div [id]="'level-' + level + '-container'" class="transform hover:scale-105 transition-all">
-                    <button [routerLink]="['/cours', subjectData.name.toLowerCase(), level]"
+                <ng-container *ngFor="let classe of [1, 2, 3]">
+                  <div [id]="'classe-' + classe + '-container'" class="transform hover:scale-105 transition-all">
+                    <button [routerLink]="['/cours', subjectData.name.toLowerCase(), classe]"
                       class="w-full md:w-96 mx-auto py-5 rounded-full shadow-lg flex items-center justify-center gap-3 group transition-all"
-                      [disabled]="level > unlockedLevel"
+                      [disabled]="classe > unlockedClasse"
                       [ngClass]="[
-                      level > unlockedLevel 
+                      classe > unlockedClasse 
                         ? 'cursor-not-allowed bg-gradient-to-r from-gray-200 to-gray-400' 
                         : 'bg-gradient-to-r ' + getGradientClass(subjectData.color)
                     ]"
@@ -62,18 +62,18 @@
                       <i
                         class="fa-solid"
                         [ngClass]="{
-                          'fa-star text-green-900 group-hover:text-yellow-400': level === 1 && level <= unlockedLevel,
-                          'fa-lock text-gray-600': level > unlockedLevel
+                          'fa-star text-green-900 group-hover:text-yellow-400': classe === 1 && classe <= unlockedClasse,
+                          'fa-lock text-gray-600': classe > unlockedClasse
                         }"
                       ></i>
-                      <span class="text-xl font-medium">Niveau {{ level }}</span>
+                      <span class="text-xl font-medium">Classe {{ classe }}</span>
                     </button>
               
                     <div class="text-center mt-2"
-                         [ngClass]="level > unlockedLevel ? 'text-gray-500' : subjectData.iconColor">
-                      <i class="fa-solid" [ngClass]="level > unlockedLevel ? 'fa-lock' : 'fa-unlock'"></i>
+                         [ngClass]="classe > unlockedClasse ? 'text-gray-500' : subjectData.iconColor">
+                      <i class="fa-solid" [ngClass]="classe > unlockedClasse ? 'fa-lock' : 'fa-unlock'"></i>
                       <span class="text-sm ml-1">
-                        {{ level > unlockedLevel ? 'Terminez le niveau ' + (level - 1) : 'Disponible' }}
+                        {{ classe > unlockedClasse ? 'Terminez la classe ' + (classe - 1) : 'Disponible' }}
                       </span>
                     </div>
                   </div>

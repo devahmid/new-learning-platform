@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './niveau-user.component.scss',
 })
 export class NiveauUserComponent implements OnInit, OnDestroy {
-  level = 1;
+  classe = 1;
   progress = 0; // Progression réelle depuis l'API
   subjectData: any = null;
   vocabularyLessons: Lesson[] = [];
@@ -42,8 +42,8 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     // Écouter les changements de paramètres de route
     this.routeSubscription = this.route.paramMap.subscribe(params => {
       const subjectName = params.get('subjectName');
-      const levelParam = params.get('level');
-      this.level = levelParam ? +levelParam : 1;
+      const classeParam = params.get('classe');
+      this.classe = classeParam ? +classeParam : 1;
 
       // Gestion spéciale pour "replay"
       if (subjectName === 'replay') {
@@ -109,14 +109,14 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
   private handleChildChange(newChild: any) {
     this.currentChildId = newChild.id;
     
-    // Vérifier si le nouvel enfant a accès au niveau actuel
-    const childLevel = newChild.level?.id || 1; // Niveau par défaut si non défini
-    const currentLevel = this.level;
+    // Vérifier si le nouvel enfant a accès à la classe actuelle
+    const childClasse = newChild.classe?.id || 1; // Classe par défaut si non définie
+    const currentClasse = this.classe;
     
-    console.log(`Nouvel enfant niveau ${childLevel}, page niveau ${currentLevel}`);
+    console.log(`Nouvel enfant classe ${childClasse}, page classe ${currentClasse}`);
     console.log('Enfant complet:', newChild);
     
-    // Rediriger vers matières pour forcer la sélection du bon niveau
+    // Rediriger vers matières pour forcer la sélection de la bonne classe
     console.log('Changement d\'enfant détecté - Redirection vers matières');
     // Forcer la navigation immédiatement
     window.location.href = '/matières';
@@ -126,23 +126,43 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = null;
 
-    // Gestion spéciale pour les replays
-    if (this.subjectData && this.subjectData.name === 'Replay') {
-      this.loadReplayCourses();
+    // Récupérer l'enfant sélectionné pour obtenir sa classe
+    const selectedChild = this.childContext.selectedChild();
+    console.log('Enfant sélectionné:', selectedChild);
+    
+    if (!selectedChild) {
+      console.error('Aucun enfant sélectionné');
+      this.error = 'Aucun enfant sélectionné';
+      this.isLoading = false;
       return;
     }
 
-    // Récupérer les cours pour cette matière et ce niveau
+    // Vérifier si l'enfant a une classe (classeId ou classe.id)
+    const classeId = selectedChild.classeId || selectedChild.classe?.id;
+    if (!classeId) {
+      console.error('Classe manquante pour l\'enfant:', selectedChild);
+      this.error = 'Classe non définie pour cet enfant';
+      this.isLoading = false;
+      return;
+    }
+
+    // Gestion spéciale pour les replays
+    if (this.subjectData && this.subjectData.name === 'Replay') {
+      this.loadReplayCourses(classeId);
+      return;
+    }
+
+    // Récupérer les cours pour cette matière et cette classe
     if (this.subjectData && this.subjectData.id) {
       this.courseService
-        .getCoursesByCategoryAndLevel(this.subjectData.id, this.level)
+        .getCoursesByCategoryAndClasse(this.subjectData.id, classeId)
         .subscribe({
           next: (courses) => {
             console.log(
               "Cours récupérés depuis l'API pour",
               this.subjectData.name,
-              'niveau',
-              this.level,
+              'classe',
+              classeId,
               ':',
               courses
             );
@@ -169,16 +189,16 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadReplayCourses() {
+  private loadReplayCourses(classeId: number) {
     // Pour les replays, on récupère tous les cours de la catégorie "Replay" (ID 14)
-    // et on filtre par niveau
+    // et on filtre par classe
     this.courseService
-      .getCoursesByCategoryAndLevel(14, this.level) // ID 14 = catégorie Replay
+      .getCoursesByCategoryAndClasse(14, classeId) // ID 14 = catégorie Replay
       .subscribe({
         next: (courses) => {
           console.log(
-            "Cours Replay récupérés depuis l'API pour niveau",
-            this.level,
+            "Cours Replay récupérés depuis l'API pour classe",
+            classeId,
             ':',
             courses
           );
@@ -227,11 +247,11 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     }
     
     if (coursesWithBlocking.length > 2) {
-      // Troisième cours : bloqué par niveau
+      // Troisième cours : bloqué par classe
       coursesWithBlocking[2] = {
         ...coursesWithBlocking[2],
-        requiredLevel: this.level + 1,
-        lockedReason: `Niveau ${this.level + 1} requis`
+        requiredClasse: this.classe + 1,
+        lockedReason: `Classe ${this.classe + 1} requise`
       };
     }
     
@@ -305,8 +325,8 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
       return true;
     }
     
-    // Blocage par niveau (exemple: cours avancé nécessite niveau intermédiaire)
-    if (course.requiredLevel && this.level < course.requiredLevel) {
+    // Blocage par classe (exemple: cours avancé nécessite classe intermédiaire)
+    if (course.requiredClasse && this.classe < course.requiredClasse) {
       return true;
     }
     
@@ -324,8 +344,8 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
       return 'Terminez le cours précédent';
     }
     
-    if (course.requiredLevel && this.level < course.requiredLevel) {
-      return `Niveau ${course.requiredLevel} requis`;
+    if (course.requiredClasse && this.classe < course.requiredClasse) {
+      return `Classe ${course.requiredClasse} requise`;
     }
     
     return course.lockedReason || 'Bientôt disponible';
@@ -340,7 +360,7 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    // Retourner vers la page des niveaux pour cette matière
+    // Retourner vers la page des classes pour cette matière
     this.router.navigate(['/matières', this.subjectData?.name?.toLowerCase()]);
   }
 

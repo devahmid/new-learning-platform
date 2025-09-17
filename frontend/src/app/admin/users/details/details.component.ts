@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import { AdminUserService } from '../../../services/admin-user.service';
-import { LevelService } from '../../../services/level.service';
+import { ClasseService } from '../../../services/classe.service';
 
 @Component({
     selector: 'app-details',
@@ -35,14 +35,14 @@ export class DetailsComponent implements OnInit {
     notificationType: 'success' | 'error' = 'success';
     
     // Niveaux
-    levels: any[] = [];
-    levelsLoading = false;
+    classes: any[] = [];
+    classesLoading = false;
 
     constructor(
         private route: ActivatedRoute, 
         private userService: UserService, 
         private adminUserService: AdminUserService,
-        private levelService: LevelService,
+        private classeService: ClasseService,
         private router: Router
     ) {}
 
@@ -57,7 +57,7 @@ export class DetailsComponent implements OnInit {
                 this.user = user;
                 this.editedUser = { 
                     ...user,
-                    level: user.level ? { ...user.level } : { name: '' }
+                    classe: user.classe ? { ...user.classe } : { id: 0, name: '' }
                 };
                 this.loading = false;
                 
@@ -109,7 +109,7 @@ export class DetailsComponent implements OnInit {
         this.isEditing = true;
         this.editedUser = { 
             ...this.user,
-            level: this.user.level ? { ...this.user.level } : { name: '' }
+            classe: this.user.classe ? { ...this.user.classe } : { id: 0, name: '' }
         };
     }
 
@@ -117,7 +117,7 @@ export class DetailsComponent implements OnInit {
         this.isEditing = false;
         this.editedUser = { 
             ...this.user,
-            level: this.user.level ? { ...this.user.level } : { name: '' }
+            classe: this.user.classe ? { ...this.user.classe } : { id: 0, name: '' }
         };
     }
 
@@ -144,9 +144,9 @@ export class DetailsComponent implements OnInit {
         this.router.navigate(['/admin/users']);
     }
 
-    updateLevelName(value: string) {
+    updateClasseName(value: string) {
         if (this.editedUser) {
-            this.editedUser.level = { ...this.editedUser.level, name: value };
+            this.editedUser.classe = { ...this.editedUser.classe, name: value, id: this.editedUser.classe?.id || 0 };
         }
     }
 
@@ -213,12 +213,12 @@ export class DetailsComponent implements OnInit {
             lastName: '',
             email: '',
             dateOfBirth: '',
-            level: { name: '' }
+            classe: { id: 0, name: '' }
         };
         
-        // Charger les niveaux si pas déjà chargés
-        if (this.levels.length === 0) {
-            this.loadLevels();
+        // Charger les classes si pas déjà chargées
+        if (this.classes.length === 0) {
+            this.loadClasses();
         }
         
         this.showCreateChildModal = true;
@@ -273,9 +273,9 @@ export class DetailsComponent implements OnInit {
         });
     }
 
-    updateChildLevelName(value: string) {
+    updateChildClasseName(value: string) {
         if (this.selectedChild) {
-            this.selectedChild.level = { ...this.selectedChild.level, name: value };
+            this.selectedChild.classe = { ...this.selectedChild.classe, name: value, id: this.selectedChild.classe?.id || 0 };
         }
     }
 
@@ -307,19 +307,19 @@ export class DetailsComponent implements OnInit {
     }
 
     // Charger les niveaux
-    loadLevels() {
-        this.levelsLoading = true;
+    loadClasses() {
+        this.classesLoading = true;
         
-        // Utiliser le service LevelService pour récupérer les niveaux
-        this.levelService.getAll().subscribe({
-            next: (levels) => {
-                this.levels = levels;
-                this.levelsLoading = false;
+        // Utiliser le service ClasseService pour récupérer les classes
+        this.classeService.getAllClasses().subscribe({
+            next: (classes: any[]) => {
+                this.classes = classes;
+                this.classesLoading = false;
             },
-            error: (error) => {
-                console.error('Erreur lors du chargement des niveaux:', error);
-                this.levelsLoading = false;
-                this.showErrorNotification('Erreur lors du chargement des niveaux');
+            error: (error: any) => {
+                console.error('Erreur lors du chargement des classes:', error);
+                this.classesLoading = false;
+                this.showErrorNotification('Erreur lors du chargement des classes');
             }
         });
     }
@@ -352,8 +352,8 @@ export class DetailsComponent implements OnInit {
             lastName: this.newChild.lastName,
             email: this.newChild.email || '',
             dateOfBirth: this.newChild.dateOfBirth || '',
-            level: this.newChild.level?.name || '',
-            levelId: this.newChild.level?.id || null
+            classe: this.newChild.classe?.name || '',
+            classeId: this.newChild.classe?.id || null
         };
 
         console.log('Données à envoyer:', childData);
@@ -385,32 +385,32 @@ export class DetailsComponent implements OnInit {
         });
     }
 
-    updateNewChildLevelName(value: string) {
+    updateNewChildClasseName(value: string) {
         if (this.newChild) {
-            this.newChild.level = { ...this.newChild.level, name: value };
+            this.newChild.classe = { ...this.newChild.classe, name: value, id: this.newChild.classe?.id || 0 };
         }
     }
 
-    selectLevel(level: any) {
+    selectClasse(classe: any) {
         if (this.newChild) {
-            this.newChild.level = { id: level.id, name: level.name };
+            this.newChild.classe = { id: classe.id, name: classe.name };
         }
     }
 
-    onLevelChange(levelId: string | number) {
-        console.log('onLevelChange appelé avec levelId:', levelId, 'type:', typeof levelId);
-        console.log('levels disponibles:', this.levels);
+    onClasseChange(classeId: string | number) {
+        console.log('onClasseChange appelé avec classeId:', classeId, 'type:', typeof classeId);
+        console.log('classes disponibles:', this.classes);
         
-        // Convertir levelId en number si c'est une string
-        const numericLevelId = typeof levelId === 'string' ? parseInt(levelId, 10) : levelId;
-        console.log('levelId converti en number:', numericLevelId);
+        // Convertir classeId en number si c'est une string
+        const numericClasseId = typeof classeId === 'string' ? parseInt(classeId, 10) : classeId;
+        console.log('classeId converti en number:', numericClasseId);
         
-        const selectedLevel = this.levels.find(l => l.id === numericLevelId);
-        console.log('niveau sélectionné:', selectedLevel);
+        const selectedClasse = this.classes.find(c => c.id === numericClasseId);
+        console.log('classe sélectionnée:', selectedClasse);
         
-        if (selectedLevel && this.newChild) {
-            this.newChild.level = { id: selectedLevel.id, name: selectedLevel.name };
-            console.log('newChild.level mis à jour:', this.newChild.level);
+        if (selectedClasse && this.newChild) {
+            this.newChild.classe = { id: selectedClasse.id, name: selectedClasse.name };
+            console.log('newChild.classe mis à jour:', this.newChild.classe);
         }
     }
 }

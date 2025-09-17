@@ -14,7 +14,7 @@ import { ChildContextService } from '../_children-context/_children-context/chil
 export class LevelPageComponent implements OnInit {
   subjectName!: string;
   subjectData: any;
-  unlockedLevel = 1; // Par défaut, seul le niveau 1 est débloqué
+  unlockedClasse = 1; // Par défaut, seule la classe 1 est débloquée
 
   private childContext = inject(ChildContextService);
   selectedChild = this.childContext.selectedChild;
@@ -29,7 +29,7 @@ export class LevelPageComponent implements OnInit {
     effect(() => {
       const child = this.selectedChild();
       if (child) {
-        this.updateUnlockedLevel();
+        this.updateUnlockedClasse();
       }
     });
   }
@@ -55,23 +55,23 @@ export class LevelPageComponent implements OnInit {
         .find((s) => s.name.toLowerCase() === name);
     }
 
-    // Déterminer le niveau débloqué selon l'enfant sélectionné
-    this.updateUnlockedLevel();
+    // Déterminer la classe débloquée selon l'enfant sélectionné
+    this.updateUnlockedClasse();
   }
 
-  private updateUnlockedLevel() {
+  private updateUnlockedClasse() {
     const child = this.selectedChild();
-    if (child && child.level && child.level.id) {
-      // Le niveau débloqué correspond au niveau de l'enfant
-      this.unlockedLevel = child.level.id;
+    if (child && child.classe && child.classe.id) {
+      // La classe débloquée correspond à la classe de l'enfant
+      this.unlockedClasse = child.classe.id;
       console.log(
-        `[LEVEL-PAGE] Enfant sélectionné: ${child.firstName} ${child.lastName}, Niveau: ${child.level.id}`
+        `[LEVEL-PAGE] Enfant sélectionné: ${child.firstName} ${child.lastName}, Classe: ${child.classe.id}`
       );
     } else {
-      // Si aucun enfant sélectionné ou pas de niveau, seul le niveau 1 est accessible
-      this.unlockedLevel = 1;
+      // Si aucun enfant sélectionné ou pas de classe, seule la classe 1 est accessible
+      this.unlockedClasse = 1;
       console.log(
-        '[LEVEL-PAGE] Aucun enfant sélectionné ou niveau non défini, niveau 1 uniquement'
+        '[LEVEL-PAGE] Aucun enfant sélectionné ou classe non définie, classe 1 uniquement'
       );
     }
   }
@@ -96,8 +96,6 @@ export class LevelPageComponent implements OnInit {
         return 'from-pink-300 to-pink-500';
       case 'bg-green-600':
         return 'from-green-200 to-green-500';
-      case 'bg-yellow-500':
-        return 'from-yellow-200 to-yellow-500';
       default:
         return 'from-gray-200 to-gray-400';
     }

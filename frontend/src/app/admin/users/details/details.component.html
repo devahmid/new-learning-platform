@@ -255,13 +255,13 @@
                   <label class="block text-sm font-semibold text-gray-700 mb-2 group-hover:text-emerald-600 transition-colors duration-200">Niveau</label>
                   <input
                     *ngIf="isEditing"
-                    [ngModel]="editedUser?.level?.name"
-                    (ngModelChange)="updateLevelName($event)"
+                    [ngModel]="editedUser?.classe?.name"
+                    (ngModelChange)="updateClasseName($event)"
                     type="text"
                     class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                   />
                   <div *ngIf="!isEditing" class="px-4 py-3 bg-gray-50/50 rounded-xl border border-gray-100">
-                    <p class="text-gray-900 font-medium">{{ user.level?.name || '—' }}</p>
+                    <p class="text-gray-900 font-medium">{{ user.classe?.name || '—' }}</p>
                   </div>
                 </div>
 
@@ -399,7 +399,7 @@
                     <svg class="flex-shrink-0 mr-2 h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                     </svg>
-                    <span>{{ child.level?.name || '—' }}</span>
+                    <span>{{ child.classe?.name || '—' }}</span>
                   </div>
 
                   <!-- Email si présent -->
@@ -511,7 +511,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Niveau</label>
-            <p class="text-gray-900">{{ selectedChild.level?.name || '—' }}</p>
+            <p class="text-gray-900">{{ selectedChild.classe?.name || '—' }}</p>
           </div>
         </div>
 
@@ -617,8 +617,8 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Niveau</label>
           <input
             type="text"
-            [ngModel]="selectedChild.level?.name"
-            (ngModelChange)="updateChildLevelName($event)"
+            [ngModel]="selectedChild.classe?.name"
+            (ngModelChange)="updateChildClasseName($event)"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -724,30 +724,30 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Niveau *</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Classe *</label>
           <div class="relative">
             <select
-              [ngModel]="newChild.level?.id"
-              (ngModelChange)="onLevelChange($event)"
+              [ngModel]="newChild.classe?.id"
+              (ngModelChange)="onClasseChange($event)"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
-              [disabled]="levelsLoading"
+              [disabled]="classesLoading"
             >
-              <option value="">Sélectionner un niveau</option>
-              <option *ngFor="let level of levels" [value]="level.id">
-                {{ level.name }}
+              <option value="">Sélectionner une classe</option>
+              <option *ngFor="let classe of classes" [value]="classe.id">
+                {{ classe.name }}
               </option>
             </select>
-            <div *ngIf="levelsLoading" class="absolute inset-y-0 right-0 flex items-center pr-3">
+            <div *ngIf="classesLoading" class="absolute inset-y-0 right-0 flex items-center pr-3">
               <div class="animate-spin rounded-full h-4 w-4 border-2 border-emerald-500 border-t-transparent"></div>
             </div>
-            <div *ngIf="!levelsLoading" class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <div *ngIf="!classesLoading" class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </div>
           </div>
-          <p *ngIf="!newChild.level?.name && !levelsLoading" class="mt-1 text-sm text-red-600">
-            Le niveau est obligatoire
+          <p *ngIf="!newChild.classe?.name && !classesLoading" class="mt-1 text-sm text-red-600">
+            La classe est obligatoire
           </p>
         </div>
 

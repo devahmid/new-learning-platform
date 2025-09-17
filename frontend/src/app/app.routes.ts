@@ -103,6 +103,30 @@ export const routes: Routes = [
         canActivate: [childGuard],
       },
       {
+        path: 'classes',
+        loadComponent: () =>
+          import('./components/classe-selector/classe-selector.component').then(
+            (m) => m.ClasseSelectorComponent
+          ),
+        canActivate: [childGuard],
+      },
+      {
+        path: 'classes/:classeId/courses',
+        loadComponent: () =>
+          import('./cours/cours-list/cours-list.component').then(
+            (m) => m.CoursListComponent
+          ),
+        canActivate: [childGuard],
+      },
+      {
+        path: 'classes/:classeId/courses/:courseId',
+        loadComponent: () =>
+          import('./cours/cours-detail/cours-detail.component').then(
+            (m) => m.CoursDetailComponent
+          ),
+        canActivate: [childGuard],
+      },
+      {
         path: 'no-children-info',
         loadComponent: () =>
           import('./pages/no-children-info/no-children-info.component').then(

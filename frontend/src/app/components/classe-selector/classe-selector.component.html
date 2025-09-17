@@ -1,0 +1,64 @@
+<div class="classe-selector">
+  <div class="header">
+    <h2>Sélectionnez votre classe</h2>
+    <p>Choisissez la classe correspondant à votre niveau d'études</p>
+  </div>
+  
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des classes...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadClasses()" class="retry-btn">Réessayer</button>
+  </div>
+
+  <!-- Classes grid -->
+  <div *ngIf="!loading && !error" class="classes-grid">
+    <div 
+      *ngFor="let classe of classes" 
+      class="classe-card"
+      [class.selected]="selectedClasse?.id === classe.id"
+      (click)="onClasseSelect(classe)">
+      
+      <div class="classe-header">
+        <h3>{{ classe.name }}</h3>
+        <span *ngIf="classe.capacity" class="capacity">
+          {{ classe.capacity }} élèves max
+        </span>
+      </div>
+      
+      <div class="classe-content">
+        <p *ngIf="classe.description" class="description">
+          {{ classe.description }}
+        </p>
+        
+        <div class="classe-stats">
+          <span class="courses-count">
+            <i class="fas fa-book"></i>
+            {{ classe.courses?.length || 0 }} cours
+          </span>
+          <span class="categories-count">
+            <i class="fas fa-subject"></i>
+            {{ classe.categories?.length || 0 }} matières
+          </span>
+        </div>
+      </div>
+
+      <div class="classe-footer">
+        <button class="select-btn">
+          {{ selectedClasse?.id === classe.id ? 'Sélectionné' : 'Sélectionner' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && !error && classes.length === 0" class="empty-state">
+    <i class="fas fa-graduation-cap"></i>
+    <p>Aucune classe disponible pour le moment.</p>
+  </div>
+</div>

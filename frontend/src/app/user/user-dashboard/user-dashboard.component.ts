@@ -287,6 +287,7 @@ export class UserDashboardComponent implements OnInit {
 
   children: any[] = [];
   mesClasses: any = [];
+  classes: any[] = []; // ✅ Ajouter la liste des classes
   childContext = inject(ChildContextService);
 
   // Propriétés pour le mode focus
@@ -392,7 +393,7 @@ export class UserDashboardComponent implements OnInit {
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
-      levelId: [null, Validators.required],
+      classeId: [null, Validators.required], // ✅ Changé de levelId à classeId
     });
 
     this.passwordForm = this.fb.group({
@@ -408,6 +409,7 @@ export class UserDashboardComponent implements OnInit {
     this.loadChildren();
     this.loadLevels();
     this.loadQuizStats();
+    this.loadClasses(); // ✅ Ajouter le chargement des classes
     this.setupKeyboardShortcuts();
     this.initTheme();
     this.setupPushNotifications();
@@ -1061,6 +1063,25 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
+  // ✅ Nouvelle méthode pour charger les classes
+  loadClasses() {
+    this.isLoading = true;
+    console.log('🔄 Chargement des classes...');
+    this.classeService.findAll().subscribe({
+      next: (res) => {
+        console.log('📚 Classes chargées:', res);
+        console.log('📊 Nombre de classes:', res?.length);
+        this.classes = res.filter(c => c.isActive);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('❌ Erreur chargement classes:', err);
+        this.handleError(err, 'le chargement des classes');
+        this.isLoading = false;
+      },
+    });
+  }
+
   openEditDialog() {
     const user = this.auth.user();
     this.editForm.patchValue({
@@ -1168,15 +1189,15 @@ export class UserDashboardComponent implements OnInit {
     }
 
     const fv = this.addChildForm.value;
-    console.log('Niveaux disponibles:', this.levels);
-    console.log('levelId sélectionné:', fv.levelId);
+    console.log('Classes disponibles:', this.classes);
+    console.log('classeId sélectionné:', fv.classeId);
 
     const payload: CreateChildPayload = {
       parentId: this.auth.id()!,
       firstName: fv.firstName || '',
       lastName: fv.lastName || '',
       dateOfBirth: fv.dateOfBirth || '',
-      levelId: fv.levelId || 1,
+      classeId: fv.classeId || 1, // ✅ Changé de levelId à classeId
       childProfile: {
         gender: fv.gender || 'masculin',
         isAvailableWednesdayMorning: fv.isAvailableWednesdayMorning || false,
@@ -1576,7 +1597,7 @@ export class UserDashboardComponent implements OnInit {
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
     dateOfBirth: ['', [Validators.required, this.validChildDate()]],
-    levelId: [null, Validators.required],
+    classeId: [null, Validators.required], // ✅ Changé de levelId à classeId
     gender: [null, Validators.required],
     isAvailableWednesdayMorning: [false],
     hasExtracurricularActivity: [false],
@@ -1624,7 +1645,7 @@ export class UserDashboardComponent implements OnInit {
       firstName: child.firstName || '',
       lastName: child.lastName || '',
       dateOfBirth: child.dateOfBirth || child.birthDate || '',
-      levelId: child.level?.id || child.childProfile?.arabicLevel || '',
+      classeId: child.classe?.id || child.classeId || '', // ✅ Changé de levelId à classeId
     };
 
     console.log("Données de l'enfant à modifier:", child);
@@ -1656,7 +1677,7 @@ export class UserDashboardComponent implements OnInit {
         firstName: formValue.firstName,
         lastName: formValue.lastName,
         dateOfBirth: formValue.dateOfBirth,
-        levelId: formValue.levelId,
+        classeId: formValue.classeId,
       };
 
       console.log("Données à envoyer à l'API:", updateData);
@@ -1692,10 +1713,13 @@ export class UserDashboardComponent implements OnInit {
     this.selectedChild.firstName = updateData.firstName;
     this.selectedChild.lastName = updateData.lastName;
     this.selectedChild.dateOfBirth = updateData.dateOfBirth;
-    this.selectedChild.level = {
-      id: updateData.levelId,
-      name: 'Niveau ' + updateData.levelId,
-    };
+    this.selectedChild.classeId = updateData.classeId;
+    
+    // Trouver la classe correspondante
+    const selectedClasse = this.classes.find(c => c.id === updateData.classeId);
+    if (selectedClasse) {
+      this.selectedChild.classe = selectedClasse;
+    }
 
     // Mettre à jour la liste des enfants
     const index = this.children.findIndex(

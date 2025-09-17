@@ -155,11 +155,11 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     // Initialiser le suivi de l'enfant
     this.initializeChildTracking();
 
-    this.courseService.getCourseById(id).subscribe((data) => {
+    this.courseService.getCourseById(id).subscribe((data: any) => {
       this.cours = {
         ...data,
         lessons:
-          data.lessons?.map((lesson) => ({
+          data.lessons?.map((lesson: any) => ({
             ...lesson,
             expanded: false,
             completed: false,
@@ -167,6 +167,7 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
         enrollments: [],
         createdAt: (data as any).createdAt || '',
         updatedAt: (data as any).updatedAt || '',
+        classe: data.classe || data.level || { id: 1, name: 'Classe par défaut' }, // ✅ Gérer la transition level → classe
       } as Course;
 
       if (this.cours.videoUrl?.trim()) {
@@ -296,7 +297,7 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     console.log('Navigation vers la leçon:', lesson);
 
     // Récupérer les informations depuis les données du cours
-    if (this.cours && this.cours.category && this.cours.level) {
+    if (this.cours && this.cours.category && this.cours.classe) {
       // Utiliser le nom de la catégorie comme nom de matière
       // Mapper les noms de catégories vers les noms de matières
       const categoryToSubjectMap: { [key: string]: string } = {
@@ -314,17 +315,17 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       const subjectName =
         categoryToSubjectMap[this.cours.category.name] ||
         this.cours.category.name;
-      const level = this.cours.level.id;
+      const classe = this.cours.classe.id;
 
       console.log('Navigation vers:', {
         categoryName: this.cours.category.name,
         subjectName,
-        level,
+        classe,
         lessonId: lesson.id,
       });
 
       // Naviguer vers LessonDetailComponent avec les bons paramètres
-      this.router.navigate(['/cours', subjectName, level, 'lesson', lesson.id]);
+      this.router.navigate(['/cours', subjectName, classe, 'lesson', lesson.id]);
     } else {
       console.error(
         'Données du cours manquantes pour la navigation:',
@@ -365,10 +366,10 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
   }
 
   retourListe() {
-    // Retourner vers la page des niveaux pour cette matière
+    // Retourner vers la page des classes pour cette matière
     const subjectName = this.getSubjectName().toLowerCase();
-    const level = this.getLevel();
-    this.router.navigate(['/cours', subjectName, level]);
+    const classe = this.getClasse();
+    this.router.navigate(['/cours', subjectName, classe]);
   }
 
 
@@ -397,16 +398,16 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     return 'Arabe'; // Valeur par défaut
   }
 
-  getLevel(): string {
-    // Utiliser les données du cours pour récupérer le niveau
-    if (this.cours && this.cours.level && this.cours.level.id) {
-      return this.cours.level.id.toString();
+  getClasse(): string {
+    // Utiliser les données du cours pour récupérer la classe
+    if (this.cours && this.cours.classe && this.cours.classe.id) {
+      return this.cours.classe.id.toString();
     }
     
     // Fallback vers les paramètres de route si disponibles
-    const level = this.route.snapshot.paramMap.get('level');
-    if (level) {
-      return level;
+    const classe = this.route.snapshot.paramMap.get('classe');
+    if (classe) {
+      return classe;
     }
     
     return '1'; // Valeur par défaut
@@ -482,23 +483,23 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     this.currentChildId = newChild.id;
     
     // Vérifier si le nouvel enfant a accès au cours actuel
-    const childLevel = newChild.level?.id || 1;
-    const courseLevel = this.cours?.level?.id || 1;
-    
-    console.log(`Nouvel enfant niveau ${childLevel}, cours niveau ${courseLevel}`);
-    
-    // Rediriger vers matières pour forcer la sélection du bon niveau
+    const childClasse = newChild.classe?.id || 1;
+    const courseClasse = this.cours?.classe?.id || 1;
+
+    console.log(`Nouvel enfant classe ${childClasse}, cours classe ${courseClasse}`);
+
+    // Rediriger vers matières pour forcer la sélection de la bonne classe
     console.log('Changement d\'enfant détecté - Redirection vers matières');
     // Forcer la navigation immédiatement
     window.location.href = '/matières';
   }
 
   private loadCourseData(courseId: number) {
-    this.courseService.getCourseById(courseId).subscribe((data) => {
+    this.courseService.getCourseById(courseId).subscribe((data: any) => {
       this.cours = {
         ...data,
         lessons:
-          data.lessons?.map((lesson) => ({
+          data.lessons?.map((lesson: any) => ({
             ...lesson,
             expanded: false,
             completed: false,
@@ -506,6 +507,7 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
         enrollments: [],
         createdAt: (data as any).createdAt || '',
         updatedAt: (data as any).updatedAt || '',
+        classe: data.classe || data.level || { id: 1, name: 'Classe par défaut' }, // ✅ Gérer la transition level → classe
       } as Course;
 
       this.organizeLessonsBySubcategory();

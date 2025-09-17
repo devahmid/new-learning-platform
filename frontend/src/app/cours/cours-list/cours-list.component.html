@@ -96,11 +96,11 @@
             </div>
             <!-- Badge niveau -->
             <div class="absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-bold" [ngClass]="{
-                'bg-green-200 text-green-900': course.level.name.includes('1') || course.level.name.includes('Débutant'),
-                'bg-yellow-200 text-yellow-900': course.level.name.includes('2') || course.level.name.includes('Intermédiaire'),
-                'bg-red-200 text-red-900': course.level.name.includes('3') || course.level.name.includes('Avancé')
+                'bg-green-200 text-green-900': course.classe.name.includes('1') || course.classe.name.includes('CP'),
+                'bg-yellow-200 text-yellow-900': course.classe.name.includes('2') || course.classe.name.includes('CE1'),
+                'bg-red-200 text-red-900': course.classe.name.includes('3') || course.classe.name.includes('CE2')
               }">
-              {{ course.level.name || 'Niveau ' + level }}
+              {{ course.classe.name || 'Classe ' + level }}
             </div>
           </div>
 

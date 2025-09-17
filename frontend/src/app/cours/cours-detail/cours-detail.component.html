@@ -12,11 +12,11 @@
             {{ getSubjectName() }}
           </a>
           <i class="fa-solid fa-chevron-right text-xs"></i>
-          <a [routerLink]="['/cours', getSubjectName().toLowerCase(), getLevel()]" class="hover:text-green-600 transition-colors">
-            Cours {{getSubjectName()}} - Niveau {{ getLevel() }}
+          <a [routerLink]="['/cours', getSubjectName().toLowerCase(), getClasse()]" class="hover:text-green-600 transition-colors">
+            Cours {{getSubjectName()}} - Classe {{ getClasse() }}
           </a>
           <i class="fa-solid fa-chevron-right text-xs"></i>
-          <span class="text-green-600 font-medium">{{ cours?.title }}</span>
+                <span class="text-green-600 font-medium">{{ cours.title }}</span>
         </nav>
       </div>
       
@@ -32,11 +32,11 @@
       </div>
 
 
-      <div id="level-indicator" class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+      <div id="classe-indicator" class="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <i class="fa-solid fa-graduation-cap text-green-600 text-2xl"></i>
-            <span class="text-xl font-bold text-gray-800">{{ cours.level.name || 'Niveau 1' }}</span>
+            <span class="text-xl font-bold text-gray-800">{{ cours.classe.name || 'Classe 1' }}</span>
           </div>
           <div class="flex items-center gap-2">
             <div class="h-2 w-24 bg-gray-200 rounded-full">
