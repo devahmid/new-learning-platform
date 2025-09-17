@@ -105,14 +105,14 @@ export class ClassePageComponent implements OnInit {
   }
 
   isClasseUnlocked(classe: Classe): boolean {
-    return classe.id <= this.unlockedClasseId;
+    return classe.id === this.unlockedClasseId;
   }
 
   getClasseStatus(classe: Classe): string {
-    if (classe.id <= this.unlockedClasseId) {
+    if (classe.id === this.unlockedClasseId) {
       return 'Disponible';
     } else {
-      return `Terminez la classe ${classe.id - 1}`;
+      return 'Non disponible';
     }
   }
 
