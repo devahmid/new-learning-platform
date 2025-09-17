@@ -1,0 +1,31 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+  <input formControlName="email" placeholder="Email" class="input" />
+  <input formControlName="firstName" placeholder="Prénom" class="input" />
+  <input formControlName="lastName" placeholder="Nom" class="input" />
+  <input formControlName="phoneNumber" placeholder="Téléphone principal" class="input" />
+
+  <div formGroupName="parentProfile">
+    <input formControlName="secondaryPhone" placeholder="Téléphone secondaire" class="input" />
+
+    <label>Plateformes</label>
+    <select formControlName="platforms" multiple class="input">
+      <option value="WhatsApp">WhatsApp</option>
+      <option value="Telegram">Telegram</option>
+      <option value="Signal">Signal</option>
+    </select>
+
+    <label>Groupes</label>
+    <select formControlName="preferredGroups" multiple class="input">
+      <option value="classe">Groupe classe</option>
+      <option value="general">Groupe général</option>
+      <option value="diffusion">Diffusion privée</option>
+    </select>
+
+    <label>
+      <input type="checkbox" formControlName="emailOnly" />
+      Je préfère uniquement les e-mails
+    </label>
+  </div>
+
+  <button type="submit" class="btn-primary">💾 Enregistrer</button>
+</form>

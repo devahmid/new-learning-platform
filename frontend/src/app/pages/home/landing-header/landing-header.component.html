@@ -1,0 +1,33 @@
+<header *ngIf="!isLoggedIn" class="fixed top-0 left-0 w-full bg-white shadow z-50">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <a routerLink="/" class="text-2xl font-bold text-emerald-600 flex items-center">
+        <i class="pi pi-globe mr-2"></i> ArabicKids
+      </a>
+  
+      <!-- Menu burger (mobile) -->
+      <button class="md:hidden text-gray-800" (click)="toggleMenu()">
+        <i class="pi pi-bars text-xl"></i>
+      </button>
+  
+      <!-- Menu desktop -->
+      <nav class="hidden md:flex space-x-6 items-center text-sm font-medium">
+        <a routerLink="/" class="text-gray-700 hover:text-emerald-600">Accueil</a>
+        <a routerLink="/cours" class="text-gray-700 hover:text-emerald-600">Cours</a>
+        <a routerLink="/tarifs" class="text-gray-700 hover:text-emerald-600">Tarifs</a>
+        <a routerLink="/contact" class="text-gray-700 hover:text-emerald-600">Contact</a>
+        <a routerLink="/login" class="px-4 py-2 text-emerald-600 border border-emerald-600 rounded-full hover:bg-emerald-600 hover:text-white">Connexion</a>
+        <!-- <a routerLink="/register" class="px-4 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-700">Essai gratuit</a> -->
+      </nav>
+    </div>
+  
+    <!-- Menu mobile -->
+    <div *ngIf="menuOpen" class="md:hidden px-4 pb-4 bg-white shadow space-y-2">
+      <a routerLink="/" class="block py-2 text-gray-700 hover:text-emerald-600">Accueil</a>
+      <a routerLink="/cours" class="block py-2 text-gray-700 hover:text-emerald-600">Cours</a>
+      <a routerLink="/tarifs" class="block py-2 text-gray-700 hover:text-emerald-600">Tarifs</a>
+      <a routerLink="/contact" class="block py-2 text-gray-700 hover:text-emerald-600">Contact</a>
+      <a routerLink="/login" class="block py-2 text-emerald-600">Connexion</a>
+      <!-- <a routerLink="/register" class="block py-2 text-white bg-emerald-600 rounded text-center">Essai gratuit</a> -->
+    </div>
+  </header>
+  

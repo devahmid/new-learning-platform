@@ -1,0 +1,171 @@
+// Animations pour les niveaux
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+// Classes d'animation
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.4s ease-out;
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+.shake-animation {
+  animation: shake 0.5s ease-in-out;
+}
+
+// Styles pour les cartes
+.level-card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Styles pour les badges de niveau
+.level-badge {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+}
+
+// Styles pour les boutons
+.action-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+
+  &:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Styles pour le formulaire
+.form-input {
+  transition: all 0.3s ease;
+
+  &:focus {
+    transform: scale(1.02);
+  }
+}
+
+// Styles pour les lignes du tableau
+.table-row {
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .level-card {
+    margin-bottom: 1rem;
+  }
+
+  .action-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+// Dark mode improvements
+.dark {
+  .level-card {
+    &:hover {
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .table-row {
+    &:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+  }
+}
+
+// Loading states
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// Error states
+.error-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+// Success states
+.success-glow {
+  animation: successGlow 0.6s ease-out;
+}
+
+@keyframes successGlow {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}

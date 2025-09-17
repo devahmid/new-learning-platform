@@ -1,0 +1,220 @@
+/* Styles pour le composant lesson-detail */
+.video-container {
+  position: relative;
+}
+
+.video-container iframe,
+.video-container video {
+  border: none;
+  outline: none;
+}
+
+/* ===== ANIMATIONS ET TRANSITIONS ===== */
+
+/* Animation d'entrée pour les sections */
+.section-enter {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideInUp 0.5s ease-out forwards;
+}
+
+@keyframes slideInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation de sortie pour les sections */
+.section-exit {
+  opacity: 1;
+  transform: translateY(0);
+  animation: slideOutDown 0.3s ease-in forwards;
+}
+
+@keyframes slideOutDown {
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Animation pour les cartes de quiz */
+.quiz-option {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
+}
+
+.quiz-option:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-option:active {
+  transform: scale(0.98);
+}
+
+/* Animation pour les flashcards */
+.flashcard {
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front,
+.flashcard-back {
+  backface-visibility: hidden;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+}
+
+/* Animation pour les boutons */
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Effet de vague sur les boutons */
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Animation pour les barres de progression */
+.progress-bar {
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animation pour les messages de feedback */
+.feedback-message {
+  animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation pour les icônes de chargement */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation pour les cartes d'exercices */
+.exercise-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
+}
+
+.exercise-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation pour les réponses correctes/incorrectes */
+.answer-correct {
+  animation: correctPulse 0.6s ease-out;
+}
+
+.answer-incorrect {
+  animation: incorrectShake 0.6s ease-out;
+}
+
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); background-color: #10b981; }
+  100% { transform: scale(1); }
+}
+
+@keyframes incorrectShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Animation pour les transitions de section */
+.section-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .video-container {
+    height: 250px;
+  }
+  
+  .quiz-option:hover {
+    transform: none; /* Désactiver les animations sur mobile */
+  }
+  
+  .exercise-card:hover {
+    transform: none; /* Désactiver les animations sur mobile */
+  }
+}
+
+/* ===== ACCESSIBILITÉ ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== MODE SOMBRE ===== */
+@media (prefers-color-scheme: dark) {
+  .quiz-option:hover {
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+  }
+  
+  .exercise-card:hover {
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+  }
+}

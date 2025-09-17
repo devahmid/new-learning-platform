@@ -1,0 +1,106 @@
+// Styles pour la liste des cours admin
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Animations pour les cartes
+.course-card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+}
+
+// Styles pour les badges
+.status-badge {
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+
+  &.active {
+    @apply bg-green-100 text-green-800;
+  }
+
+  &.draft {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  &.archived {
+    @apply bg-gray-100 text-gray-800;
+  }
+}
+
+.level-badge {
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+
+  &.DEBUTANT {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  &.INTERMEDIAIRE {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  &.AVANCE {
+    @apply bg-red-100 text-red-800;
+  }
+}
+
+// Styles pour la pagination
+.pagination-button {
+  @apply px-3 py-2 text-sm font-medium rounded-lg transition-colors;
+
+  &.active {
+    @apply bg-blue-600 text-white;
+  }
+
+  &.inactive {
+    @apply text-gray-500 bg-white border border-gray-300 hover:bg-gray-50;
+  }
+
+  &:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filters-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .course-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .filters-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}

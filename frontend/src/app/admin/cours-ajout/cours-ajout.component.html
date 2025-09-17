@@ -1,0 +1,210 @@
+<!-- <div class="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md mt-10">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">📌 Ajouter un Cours</h2>
+    <form [formGroup]="coursForm" class="space-y-4">
+      <div>
+        <label for="title" class="block text-sm font-medium text-gray-700">Titre :</label>
+        <input id="title" pInputText formControlName="title" placeholder="Entrez le titre du cours"
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:ring-green-500 focus:border-green-500">
+      </div>
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700">Description :</label>
+        <textarea id="description" p-inputTextarea formControlName="description" rows="4" placeholder="Entrez une description"
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:ring-green-500 focus:border-green-500"></textarea>
+      </div>
+      <div>
+        <label for="category" class="block text-sm font-medium text-gray-700">Catégorie :</label>
+        <p-dropdown id="category" formControlName="category" [options]="categories" placeholder="Sélectionner une catégorie"
+          optionLabel="label"
+          styleClass="w-full mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+        </p-dropdown>
+      </div>
+      <div>
+        <label for="level" class="block text-sm font-medium text-gray-700">Niveau :</label>
+        <p-dropdown id="level" formControlName="level" [options]="niveaux" placeholder="Sélectionner un niveau"
+          optionLabel="label"
+          styleClass="w-full mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+        </p-dropdown>
+      </div>
+      <div>
+        <label for="videoUrl" class="block text-sm font-medium text-gray-700">Lien Vidéo :</label>
+        <input id="videoUrl" pInputText formControlName="videoUrl" placeholder="Lien YouTube ou autre"
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:ring-green-500 focus:border-green-500">
+      </div>
+      <div>
+        <label for="pdfUrl" class="block text-sm font-medium text-gray-700">Lien PDF :</label>
+        <input id="pdfUrl" pInputText formControlName="pdfUrl" placeholder="Lien du document PDF"
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:ring-green-500 focus:border-green-500">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Vidéo :</label>
+        <p-fileUpload name="file" [auto]="true" [multiple]="false" accept="video/*"
+          (onUpload)="onVideoUpload($event)" [customUpload]="true" [chooseLabel]="'Uploader Vidéo'"
+          [showUploadButton]="false">
+        </p-fileUpload>
+      </div>
+      <div *ngIf="previewVideoUrl" class="mt-2">
+        <video [src]="previewVideoUrl" width="100%" height="300" controls class="rounded-lg border shadow-sm"></video>
+      </div>
+      
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700">PDF :</label>
+        <p-fileUpload name="file" [auto]="true" [multiple]="false" accept=".pdf"
+          (onUpload)="onPdfUpload($event)" [customUpload]="true" [chooseLabel]="'Uploader PDF'"
+          [showUploadButton]="false">
+        </p-fileUpload>
+      </div>
+      <div *ngIf="previewPdfUrl" class="mt-4">
+        <iframe [src]="previewPdfUrl" width="100%" height="400" class="rounded-lg border shadow-sm"></iframe>
+      </div>
+      
+      <p-button label="Ajouter" icon="pi pi-check" (click)="ajouterCours()" class="mt-4 w-full p-button-success"></p-button>
+    </form>
+  </div>
+   -->
+
+   <form [formGroup]="courseForm" (ngSubmit)="submit()" class="max-w-4xl mx-auto p-6 bg-white shadow rounded space-y-6">
+
+    <div class="space-y-2">
+      <label for="title" class="font-semibold">Titre du cours</label>
+      <input pInputText id="title" formControlName="title" class="w-full" />
+    </div>
+  
+    <div class="space-y-2">
+      <label for="description" class="font-semibold">Description</label>
+      <textarea pInputTextarea id="description" formControlName="description" rows="4" class="w-full"></textarea>
+    </div>
+  
+    <div class="flex gap-4">
+      <div class="flex-1 space-y-2">
+        <div class="flex-1 space-y-2">
+          <label class="font-semibold">Lien de la vidéo</label>
+          <input pInputText formControlName="videoUrl" placeholder="https://..." class="w-full" />
+        </div>
+        
+      </div>
+  
+      <div class="flex-1 space-y-2">
+        <label class="font-semibold">PDF du cours</label>
+        <p-fileUpload
+        mode="basic"
+        name="files"
+        customUpload="true"
+        (onSelect)="uploadFile($event, courseForm.get('pdfUrl'))"
+        chooseLabel="Choisir un PDF"
+      ></p-fileUpload>
+      
+      </div>
+    </div>
+  
+    <div class="flex gap-4">
+      <div class="flex-1 space-y-2">
+        <label class="font-semibold">Niveau</label>
+        <p-dropdown
+          [options]="[{ label: 'Débutant', value: 1 }, { label: 'Intermédiaire', value: 2 }]"
+          formControlName="levelId"
+          placeholder="Choisir un niveau"
+          [style]="{ width: '100%' }"
+          class="block"
+        ></p-dropdown>
+      </div>
+    
+      <div class="flex-1 space-y-2">
+        <label class="font-semibold">Catégorie</label>
+        <p-dropdown
+          [options]="categories"
+          formControlName="categoryId"
+          placeholder="Choisir une catégorie"
+          [style]="{ width: '100%' }"
+          class="block"
+        ></p-dropdown>
+      </div>
+    </div>
+    
+  
+    <!-- Leçons -->
+    <div formArrayName="lessons" class="space-y-4 mt-6">
+      <h2 class="text-xl font-bold">Leçons</h2>
+  
+      <div *ngFor="let lesson of lessons.controls; let i = index" [formGroupName]="i" class="bg-gray-50 p-4 rounded shadow">
+        <div class="space-y-2">
+          <label>Titre</label>
+          <input pInputText formControlName="title" class="w-full" />
+        </div>
+  
+        <div class="space-y-2">
+          <label>Contenu</label>
+          <textarea pInputTextarea formControlName="content" class="w-full" rows="3"></textarea>
+        </div>
+  
+        <div class="flex gap-4">
+          <div class="flex-1 space-y-2">
+            <label class="font-semibold">Lien de la vidéo</label>
+            <input pInputText formControlName="videoUrl" placeholder="https://..." class="w-full" />
+          </div>
+          
+          <p-fileUpload
+            mode="basic"
+            name="files"
+            customUpload="true"
+            (onSelect)="uploadFile($event, lesson.get('fileUrl'))"
+            chooseLabel="Fichier"
+          ></p-fileUpload>
+        </div>
+      </div>
+  
+      <button type="button" class="p-button p-component" (click)="addLesson()">
+        <span class="p-button-label">+ Ajouter une leçon</span>
+      </button>
+    </div>
+  
+    <!-- Quizzes -->
+    <div formArrayName="quizzes" class="space-y-4 mt-6">
+      <h2 class="text-xl font-bold">Quiz</h2>
+  
+      <div *ngFor="let quiz of quizzes.controls; let i = index" [formGroupName]="i" class="bg-gray-50 p-4 rounded shadow">
+        <div class="space-y-2">
+          <label>Titre du quiz</label>
+          <input pInputText formControlName="title" class="w-full" />
+        </div>
+  
+        <div formArrayName="questions" class="space-y-4 mt-2">
+          <h3 class="font-semibold">Questions</h3>
+          <div *ngFor="let question of getQuestionsArray(quiz).controls; let j = index" [formGroupName]="j" class="space-y-2">
+            <input pInputText formControlName="text" placeholder="Question" class="w-full" />
+  
+            <div formArrayName="answers" class="grid grid-cols-2 gap-2">
+              <div *ngFor="let answer of getAnswersArray(question).controls; let k = index" [formGroupName]="k">
+                <input pInputText formControlName="text" placeholder="Réponse {{k + 1}}" />
+                <p-checkbox binary="true" formControlName="isCorrect" label="Correct ?"></p-checkbox>
+              </div>
+            </div>
+            
+            
+            
+            <button
+              type="button"
+              class="p-button p-button-sm p-button-outlined mt-2"
+              (click)="addAnswer(question)">
+              + Ajouter une réponse
+            </button>
+            
+          </div>
+  
+          <button type="button" class="p-button p-button-sm p-button-outlined" (click)="addQuestion(i)">
+            Ajouter une question
+          </button>
+        </div>
+      </div>
+  
+      <button type="button" class="p-button p-component" (click)="addQuiz()">
+        <span class="p-button-label">+ Ajouter un quiz</span>
+      </button>
+    </div>
+  
+    <button type="submit" class="mt-6 p-button p-button-success w-full">
+      <span class="p-button-label">Créer le cours</span>
+    </button>
+  </form>
+  

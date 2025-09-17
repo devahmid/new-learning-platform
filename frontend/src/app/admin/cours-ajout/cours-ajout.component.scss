@@ -1,0 +1,68 @@
+/* ✅ Style global pour le formulaire */
+.cours-ajout-card {
+    width: 50%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  
+    h2 {
+      color: #007bff;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  }
+  
+  /* ✅ Style des champs du formulaire */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+  
+  label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  /* ✅ Style des champs d'entrée */
+  input[pInputText], textarea[p-inputTextarea], p-dropdown {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
+  
+    &:focus {
+      border-color: #007bff;
+      box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+    }
+  }
+  
+  /* ✅ Bouton stylisé */
+  .p-button-success {
+    width: 100%;
+    font-size: 18px;
+    padding: 10px;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+  
+    &:hover {
+      background-color: #218838;
+    }
+  }
+  
+  /* ✅ Style pour le toast */
+  .p-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+  }
+  

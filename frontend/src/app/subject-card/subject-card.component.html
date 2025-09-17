@@ -1,0 +1,9 @@
+<div class="w-full max-w-xs border-4 rounded-xl shadow-md px-4 py-3 flex gap-4 items-center text-white"
+     [ngClass]="[bg, border]">
+  <img src="https://cdn-icons-png.flaticon.com/512/2693/2693507.png" class="w-10 h-10" />
+  <div class="text-left">
+    <div class="text-lg font-bold leading-tight">{{ fr }}</div>
+    <div class="text-base">{{ ar }}</div>
+    <div class="text-sm italic opacity-90" *ngIf="en">{{ en }}</div>
+  </div>
+</div>

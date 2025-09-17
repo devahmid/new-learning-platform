@@ -1,0 +1,97 @@
+// Styles pour le formulaire d'exercices
+.form-section {
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.question-card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #3b82f6;
+  }
+}
+
+.answer-item {
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #f8fafc;
+  }
+}
+
+.type-selector {
+  .type-option {
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+}
+
+.submit-button {
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+// Animations pour les messages
+.success-message,
+.error-message {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// Styles pour les champs de formulaire
+.form-field {
+  transition: all 0.2s ease;
+
+  &:focus {
+    transform: scale(1.01);
+  }
+}
+
+// Styles pour les badges de type
+.type-badge {
+  &.flashcard {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  &.translation {
+    @apply bg-green-100 text-green-800;
+  }
+
+  &.listening {
+    @apply bg-purple-100 text-purple-800;
+  }
+
+  &.multiple_choice {
+    @apply bg-orange-100 text-orange-800;
+  }
+
+  &.fill_blank {
+    @apply bg-pink-100 text-pink-800;
+  }
+}

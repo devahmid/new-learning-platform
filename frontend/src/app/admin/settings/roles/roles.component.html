@@ -1,0 +1,160 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <!-- Header avec gradient -->
+      <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <!-- Bouton de retour -->
+            <button
+              (click)="goBack()"
+              class="p-3 bg-white/20 hover:bg-white/30 rounded-xl backdrop-blur-sm transition-all duration-200 group"
+              title="Retour à la gestion des utilisateurs"
+            >
+              <svg class="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+            </button>
+            
+            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-3xl font-bold text-white">Gestion des Rôles</h1>
+              <p class="text-blue-100 mt-1">Configurez les permissions et rôles des utilisateurs</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-bold text-white">{{ filteredUsers.length }}</div>
+            <div class="text-blue-100 text-sm">utilisateurs actifs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barre de recherche et filtres -->
+      <div class="px-8 py-6 bg-gray-50 border-b border-gray-200">
+        <div class="flex flex-col lg:flex-row gap-4">
+          <!-- Barre de recherche -->
+          <div class="flex-1 relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange()"
+              placeholder="Rechercher par nom ou email..."
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+            />
+          </div>
+
+          <!-- Filtre par rôle -->
+          <div class="lg:w-64">
+            <select
+              [(ngModel)]="selectedRole"
+              (change)="onRoleFilterChange()"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+            >
+              <option value="">Tous les rôles</option>
+              <option *ngFor="let role of roles" [value]="role.value">{{ role.label }}</option>
+            </select>
+          </div>
+
+          <!-- Bouton reset -->
+          <button
+            (click)="clearFilters()"
+            class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl transition-all duration-200 font-medium flex items-center space-x-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenu principal -->
+      <div class="p-8">
+        <!-- Loading state -->
+        <div *ngIf="isLoading" class="flex items-center justify-center py-12">
+          <div class="flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span class="text-gray-600 font-medium">Chargement des utilisateurs...</span>
+          </div>
+        </div>
+
+        <!-- Liste des utilisateurs -->
+        <div *ngIf="!isLoading" class="space-y-4">
+          <div *ngIf="filteredUsers.length === 0" class="text-center py-12">
+            <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun utilisateur trouvé</h3>
+            <p class="text-gray-500">Essayez de modifier vos critères de recherche</p>
+          </div>
+
+          <div *ngFor="let user of filteredUsers" class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-200 hover:border-blue-300">
+            <div class="flex items-center justify-between">
+              <!-- Informations utilisateur -->
+              <div class="flex items-center space-x-4">
+                <!-- Avatar -->
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  {{ user.firstName?.charAt(0) }}{{ user.lastName?.charAt(0) }}
+                </div>
+                
+                <!-- Détails -->
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">
+                    {{ user.firstName || '' }} {{ user.lastName || '' }}
+                  </h3>
+                  <p class="text-gray-600">{{ user.email || 'Email non renseigné' }}</p>
+                </div>
+              </div>
+
+              <!-- Sélecteur de rôle -->
+              <div class="relative role-dropdown-container">
+                <button
+                  (click)="toggleRoleDropdown(user.id)"
+                  class="flex items-center space-x-2 px-4 py-2 rounded-lg border border-gray-300 hover:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                >
+                  <span [class]="'px-3 py-1 rounded-full text-xs font-medium ' + getRoleInfo(user.role).color">
+                    {{ getRoleInfo(user.role).label }}
+                  </span>
+                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+
+                <!-- Dropdown des rôles -->
+                <div
+                  *ngIf="showRoleDropdown[user.id]"
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-10"
+                >
+                  <div class="py-2">
+                    <div
+                      *ngFor="let role of roles"
+                      (click)="changeRole(user, role.value)"
+                      class="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150 flex items-center space-x-3"
+                    >
+                      <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + role.color">
+                        {{ role.label }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  

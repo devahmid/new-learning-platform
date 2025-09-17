@@ -1,0 +1,207 @@
+<main class="py-12 bg-gray-50 min-h-screen" *ngIf="cours">
+  <section id="vocabulary-grammar" class="container mx-auto py-12 px-4">
+    <div class="max-w-3xl mx-auto">
+      <!-- Breadcrumb Navigation -->
+      <div class="mb-6">
+        <nav class="flex items-center space-x-2 text-sm text-gray-600">
+          <a routerLink="/matières" class="hover:text-green-600 transition-colors">
+            <i class="fa-solid fa-book mr-1"></i>Matières
+          </a>
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+          <a [routerLink]="['/matières', getSubjectName().toLowerCase()]" class="hover:text-green-600 transition-colors">
+            {{ getSubjectName() }}
+          </a>
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+          <a [routerLink]="['/cours', getSubjectName().toLowerCase(), getLevel()]" class="hover:text-green-600 transition-colors">
+            Cours {{getSubjectName()}} - Niveau {{ getLevel() }}
+          </a>
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+          <span class="text-green-600 font-medium">{{ cours?.title }}</span>
+        </nav>
+      </div>
+      
+      <!-- Back Button -->
+      <div class="flex items-center justify-between mb-8">
+        <button (click)="retourListe()" class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 hover:text-green-600 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md">
+          <i class="fa-solid fa-arrow-left text-sm"></i>
+          <span class="text-sm font-medium">Retour aux Cours</span>
+        </button>
+        <div class="text-green-600 text-sm font-bold rounded-full border-4 border-green-400 w-12 h-12 flex items-center justify-center">
+          {{ progression }}%
+        </div>
+      </div>
+
+
+      <div id="level-indicator" class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-graduation-cap text-green-600 text-2xl"></i>
+            <span class="text-xl font-bold text-gray-800">{{ cours.level.name || 'Niveau 1' }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="h-2 w-24 bg-gray-200 rounded-full">
+              <div class="h-2 w-3/4 bg-green-500 rounded-full" [style.width.%]="progression"></div>
+            </div>
+            <span class="text-sm text-gray-600">{{ progression }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sections d'apprentissage - 3 sous-catégories arabes -->
+      <div id="learning-sections" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Section Grammaire -->
+        <div id="grammar-section" class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow" *ngIf="grammarLessons.length > 0">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+              <i class="fa-solid fa-pencil text-blue-600 text-xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Grammaire</h3>
+          </div>
+          <div class="space-y-4">
+            <button 
+              *ngFor="let lesson of grammarLessons; let i = index"
+              class="w-full py-3 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors flex items-center justify-between"
+              (click)="toggleLesson(lesson)">
+              <span class="text-gray-700">{{ lesson.title }}</span>
+              <i class="fa-solid fa-check text-blue-600" *ngIf="lesson.completed"></i>
+              <i class="fa-regular fa-circle-play text-blue-600" *ngIf="!lesson.completed && i === 0"></i>
+              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed && i > 0"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section Vocabulaire -->
+        <div id="vocabulary-section" class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow" *ngIf="vocabularyLessons.length > 0">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+              <i class="fa-solid fa-book text-green-600 text-xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Vocabulaire</h3>
+          </div>
+          <div class="space-y-4">
+            <button 
+              *ngFor="let lesson of vocabularyLessons; let i = index"
+              class="w-full py-3 px-4 rounded-xl bg-green-50 hover:bg-green-100 transition-colors flex items-center justify-between"
+              (click)="toggleLesson(lesson)">
+              <span class="text-gray-700">{{ lesson.title }}</span>
+              <i class="fa-solid fa-check text-green-600" *ngIf="lesson.completed"></i>
+              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section Lecture -->
+        <div id="reading-section" class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow" *ngIf="readingLessons.length > 0">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+              <i class="fa-solid fa-book-open text-orange-600 text-xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Lecture</h3>
+          </div>
+          <div class="space-y-4">
+            <button 
+              *ngFor="let lesson of readingLessons; let i = index"
+              class="w-full py-3 px-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors flex items-center justify-between"
+              (click)="toggleLesson(lesson)">
+              <span class="text-gray-700">{{ lesson.title }}</span>
+              <i class="fa-solid fa-check text-orange-600" *ngIf="lesson.completed"></i>
+              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Replay - Pleine largeur en bas -->
+      <div id="replay-section" class="mt-8" *ngIf="isReplayCourse() && otherLessons.length > 0">
+        <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center">
+              <i class="fa-solid fa-video text-white text-xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Leçons Replay</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button 
+              *ngFor="let lesson of otherLessons; let i = index"
+              class="py-3 px-4 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 transition-colors flex items-center justify-between border border-purple-200"
+              (click)="toggleLesson(lesson)">
+              <span class="text-gray-700">{{ lesson.title }}</span>
+              <i class="fa-solid fa-play text-purple-600" *ngIf="!lesson.completed"></i>
+              <i class="fa-solid fa-check text-green-600" *ngIf="lesson.completed"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Autres leçons - Pleine largeur en bas -->
+      <div id="other-section" class="mt-8" *ngIf="!isReplayCourse() && otherLessons.length > 0">
+        <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+              <i class="fa-solid fa-graduation-cap text-purple-600 text-xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Autres leçons</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button 
+              *ngFor="let lesson of otherLessons; let i = index"
+              class="py-3 px-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors flex items-center justify-between"
+              (click)="toggleLesson(lesson)">
+              <span class="text-gray-700">{{ lesson.title }}</span>
+              <i class="fa-solid fa-check text-purple-600" *ngIf="lesson.completed"></i>
+              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="practice-section" class="mt-8">
+        <button 
+          class="w-full py-4 rounded-full bg-gray-400 text-gray-100 text-lg font-bold shadow-lg cursor-not-allowed opacity-60 flex items-center justify-center gap-2"
+          (click)="onDisabledExerciseClick()">
+          <i class="fa-solid fa-dumbbell"></i>
+          Exercices pratiques (Bientôt disponible)
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quiz Section -->
+  <section class="relative bg-white rounded-xl shadow-lg p-6 mb-8" *ngIf="isEnrolled && showQuiz">
+    <h2 class="text-3xl font-extrabold text-emerald-800 mb-6 text-center animate-bounce">✨ Super Quiz ✨</h2>
+
+    <div *ngIf="showConfetti" class="absolute inset-0 z-20 pointer-events-none">
+      <div class="confetti w-full h-full"></div>
+    </div>
+
+    <div *ngFor="let question of cours.quizzes[0].questions" class="mb-6 bg-emerald-50 rounded-lg p-4 shadow-md">
+      <p class="font-semibold text-lg text-emerald-900 mb-2">❓ {{ question.text }}</p>
+
+      <div *ngFor="let answer of question.answers" class="mb-2">
+        <label class="flex items-center space-x-2">
+          <input type="radio" name="question-{{ question.id }}" [value]="answer.id"
+            [(ngModel)]="selectedAnswers[question.id]" class="form-radio text-green-600 transform scale-125" />
+          <span class="text-gray-800">{{ answer.text }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <button
+        class="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white px-6 py-3 rounded-full text-xl font-bold shadow-lg transform hover:scale-105 transition-all"
+        (click)="submitQuiz()">
+        🚀 Je valide mes réponses !
+      </button>
+
+      <div *ngIf="resultMessage" class="mt-6 text-2xl font-bold" [ngClass]="{
+        'text-green-600 animate-pulse': resultMessage.startsWith('🌟'),
+        'text-red-500': resultMessage.startsWith('🙁')
+      }">
+        {{ resultMessage }}
+      </div>
+    </div>
+  </section>
+  
+  <app-confetti *ngIf="showConfetti"></app-confetti>
+</main>

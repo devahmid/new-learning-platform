@@ -1,0 +1,30 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+  <input formControlName="firstName" placeholder="Prénom" class="input" />
+  <input formControlName="lastName" placeholder="Nom" class="input" />
+  <input formControlName="dateOfBirth" type="date" class="input" />
+
+  <select formControlName="levelId" class="input">
+    <option [ngValue]="1">Niveau 1</option>
+    <option [ngValue]="2">Niveau 2</option>
+    <option [ngValue]="3">Niveau 3</option>
+  </select>
+
+  <div formGroupName="childProfile">
+    <label>
+      <input type="checkbox" formControlName="isAvailableWednesdayMorning" />
+      Disponible mercredi matin
+    </label>
+
+    <select formControlName="arabicLevel">
+      <option value="">Choisir le niveau</option>
+      <option value="debutant">Débutant</option>
+      <option value="lecture">Lecture</option>
+      <option value="fluide">Lecture fluide</option>
+      <option value="ecriture">Écriture autonome</option>
+    </select>
+
+    <input formControlName="disabilities" placeholder="Ex: dyslexie, TDAH" />
+  </div>
+
+  <button type="submit" class="btn-primary">💾 Enregistrer</button>
+</form>

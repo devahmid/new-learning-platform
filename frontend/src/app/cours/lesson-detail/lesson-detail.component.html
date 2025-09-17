@@ -1,0 +1,617 @@
+<main class="py-12 bg-gray-50 min-h-screen" *ngIf="lesson && subjectData">
+  <section class="container mx-auto py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+      <!-- Breadcrumb Navigation -->
+      <div class="mb-6">
+        <nav class="flex items-center space-x-2 text-sm text-gray-600">
+          <a routerLink="/matières" class="hover:text-green-600 transition-colors">
+            <i class="fa-solid fa-book mr-1"></i>Matières
+          </a>
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+          <a [routerLink]="['/matières', getSubjectName().toLowerCase()]" class="hover:text-green-600 transition-colors">
+            {{ getSubjectName() }}
+          </a>
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+          <a [routerLink]="['/cours', getSubjectName().toLowerCase(), getLevel()]" class="hover:text-green-600 transition-colors">
+            Cours {{getSubjectName()}} - Niveau {{ getLevel() }}
+          </a>
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+          <a [routerLink]="['/cours', getCourseId()]" class="hover:text-green-600 transition-colors">
+            {{ getCourseTitle() }}
+          </a>
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+          <span class="text-green-600 font-medium">{{ lesson?.title }}</span>
+        </nav>
+      </div>
+      
+      <!-- Back Button -->
+      <div class="mb-6">
+        <button (click)="goBack()" 
+                class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 
+                       hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 
+                       rounded-lg transition-all duration-200 border border-gray-200 dark:border-gray-700 
+                       hover:border-emerald-200 dark:hover:border-emerald-700">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Retour aux leçons</span>
+        </button>
+      </div>
+
+      <div class="text-center mb-12">
+        <div class="inline-block rounded-2xl p-1" [ngClass]="subjectData.color">
+          <div class="rounded-xl border-4 border-white px-8 py-4 text-white" [ngClass]="subjectData.innerColor">
+            <h1 class="text-2xl">{{ lesson?.title }} - {{ subjectData.ar }}</h1>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation entre sections -->
+      <div class="flex justify-center mb-8">
+        <div class="bg-white rounded-full p-2 shadow-lg">
+          <div class="flex gap-2">
+            <button (click)="setSection('video')"
+              [class]="currentSection === 'video' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+              class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+              <i class="fa-solid fa-play"></i>
+              <span>Vidéo</span>
+            </button>
+            <button (click)="onDisabledButtonClick('quiz')"
+              class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2 bg-gray-400 text-gray-100 cursor-not-allowed opacity-60">
+              <i class="fa-solid fa-question-circle"></i>
+              <span>Quiz (Bientôt disponible)</span>
+            </button>
+            <button (click)="onDisabledButtonClick('exercices')"
+              class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2 bg-gray-400 text-gray-100 cursor-not-allowed opacity-60">
+              <i class="fa-solid fa-dumbbell"></i>
+              <span>Exercices (Bientôt disponible)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Vidéo -->
+      <div *ngIf="currentSection === 'video'" class="section-enter section-transition">
+        <!-- Container principal de la vidéo -->
+        <div class="relative w-full aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-lg mb-12"
+          *ngIf="lesson?.videoUrl">
+
+          <!-- YOUTUBE -->
+          <iframe *ngIf="isYouTube()" [src]="getYouTubeEmbedUrl(lesson.videoUrl || '') | safe:'resourceUrl'"
+            class="w-full h-full" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen title="YouTube video player">
+          </iframe>
+
+          <!-- VIMEO -->
+          <iframe *ngIf="isVimeo()" 
+            [src]="getVimeoEmbedUrl(lesson.videoUrl || '') | safe:'resourceUrl'"
+            class="w-full h-full" 
+            frameborder="0" 
+            allow="autoplay; fullscreen; picture-in-picture" 
+            allowfullscreen
+            title="Vimeo video player"
+            id="vimeo-player"
+            (load)="onVimeoPlayerReady($event)">
+          </iframe>
+
+          <!-- VIDÉO DIRECTE (MP4, WebM, etc.) -->
+          <video *ngIf="isDirect()" #videoPlayer class="w-full h-full object-cover" [src]="lesson.videoUrl" controls
+            preload="metadata" 
+            (play)="onVideoPlay()" 
+            (pause)="onVideoPause()" 
+            (ended)="onVideoEnd()"
+            (seeked)="onVideoSeek($event)"
+            (timeupdate)="onVideoTimeUpdate($event)"
+            (error)="onVideoError($event)">
+
+            <!-- Sources multiples pour compatibilité -->
+            <source [src]="lesson.videoUrl" [type]="getVideoMimeType(lesson.videoUrl || '')">
+
+            <!-- Message de fallback -->
+            <p class="text-white p-4">
+              Votre navigateur ne supporte pas la lecture vidéo.
+              <a [href]="lesson.videoUrl" target="_blank" class="text-blue-400 underline">
+                Télécharger la vidéo
+              </a>
+            </p>
+          </video>
+
+          <!-- MESSAGE D'ERREUR si format non reconnu -->
+          <div *ngIf="getVideoType(lesson.videoUrl || '') === 'unknown'"
+            class="w-full h-full flex items-center justify-center bg-gray-800 text-white">
+            <div class="text-center p-8">
+              <p class="text-xl mb-4">Format vidéo non supporté</p>
+              <p class="text-gray-300">URL: {{ lesson.videoUrl }}</p>
+              <a [href]="lesson.videoUrl" target="_blank"
+                class="inline-block mt-4 px-4 py-2 bg-blue-600 rounded hover:bg-blue-700">
+                Ouvrir dans un nouvel onglet
+              </a>
+            </div>
+          </div>
+
+          <!-- Overlay avec bouton play/pause pour vidéos directes -->
+          <div *ngIf="isDirect()" class="absolute inset-0 flex items-center justify-center bg-black/30">
+            <button (click)="toggleVideo()"
+              class="text-white hover:text-green-400 transition-all duration-300 transform hover:scale-110">
+              <i class="fa-solid fa-circle-play text-6xl"></i>
+            </button>
+          </div>
+
+          <!-- Contrôles vidéo -->
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 p-4">
+            <div class="flex items-center justify-between text-white">
+              <span>{{ lesson?.title }}</span>
+              <div class="flex items-center gap-4">
+                <!-- Indicateur de progression vidéo -->
+                <div *ngIf="isVideoTracking" class="flex items-center gap-2 text-sm">
+                  <i class="fa-solid fa-chart-line text-green-400"></i>
+                  <span>{{ videoProgress | number:'1.0-1' }}% regardé</span>
+                </div>
+                <button class="hover:text-green-400 transition-colors">
+                  <i class="fa-solid fa-closed-captioning"></i>
+                </button>
+                <button class="hover:text-green-400 transition-colors">
+                  <i class="fa-solid fa-expand"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message si pas de vidéo -->
+        <div *ngIf="!lesson?.videoUrl"
+          class="relative w-full aspect-video bg-gray-100 rounded-2xl flex items-center justify-center mb-12">
+          <div class="text-center text-gray-500">
+            <i class="fa-solid fa-video-slash text-6xl mb-4"></i>
+            <p class="text-lg font-medium">Aucune vidéo disponible</p>
+            <p class="text-sm">Cette leçon ne contient pas de vidéo</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Support de cours - Dynamique -->
+          <div *ngIf="lesson?.fileUrl" 
+               class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
+               (click)="downloadSupportFile()">
+            <div class="flex items-center gap-4">
+              <i [class]="getFileIcon(lesson.fileUrl!)" class="text-4xl"></i>
+              <div>
+                <h3 class="font-bold group-hover:text-blue-600 transition-colors">Support de cours</h3>
+                <p class="text-sm text-gray-600">{{ getFileName(lesson.fileUrl!) }}</p>
+                <p class="text-xs text-blue-500 mt-1 group-hover:text-blue-700">
+                  <i class="fa-solid fa-download mr-1"></i>Cliquer pour télécharger
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Message si pas de support -->
+          <div *ngIf="!lesson?.fileUrl" 
+               class="bg-gray-50 rounded-xl p-6 shadow-sm border-2 border-dashed border-gray-300">
+            <div class="flex items-center gap-4">
+              <i class="fa-solid fa-file-slash text-4xl text-gray-400"></i>
+              <div>
+                <h3 class="font-bold text-gray-500">Support de cours</h3>
+                <p class="text-sm text-gray-400">Aucun fichier disponible</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-100 rounded-xl p-6 shadow-sm cursor-not-allowed opacity-60" (click)="onDisabledButtonClick('flashcard')">
+            <div class="flex items-center gap-4">
+              <i class="fa-solid fa-clone text-4xl text-gray-400"></i>
+              <div>
+                <h3 class="font-bold text-gray-500">Flashcards</h3>
+                <p class="text-sm text-gray-400">Bientôt disponible</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-100 rounded-xl p-6 shadow-sm cursor-not-allowed opacity-60" (click)="onDisabledButtonClick('quiz')">
+            <div class="flex items-center gap-4">
+              <i class="fa-solid fa-question-circle text-4xl text-gray-400"></i>
+              <div>
+                <h3 class="font-bold text-gray-500">Quiz</h3>
+                <p class="text-sm text-gray-400">Bientôt disponible</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-12 bg-white rounded-xl p-6 shadow-sm">
+          <h2 class="text-xl font-bold mb-6">Votre progression</h2>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-green-500 rounded-full" [style.width.%]="lesson?.progress"></div>
+            </div>
+            <span class="text-green-600 font-bold">{{ lesson?.progress }}%</span>
+          </div>
+          <p class="text-sm text-gray-600">14 sur 20 mots maîtrisés</p>
+        </div>
+
+        <div class="flex justify-between mt-8">
+          <button (click)="goBack()"
+            class="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 hover:bg-gray-200">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Précédent</span>
+          </button>
+          <button class="flex items-center gap-2 px-6 py-3 rounded-full bg-green-600 text-white hover:bg-green-700">
+            <span>Suivant</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Section Quiz -->
+      <div *ngIf="currentSection === 'quiz'" class="space-y-8 section-enter section-transition">
+        <!-- En-tête du Quiz -->
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-gray-800 mb-2">Quiz de la leçon</h2>
+          <p class="text-gray-600">Testez vos connaissances avec {{ quizQuestions.length }} questions</p>
+        </div>
+
+        <!-- Progression du Quiz -->
+        <div class="bg-white rounded-xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-600">Question {{ currentQuizIndex + 1 }} sur {{
+              quizQuestions.length }}</span>
+            <span class="text-sm font-medium text-gray-600">{{ getQuizProgress() }}%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-green-500 h-2 rounded-full transition-all duration-300" [style.width.%]="getQuizProgress()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Question du Quiz -->
+        <div *ngIf="!showQuizResults && quizQuestions.length > 0" class="bg-white rounded-xl p-8 shadow-sm">
+          <h3 class="text-xl font-bold mb-6 text-gray-800">{{ getCurrentQuizQuestion()?.question }}</h3>
+
+          <div class="space-y-4">
+            <div *ngFor="let option of getCurrentQuizQuestion()?.options"
+              (click)="selectQuizAnswer(getCurrentQuizQuestion()?.id, option.id)"
+              [class]="isQuizAnswerSelected(getCurrentQuizQuestion()?.id, option.id) ? 'bg-green-100 border-green-500 text-green-800' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'"
+              class="p-4 rounded-lg border-2 cursor-pointer quiz-option">
+              <div class="flex items-center gap-3">
+                <div
+                  [class]="isQuizAnswerSelected(getCurrentQuizQuestion()?.id, option.id) ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'"
+                  class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                  {{ getOptionLetter(option.id) }}
+                </div>
+                <span class="text-lg font-medium">{{ option.text }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Quiz -->
+          <div class="flex justify-between mt-8">
+            <button (click)="previousQuizQuestion()" [disabled]="currentQuizIndex === 0"
+              [class]="currentQuizIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+              class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Précédent</span>
+            </button>
+
+            <button (click)="nextQuizQuestion()" [disabled]="!quizAnswers[getCurrentQuizQuestion()?.id]"
+              [class]="!quizAnswers[getCurrentQuizQuestion()?.id] ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'"
+              class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+              <span>{{ currentQuizIndex === quizQuestions.length - 1 ? 'Terminer' : 'Suivant' }}</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Résultats du Quiz -->
+        <div *ngIf="showQuizResults" class="bg-white rounded-xl p-8 shadow-sm text-center">
+          <div class="mb-6">
+            <div [class]="quizScore >= 70 ? 'text-green-500' : quizScore >= 50 ? 'text-yellow-500' : 'text-red-500'"
+              class="text-6xl mb-4">
+              <i
+                [class]="quizScore >= 70 ? 'fa-solid fa-trophy' : quizScore >= 50 ? 'fa-solid fa-medal' : 'fa-solid fa-exclamation-triangle'"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-2">Quiz terminé !</h3>
+            <p class="text-gray-600 mb-4">Votre score : <span
+                [class]="quizScore >= 70 ? 'text-green-600' : quizScore >= 50 ? 'text-yellow-600' : 'text-red-600'"
+                class="font-bold text-3xl">{{ quizScore }}%</span></p>
+
+            <div *ngIf="quizScore >= 70" class="text-green-600 font-medium">
+              <i class="fa-solid fa-check-circle mr-2"></i>
+              Excellent travail ! Vous maîtrisez bien cette leçon.
+            </div>
+            <div *ngIf="quizScore >= 50 && quizScore < 70" class="text-yellow-600 font-medium">
+              <i class="fa-solid fa-exclamation-circle mr-2"></i>
+              Pas mal ! Quelques révisions vous aideront à mieux maîtriser.
+            </div>
+            <div *ngIf="quizScore < 50" class="text-red-600 font-medium">
+              <i class="fa-solid fa-times-circle mr-2"></i>
+              N'hésitez pas à revoir la leçon et réessayer le quiz.
+            </div>
+          </div>
+
+          <div class="flex justify-center gap-4">
+            <button (click)="restartQuiz()"
+              class="px-6 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all duration-200 flex items-center gap-2">
+              <i class="fa-solid fa-redo"></i>
+              <span>Recommencer</span>
+            </button>
+            <button (click)="setSection('exercises')"
+              class="px-6 py-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all duration-200 flex items-center gap-2">
+              <span>Exercices</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Exercices -->
+      <div *ngIf="currentSection === 'exercises'" class="space-y-8 section-enter section-transition">
+        <!-- En-tête des Exercices -->
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-gray-800 mb-2">Exercices pratiques</h2>
+          <p class="text-gray-600">Renforcez vos connaissances avec des exercices interactifs</p>
+        </div>
+
+        <!-- Navigation des types d'exercices -->
+        <div class="flex justify-center">
+          <div class="bg-white rounded-full p-2 shadow-lg">
+            <div class="flex gap-2">
+              <button (click)="setExerciseType('flashcard')"
+                [class]="currentExerciseType === 'flashcard' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-clone"></i>
+                <span>Flashcards</span>
+              </button>
+              <button (click)="setExerciseType('translation')"
+                [class]="currentExerciseType === 'translation' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-language"></i>
+                <span>Traduction</span>
+              </button>
+              <button (click)="setExerciseType('listening')"
+                [class]="currentExerciseType === 'listening' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-volume-up"></i>
+                <span>Écoute</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercice Flashcards -->
+        <div *ngIf="currentExerciseType === 'flashcard' && !showExerciseResults"
+          class="bg-white rounded-xl p-8 shadow-sm">
+          <div class="text-center mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ getCurrentExercise()?.title }}</h3>
+            <p class="text-gray-600">{{ getCurrentExercise()?.description }}</p>
+          </div>
+
+          <div *ngIf="getCurrentExercise()?.type === 'flashcard'" class="max-w-md mx-auto">
+            <div
+              class="bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl p-8 min-h-[300px] flex items-center justify-center">
+              <div class="text-center">
+                <div class="text-4xl font-bold text-gray-800 mb-4">
+                  {{ getCurrentExerciseQuestion()?.text }}
+                </div>
+                <div class="text-lg text-gray-600 mb-4">
+                  {{ getCurrentExerciseQuestion()?.metadata?.pronunciation }}
+                </div>
+                <button *ngIf="!showFlashcardAnswer" (click)="revealFlashcardAnswer()"
+                  class="px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-all duration-200">
+                  Voir la réponse
+                </button>
+              </div>
+            </div>
+
+            <!-- Réponse -->
+            <div *ngIf="showFlashcardAnswer" class="mt-4 text-center">
+              <div class="text-3xl font-bold text-purple-600 mb-2">
+                {{ getCorrectAnswer(getCurrentExerciseQuestion()?.id || 0) }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Flashcards -->
+          <div class="flex justify-between mt-8">
+            <button (click)="previousExercise()" [disabled]="currentExerciseIndex === 0"
+              [class]="currentExerciseIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+              class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Précédent</span>
+            </button>
+
+            <button *ngIf="showFlashcardAnswer" (click)="nextExercise()"
+              class="px-6 py-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all duration-200 flex items-center gap-2">
+              <span>{{ currentExerciseIndex === (getCurrentExercise()?.questions?.length || 0) - 1 ? 'Terminer' :
+                'Suivant'
+                }}</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Exercice Traduction -->
+        <div *ngIf="currentExerciseType === 'translation' && !showExerciseResults"
+          class="bg-white rounded-xl p-8 shadow-sm">
+          <div class="text-center mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ getCurrentExercise()?.title }}</h3>
+            <p class="text-gray-600">{{ getCurrentExercise()?.description }}</p>
+          </div>
+
+          <div *ngIf="getCurrentExercise()?.questions" class="max-w-2xl mx-auto">
+            <div class="bg-gray-50 rounded-xl p-6 mb-6">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                {{ getCurrentExerciseQuestion()?.text }}
+              </h4>
+              <div class="space-y-4">
+                <input type="text" [value]="getUserAnswer(getCurrentExerciseQuestion()?.id || 0)"
+                  (input)="onTranslationInput($event)" placeholder="Votre réponse..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+
+                <div *ngIf="getUserAnswer(getCurrentExerciseQuestion()?.id || 0)" class="mt-4">
+                  <div
+                    [class]="checkTranslationAnswer(getCurrentExerciseQuestion()?.id || 0) ? 'text-green-600' : 'text-red-600'"
+                    class="font-medium">
+                    <i [class]="checkTranslationAnswer(getCurrentExerciseQuestion()?.id || 0) ? 'fa-solid fa-check-circle' : 'fa-solid fa-times-circle'"
+                      class="mr-2"></i>
+                    {{ checkTranslationAnswer(getCurrentExerciseQuestion()?.id || 0) ? 'Correct !' :
+                    'Incorrect' }}
+                  </div>
+                  <div class="text-sm text-gray-600 mt-2">
+                    Réponse attendue : <span class="font-medium">{{
+                      getCorrectAnswer(getCurrentExerciseQuestion()?.id || 0) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Traduction -->
+          <div class="flex justify-between mt-8">
+            <button (click)="previousExercise()" [disabled]="currentExerciseIndex === 0"
+              [class]="currentExerciseIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+              class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Précédent</span>
+            </button>
+
+            <button (click)="nextExercise()" [disabled]="!getUserAnswer(getCurrentExerciseQuestion()?.id || 0)"
+              [class]="!getUserAnswer(getCurrentExerciseQuestion()?.id || 0) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'"
+              class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+              <span>{{ currentExerciseIndex === (getCurrentExercise()?.questions?.length || 0) - 1 ? 'Terminer' :
+                'Suivant' }}</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Exercice Écoute -->
+        <div *ngIf="currentExerciseType === 'listening' && !showExerciseResults"
+          class="bg-white rounded-xl p-8 shadow-sm exercise-card">
+          <div class="text-center mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ getCurrentExercise()?.title }}</h3>
+            <p class="text-gray-600">{{ getCurrentExercise()?.description }}</p>
+          </div>
+
+          <div *ngIf="getCurrentAudioExercise()" class="max-w-md mx-auto">
+            <div class="bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl p-8 text-center">
+              <div class="text-4xl font-bold text-gray-800 mb-4">
+                {{ getCurrentAudioExercise()?.word }}
+              </div>
+              <div class="text-lg text-gray-600 mb-6">
+                {{ getCurrentAudioExercise()?.translation }}
+              </div>
+
+              <div class="space-y-4">
+                <button
+                  (click)="playAudio(getCurrentAudioExercise()?.audioUrl || ''); speakText(getCurrentAudioExercise()?.word || '')"
+                  class="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 mx-auto">
+                  <i class="fa-solid fa-play"></i>
+                  <span>Écouter</span>
+                </button>
+
+                <div class="flex justify-center gap-4">
+                  <button (click)="markAudioExerciseCorrect()"
+                    class="px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200">
+                    <i class="fa-solid fa-check"></i>
+                  </button>
+                  <button (click)="markAudioExerciseIncorrect()"
+                    class="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-200">
+                    <i class="fa-solid fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Écoute -->
+          <div class="flex justify-between mt-8">
+            <button (click)="previousExercise()" [disabled]="currentExerciseIndex === 0"
+              [class]="currentExerciseIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+              class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Précédent</span>
+            </button>
+
+            <button (click)="nextExercise()"
+              class="px-6 py-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all duration-200 flex items-center gap-2">
+              <span>{{ currentExerciseIndex === (getCurrentExercise()?.questions?.length || 0) - 1 ? 'Terminer' :
+                'Suivant' }}</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Résultats des exercices -->
+        <div *ngIf="showExerciseResults" class="bg-white rounded-xl p-8 shadow-sm text-center">
+          <div class="mb-6">
+            <div
+              [class]="exerciseScore >= 70 ? 'text-green-500' : exerciseScore >= 50 ? 'text-yellow-500' : 'text-red-500'"
+              class="text-6xl mb-4">
+              <i
+                [class]="exerciseScore >= 70 ? 'fa-solid fa-trophy' : exerciseScore >= 50 ? 'fa-solid fa-medal' : 'fa-solid fa-exclamation-triangle'"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-2">Exercices terminés !</h3>
+            <p class="text-gray-600 mb-4">Votre score : <span
+                [class]="exerciseScore >= 70 ? 'text-green-600' : exerciseScore >= 50 ? 'text-yellow-600' : 'text-red-600'"
+                class="font-bold text-3xl">{{ exerciseScore }}%</span></p>
+
+            <div *ngIf="exerciseScore >= 70" class="text-green-600 font-medium">
+              <i class="fa-solid fa-check-circle mr-2"></i>
+              Excellent travail ! Vous maîtrisez bien ces exercices.
+            </div>
+            <div *ngIf="exerciseScore >= 50 && exerciseScore < 70" class="text-yellow-600 font-medium">
+              <i class="fa-solid fa-exclamation-circle mr-2"></i>
+              Pas mal ! Continuez à vous entraîner.
+            </div>
+            <div *ngIf="exerciseScore < 50" class="text-red-600 font-medium">
+              <i class="fa-solid fa-times-circle mr-2"></i>
+              N'hésitez pas à revoir la leçon et réessayer.
+            </div>
+          </div>
+
+          <div class="flex justify-center gap-4">
+            <button (click)="restartExercise()"
+              class="px-6 py-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all duration-200 flex items-center gap-2">
+              <i class="fa-solid fa-redo"></i>
+              <span>Recommencer</span>
+            </button>
+            <button (click)="setSection('video')"
+              class="px-6 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all duration-200 flex items-center gap-2">
+              <span>Retour à la vidéo</span>
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div *ngIf="error" class="text-center py-12">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+          <i class="fa-solid fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+          <h3 class="text-lg font-semibold text-red-800 mb-2">Erreur de chargement</h3>
+          <p class="text-red-600 mb-4">{{ error }}</p>
+          
+          <!-- Boutons d'action -->
+          <div class="flex gap-3 justify-center">
+            <button (click)="retryLoadLesson()" 
+                    [disabled]="isRetrying || retryCount >= maxRetries"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              <i *ngIf="!isRetrying" class="fa-solid fa-redo mr-2"></i>
+              <i *ngIf="isRetrying" class="fa-solid fa-spinner fa-spin mr-2"></i>
+              {{ isRetrying ? 'Tentative...' : 'Réessayer' }}
+              <span *ngIf="retryCount > 0" class="text-xs">({{ retryCount }}/{{ maxRetries }})</span>
+            </button>
+            
+            <button (click)="goBack()" 
+                    class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+              <i class="fa-solid fa-arrow-left mr-2"></i>
+              Retour
+            </button>
+          </div>
+          
+          <!-- Message de retry -->
+          <p *ngIf="retryCount >= maxRetries" class="text-sm text-red-500 mt-3">
+            Nombre maximum de tentatives atteint. Utilisation des données de démonstration.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

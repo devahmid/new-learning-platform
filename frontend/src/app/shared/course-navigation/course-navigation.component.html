@@ -1,0 +1,38 @@
+<div class="course-navigation">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <span class="breadcrumb-text">{{ getBreadcrumbText() }}</span>
+    </div>
+
+    <!-- Category Selection -->
+    <div class="category-section">
+        <h3 class="section-title">Matières</h3>
+        <div class="category-grid">
+            <button *ngFor="let category of categories" class="category-button"
+                [class.active]="isCategoryActive(category.id)" (click)="selectCategory(category.id)">
+                <span class="category-name">{{ category.name }}</span>
+                <span class="category-description">{{ category.description }}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Level Selection (only if category is selected) -->
+    <div *ngIf="canSelectLevel()" class="level-section">
+        <h3 class="section-title">Niveaux</h3>
+        <div class="level-grid">
+            <button *ngFor="let level of levels" class="level-button" [class.active]="isLevelActive(level.id)"
+                (click)="selectLevel(level.id)">
+                <span class="level-name">{{ level.name }}</span>
+                <span class="level-description">{{ level.description }}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- All Courses Button -->
+    <div class="all-courses-section">
+        <button class="all-courses-button" (click)="selectCategory(0)"
+            [class.active]="!selectedCategoryId && !selectedLevelId">
+            <span class="button-text">Voir tous les cours</span>
+        </button>
+    </div>
+</div>

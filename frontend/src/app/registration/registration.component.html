@@ -1,0 +1,307 @@
+<div class="container mx-auto px-4 py-8 space-y-8">
+  <!-- En-tête -->
+  <section class="mb-8 text-center">
+    <h1 class="text-3xl md:text-4xl font-serif font-bold text-[#2F8CCF] mb-2">
+      Inscription aux cours d'arabe
+    </h1>
+    <img src="assets/cropped-logo-3.webp" alt="Logo Centre Culturel l'Olivier"
+      class="mx-auto mb-4 h-20 md:h-24 lg:h-28 w-auto" />
+
+
+    <p class="text-gray-600 max-w-2xl mx-auto">
+      Complétez le formulaire ci-dessous pour inscrire vos enfants.
+    </p>
+  </section>
+
+  <!-- Bannière Cours en Ligne -->
+  <section class="max-w-4xl mx-auto bg-[#8EC560]/20 border-l-4 border-[#8EC560] p-4 rounded-md">
+    <h2 class="text-2xl font-semibold text-[#8EC560] mb-2">
+      <i class="fa-solid fa-laptop mr-2"></i>
+      Inscription Cours en Ligne : 2025/2026
+    </h2>
+    <p class="text-gray-700 mb-1"><strong>Enfants à partir de 6 ans.</strong></p>
+    <p class="text-gray-700">
+      Bienvenue sur le formulaire d'inscription aux cours pour l'année 2025-2026.
+      Merci de remplir soigneusement les informations concernant votre/vos enfant(s).
+    </p>
+  </section>
+
+  <!-- Rappel Fonctionnement -->
+  <section class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6 space-y-4">
+    <h3 class="text-xl font-semibold text-[#2F8CCF] border-b-2 border-[#9CC870] pb-2">
+      Rappel du fonctionnement des cours en Ligne
+    </h3>
+    <ul class="space-y-3">
+      <li class="flex items-start space-x-2">
+        <i class="fa-solid fa-check text-[#8EC560] mt-1"></i>
+        <div>
+          <strong>Matières enseignées :</strong>
+          <ul class="list-disc list-inside mt-1 space-y-1">
+            <li>Langue arabe</li>
+            <li>Croyance (عقيدة)</li>
+            <li>Jurisprudence (فقه)</li>
+          </ul>
+        </div>
+      </li>
+      <li class="flex items-center space-x-2">
+        <i class="fa-solid fa-check text-[#8EC560]"></i>
+        <span>
+          Cours entre <strong>9h et 17h</strong>, mercredis, samedis et dimanches,
+          <strong>1 h/jour (3 h/semaine)</strong>.
+        </span>
+      </li>
+      <li class="flex items-center space-x-2">
+        <i class="fa-solid fa-check text-[#8EC560]"></i>
+        <span>
+          Horaires définitifs fixés après clôture des inscriptions, en tenant compte des contraintes familiales.
+        </span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Formulaire -->
+  <form [formGroup]="form" (ngSubmit)="submit()"
+    class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 md:p-8 space-y-8">
+
+    <!-- ProgressBar PrimeNG -->
+    <p-progressBar *ngIf="submitting" mode="indeterminate" class="mb-4" styleClass="h-2 bg-[#2F8CCF]" />
+
+    <!-- Info parent -->
+    <div>
+      <h2 class="text-xl font-semibold text-[#2F8CCF] border-b-2 border-[#9CC870] pb-2 mb-6">
+        <i class="fa-solid fa-user-pen mr-2"></i>Informations du parent
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Nom complet -->
+        <div class="col-span-2">
+          <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Nom complet *</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+              <i class="fa-solid fa-user"></i>
+            </span>
+            <input formControlName="fullName" id="fullName" type="text"
+              class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8EC560] focus:border-[#8EC560]"
+              placeholder="Prénom et nom" />
+          </div>
+        </div>
+        <!-- Email -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+              <i class="fa-solid fa-envelope"></i>
+            </span>
+            <input formControlName="email" id="email" type="email"
+              class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8EC560] focus:border-[#8EC560]"
+              placeholder="vous@exemple.com" />
+          </div>
+        </div>
+        <!-- Téléphone -->
+        <div>
+          <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+              <i class="fa-solid fa-phone"></i>
+            </span>
+            <input formControlName="phone" id="phone" type="tel"
+              class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8EC560] focus:border-[#8EC560]"
+              placeholder="06 XX XX XX XX" />
+          </div>
+          <div *ngIf="form.get('phone')?.hasError('invalidPhone') && form.get('phone')?.touched"
+            class="text-red-500 text-sm mt-1">
+            Numéro de téléphone invalide (format FR).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info enfants -->
+    <div formArrayName="children">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-[#2F8CCF] border-b-2 border-[#9CC870] pb-2">
+          <i class="fa-solid fa-children mr-2"></i>Enfants
+        </h2>
+        <button type="button" (click)="addChild()"
+          class="bg-[#8EC560] hover:bg-[#9CC870] text-white py-2 px-4 rounded-md transition flex items-center">
+          <i class="fa-solid fa-plus mr-2"></i>Ajouter un enfant
+        </button>
+      </div>
+
+      <div *ngFor="let child of children.controls; let i = index" [formGroupName]="i"
+        class="mb-8 p-6 border border-gray-200 rounded-lg bg-gray-50 relative">
+        <div class="absolute top-4 right-4 flex items-center space-x-2">
+          <span class="bg-[#9CC870] text-white text-xs font-bold px-2 py-1 rounded-full">
+            Enfant {{ i + 1 }}
+          </span>
+          <button *ngIf="i > 0" type="button" (click)="removeChild(i)" class="text-red-500 hover:text-red-700">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+
+        <!-- Coordonnées de l'enfant -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label for="firstName-{{i}}" class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+            <input formControlName="firstName" id="firstName-{{i}}" type="text"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8EC560] focus:border-[#8EC560]"
+              placeholder="Prénom" />
+          </div>
+          <div>
+            <label for="lastName-{{i}}" class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+            <input formControlName="lastName" id="lastName-{{i}}" type="text"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8EC560] focus:border-[#8EC560]"
+              placeholder="Nom" />
+          </div>
+          <div>
+            <label for="birthDate-{{i}}" class="block text-sm font-medium text-gray-700 mb-1">Date de naissance
+              *</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                <i class="fa-solid fa-calendar-days"></i>
+              </span>
+              <input formControlName="birthDate" id="birthDate-{{i}}" type="date"
+                class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8EC560] focus:border-[#8EC560]" />
+            </div>
+            <div *ngIf="child.get('birthDate')?.hasError('tooYoung') && child.get('birthDate')?.touched"
+              class="text-red-500 text-sm mt-1">
+              L’enfant doit avoir au moins 6 ans.
+            </div>
+          </div>
+          <div>
+            <label for="arabicLevel-{{i}}" class="block text-sm font-medium text-gray-700 mb-1">Niveau d'arabe *</label>
+            <div class="relative">
+              <select formControlName="arabicLevel" id="arabicLevel-{{i}}"
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8EC560] focus:border-[#8EC560] appearance-none">
+                <option *ngFor="let lvl of arabicLevels" [value]="lvl.value">{{ lvl.label }}</option>
+              </select>
+              <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 pointer-events-none">
+                <i class="fa-solid fa-chevron-down"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activités extra-scolaires -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Votre enfant {{ i + 1 }} a-t-il des activités scolaires, extra-scolaires ou sportives les : *
+          </label>
+          <div class="flex flex-wrap gap-4 mb-4">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" formControlName="hasActivityOnWednesday"
+                class="rounded text-[#8EC560] focus:ring-[#8EC560]" />
+              <span>Mercredi</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" formControlName="hasActivityOnSaturday"
+                class="rounded text-[#8EC560] focus:ring-[#8EC560]" />
+              <span>Samedi</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" formControlName="hasActivityOnSunday"
+                class="rounded text-[#8EC560] focus:ring-[#8EC560]" />
+              <span>Dimanche</span>
+            </label>
+          </div>
+
+          <label for="activityDetails-{{i}}" class="block text-sm font-medium text-gray-700 mb-1">
+            📝 Précisez les horaires exacts de ces activités *
+          </label>
+          <textarea formControlName="activityDetails" id="activityDetails-{{i}}" rows="3"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8EC560] focus:border-[#8EC560]"
+            placeholder="Ex : Mercredi 13h-14h, Samedi 9h-11h, etc."></textarea>
+        </div>
+
+
+        <!-- Détails -->
+        <div>
+          <label for="activityDetails-{{i}}" class="block text-sm font-medium text-gray-700 mb-1">Informations
+            complémentaires</label>
+          <textarea formControlName="activityDetails" id="activityDetails-{{i}}" rows="3"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8EC560] focus:border-[#8EC560]"
+            placeholder="Allergies, besoins particuliers..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conditions & Engagement -->
+    <section class="space-y-4">
+      <h3 class="text-lg font-semibold text-[#2F8CCF]">Conditions & Engagement</h3>
+
+      <!-- Bloc montant calculé -->
+      <div class="bg-gray-100 p-4 rounded-md border border-gray-300 text-sm text-gray-700">
+        <p><strong>Montant de la cotisation annuelle : </strong>
+          <span class="text-[#2F8CCF] text-lg font-semibold">{{ totalPrice }} €</span>
+        </p>
+        <p>Rappel : 250 €/enfant — réduction à 220 €/enfant à partir de 3 enfants inscrits.</p>
+      </div>
+
+      <!-- Règles -->
+      <ul class="list-disc list-inside space-y-2 text-gray-700">
+        <li><strong>Engagement du parent :</strong> organisation des cours & plages horaires, communication par e‑mail
+          ou WhatsApp.</li>
+        <li><strong>Tarif annuel par enfant :</strong> acompte de <strong>50 €</strong> pour valider l’inscription.</li>
+      </ul>
+
+      <!-- RGPD -->
+      <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+        <label class="flex items-start space-x-3 cursor-pointer">
+          <input formControlName="acceptedConditions" type="checkbox"
+            class="mt-1 rounded text-[#8EC560] focus:ring-[#8EC560]" />
+          <span class="text-sm text-gray-700">
+            Je reconnais avoir pris connaissance des <strong>conditions et engagements</strong>, et autorise
+            l'association <strong>Centre Culturel l'Olivier</strong> à collecter et utiliser les données personnelles
+            saisies dans ce formulaire, conformément à la <strong>politique de protection des données</strong> (RGPD).
+            <br /><br />
+            Afin de garantir leur confidentialité, ces données ne seront <strong>ni divulguées, ni transmises, ni
+              partagées</strong> avec d'autres entités, entreprises ou organismes, conformément au <strong>Règlement
+              Général sur la Protection des Données (2018)</strong>.
+            <br /><br />
+            <a href="https://www.cnil.fr" target="_blank" class="text-[#2F8CCF] hover:underline">
+              Plus d'informations sur le site de la CNIL.FR
+            </a>.
+          </span>
+
+        </label>
+      </div>
+    </section>
+
+    <!-- Question précédente inscription -->
+    <section class="space-y-4">
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Étiez-vous inscrit l’année précédente ? *
+      </label>
+      <div class="flex items-center gap-6">
+        <label class="flex items-center space-x-2 cursor-pointer">
+          <input type="radio" formControlName="wasRegisteredLastYear" [value]="true"
+            class="text-[#8EC560] focus:ring-[#8EC560]" />
+          <span>Oui</span>
+        </label>
+        <label class="flex items-center space-x-2 cursor-pointer">
+          <input type="radio" formControlName="wasRegisteredLastYear" [value]="false"
+            class="text-[#8EC560] focus:ring-[#8EC560]" />
+          <span>Non</span>
+        </label>
+      </div>
+
+      <!-- Affichage erreur -->
+      <div *ngIf="form.get('wasRegisteredLastYear')?.invalid && form.get('wasRegisteredLastYear')?.touched"
+        class="text-sm text-red-600">
+        Ce champ est obligatoire.
+      </div>
+    </section>
+
+
+    <!-- Soumission -->
+    <div class="flex justify-center">
+      <button type="submit" [disabled]="form.invalid || submitting" class="
+    text-white font-semibold py-3 px-8 rounded-md transition transform flex items-center
+    bg-[#2F8CCF] hover:bg-[#2F8CCF]/90 hover:scale-105
+    disabled:bg-gray-400 disabled:text-white disabled:opacity-80 disabled:hover:scale-100 disabled:shadow-none disabled:cursor-not-allowed
+  ">
+        <i class="fa-solid fa-paper-plane mr-2"></i>Soumettre l'inscription
+      </button>
+
+    </div>
+  </form>
+</div>

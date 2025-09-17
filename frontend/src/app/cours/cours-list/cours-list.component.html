@@ -1,0 +1,144 @@
+<main class="pt-20 bg-gray-50 min-h-screen">
+  <!-- Breadcrumb Navigation -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="container mx-auto px-4 py-3">
+      <nav class="flex items-center space-x-2 text-sm text-gray-600">
+        <a routerLink="/matieres" class="hover:text-green-600 transition-colors">
+          <i class="fa-solid fa-home mr-1"></i>Matières
+        </a>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+        <a [routerLink]="['/matieres', subjectData?.name?.toLowerCase()]"
+          class="hover:text-green-600 transition-colors">
+          {{ subjectData?.name }}
+        </a>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+        <a [routerLink]="['/matieres', subjectData?.name?.toLowerCase(), level]"
+          class="hover:text-green-600 transition-colors">
+          Niveau {{ level }}
+        </a>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+        <span class="text-green-600 font-medium">Cours</span>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Header avec titre et statistiques -->
+  <div class="bg-gradient-to-r from-green-50 to-blue-50 py-8">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="inline-block rounded-2xl p-1" [ngClass]="subjectData?.color">
+          <div class="rounded-xl border-4 border-white px-10 py-5 text-white flex items-center gap-4"
+            [ngClass]="subjectData?.innerColor">
+            <i class="fa-solid text-2xl bg-white" [ngClass]="subjectData?.icon + ' ' + subjectData?.iconColor"></i>
+            <span class="text-2xl">{{ subjectData?.name }} - {{ subjectData?.ar }}</span>
+          </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="mt-6 flex items-center justify-center gap-8">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600">{{ level }}</div>
+            <div class="text-xs text-gray-500">NIVEAU</div>
+          </div>
+          <div class="h-8 w-px bg-gray-300"></div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600">{{ totalCourses }}</div>
+            <div class="text-xs text-gray-500">COURS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="container mx-auto py-8 px-4">
+    <div class="max-w-6xl mx-auto">
+      <!-- Navigation et actions -->
+      <div class="flex items-center justify-between mb-8">
+        <button (click)="goBack()"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white hover:bg-gray-50 border border-gray-200 transition-colors">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Retour</span>
+        </button>
+
+        <div class="flex items-center gap-4">
+          <div class="text-sm text-gray-500">
+            {{ totalCourses }} cours disponibles
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+        <p class="mt-4 text-gray-600">Chargement des cours...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !isLoading" class="text-center py-12">
+        <div class="rounded-full h-12 w-12 bg-red-100 flex items-center justify-center">
+          <i class="fa-solid fa-exclamation-triangle text-red-600 text-xl"></i>
+        </div>
+        <p class="mt-4 text-red-600">{{ error }}</p>
+        <button (click)="loadCourses()"
+          class="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+          Réessayer
+        </button>
+      </div>
+
+      <!-- Grille des cours -->
+      <div *ngIf="!isLoading && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let course of courses" (click)="voirDetails(course)"
+          class="bg-white rounded-2xl overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+          <!-- Image du cours -->
+          <div class="h-48 bg-gradient-to-br from-green-100 to-blue-100 relative">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <i class="fa-solid fa-book text-6xl text-green-600 opacity-20"></i>
+            </div>
+            <!-- Badge niveau -->
+            <div class="absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-bold" [ngClass]="{
+                'bg-green-200 text-green-900': course.level.name.includes('1') || course.level.name.includes('Débutant'),
+                'bg-yellow-200 text-yellow-900': course.level.name.includes('2') || course.level.name.includes('Intermédiaire'),
+                'bg-red-200 text-red-900': course.level.name.includes('3') || course.level.name.includes('Avancé')
+              }">
+              {{ course.level.name || 'Niveau ' + level }}
+            </div>
+          </div>
+
+          <!-- Contenu du cours -->
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-3 line-clamp-2">{{ course.title }}</h3>
+            <p class="text-gray-600 mb-4 line-clamp-3">{{ course.description }}</p>
+
+            <!-- Métadonnées -->
+            <div class="space-y-2 mb-4">
+              <div class="flex items-center gap-2 text-sm text-gray-500">
+                <i class="fa-solid fa-tag text-green-600"></i>
+                <span>{{ course.category?.name }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-gray-500">
+                <i class="fa-solid fa-user text-blue-600"></i>
+                <span>{{ course.instructor.firstName }} {{ course.instructor.lastName }}</span>
+              </div>
+            </div>
+
+            <!-- Bouton d'action -->
+            <button
+              class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-4 rounded-xl font-semibold hover:from-green-600 hover:to-blue-600 transition-all duration-300 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-play"></i>
+              Commencer le cours
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fallback si pas de cours -->
+      <div *ngIf="!isLoading && !error && courses.length === 0" class="text-center py-12">
+        <div class="rounded-full h-16 w-16 bg-gray-100 flex items-center justify-center">
+          <i class="fa-solid fa-book-open text-3xl text-gray-400"></i>
+        </div>
+        <h3 class="mt-4 text-xl font-semibold text-gray-700">Aucun cours disponible</h3>
+        <p class="mt-2 text-gray-500">Les cours pour ce niveau seront ajoutés prochainement</p>
+      </div>
+    </div>
+  </section>
+</main>

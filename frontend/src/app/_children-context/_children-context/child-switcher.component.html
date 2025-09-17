@@ -1,0 +1,18 @@
+<div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+  <h3 class="text-xl font-bold">Sélectionner un enfant</h3>
+
+  <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+    <button
+      *ngFor="let child of enfants"
+      class="w-full text-left p-4 border rounded-lg shadow-sm hover:bg-gray-100 transition"
+      [class.bg-green-100]="selectedChild()?.id === child.id"
+      (click)="selectChild(child)"
+    >
+      <div class="font-semibold text-lg">{{ child.lastName }}</div>
+      <div class="text-sm text-gray-500">Niveau {{ child.childProfile?.arabicLevel || '?' }}</div>
+    </button>
+  </div>
+</div>
+<!-- <div class="text-sm font-semibold">
+  👶 {{ selectedChild()?.firstName || 'Aucun enfant sélectionné' }}
+</div> -->

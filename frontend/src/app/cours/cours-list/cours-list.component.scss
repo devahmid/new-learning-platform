@@ -1,0 +1,83 @@
+// ✅ Style global du composant
+.cours-container {
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+    background: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  // ✅ Titre principal
+  .page-title {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  // ✅ Zone des filtres
+  .filter-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  .filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-weight: bold;
+  }
+  
+  // ✅ Table des cours
+  .table-container {
+    padding: 20px;
+    border-radius: 10px;
+    background: white;
+  }
+  
+  // ✅ Ligne du tableau
+  .cours-row {
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .cours-row:hover {
+    background: #f1f1f1;
+  }
+  
+  // ✅ Labels colorés pour les niveaux
+  .niveau-debutant {
+    background: #d4edda;
+    color: #155724;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  .niveau-intermediaire {
+    background: #fff3cd;
+    color: #856404;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  .niveau-avance {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  // ✅ Labels pour les catégories
+  .categorie-label {
+    background: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  

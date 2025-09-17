@@ -1,0 +1,86 @@
+<div id="exercises-module" class="container mx-auto py-12 px-4">
+    <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm p-8">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-10">
+        <div class="flex items-center gap-4">
+          <div class="rounded-full bg-gradient-to-r from-green-200 to-green-500 px-6 py-3 shadow text-lg">
+            Exercices
+          </div>
+          <span class="text-gray-500">Niveau {{ level }}</span>
+        </div>
+        <div class="text-green-600 text-sm font-bold rounded-full border-4 border-green-400 w-12 h-12 flex items-center justify-center">
+          {{ current }}/{{ total }}
+        </div>
+      </div>
+  
+      <!-- Question -->
+      <div class="text-center mb-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">Complétez la phrase</h3>
+        <p class="text-lg text-gray-600">Sélectionnez le mot correct pour compléter la phrase suivante :</p>
+      </div>
+  
+      <div class="bg-gray-50 rounded-xl p-6 mb-8">
+        <p class="text-xl text-center mb-6">أنا _____ إلى المدرسة</p>
+  
+        <div class="grid grid-cols-2 gap-4">
+          <button
+            *ngFor="let option of exercise?.options; let i = index"
+            (click)="selectAnswer(i)"
+            [ngClass]="{
+              'bg-green-100 border-green-500': selected === i,
+              'bg-white border-green-200': selected !== i
+            }"
+            class="border-2 rounded-xl p-4 text-lg hover:bg-green-50 transition-colors w-full"
+          >
+            {{ option }}
+          </button>
+        </div>
+      </div>
+  
+      <!-- Navigation -->
+      <div class="flex justify-between items-center">
+        <button  (click)="previous()" class="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+          <i class="fa-solid fa-arrow-left"></i>
+          Précédent
+        </button>
+  
+        <div class="flex gap-2">
+          <div  *ngFor="let dot of dots; let i = index"
+            class="w-2 h-2 rounded-full"
+            [ngClass]="i === current - 1 ? 'bg-green-500' : 'bg-gray-300'">
+          </div>
+        </div>
+  
+        <button (click)="next()"  class="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700">
+          Suivant
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Ressources -->
+    <div class="max-w-4xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-xl p-6 text-center hover:shadow-md transition-shadow">
+        <i class="fa-solid fa-book text-3xl text-green-500 mb-4"></i>
+        <h4 class="text-lg font-bold mb-2">Leçon associée</h4>
+        <p class="text-gray-600">Revoir la leçon sur les verbes</p>
+      </div>
+  
+      <div class="bg-white rounded-xl p-6 text-center hover:shadow-md transition-shadow">
+        <i class="fa-solid fa-video text-3xl text-green-500 mb-4"></i>
+        <h4 class="text-lg font-bold mb-2">Vidéo explicative</h4>
+        <p class="text-gray-600">Regarder la vidéo du cours</p>
+      </div>
+  
+      <div class="bg-white rounded-xl p-6 text-center hover:shadow-md transition-shadow">
+        <i class="fa-solid fa-headphones text-3xl text-green-500 mb-4"></i>
+        <h4 class="text-lg font-bold mb-2">Audio</h4>
+        <p class="text-gray-600">Écouter la prononciation</p>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="finished" class="text-center mt-8">
+    <h2 class="text-2xl font-bold text-green-600">Bravo !</h2>
+    <p class="text-lg text-gray-700">Tu as obtenu {{ score }}/{{ total }} 🎉</p>
+  </div>
+  

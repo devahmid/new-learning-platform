@@ -1,0 +1,147 @@
+<main class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pt-20">
+    <div class="container mx-auto px-4 py-12">
+
+        <!-- En-tête -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                Qui va apprendre aujourd'hui ?
+            </h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Sélectionnez l'enfant qui va suivre les cours. Chaque enfant a son propre parcours et sa progression.
+            </p>
+
+            <!-- 🔄 Bouton de rafraîchissement -->
+            <div class="mt-4">
+                <button (click)="refreshFromAPI()" [disabled]="loading"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200">
+                    <i class="fa-solid fa-sync-alt" [class.fa-spin]="loading"></i>
+                    <span>{{ loading ? 'Rechargement...' : 'Actualiser' }}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-16">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+            <p class="mt-4 text-xl text-gray-600">Chargement des profils enfants...</p>
+        </div>
+
+        <!-- Grille des enfants -->
+        <div *ngIf="!loading && children.length > 0"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+
+            <!-- Carte enfant -->
+            <div *ngFor="let child of children" (click)="selectChild(child)"
+                class="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer overflow-hidden">
+
+                <!-- En-tête de la carte avec gradient -->
+                <div class="relative h-32 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 overflow-hidden">
+                    <!-- Motif décoratif -->
+                    <div class="absolute inset-0 opacity-20">
+                        <div class="absolute top-4 right-4 w-20 h-20 bg-white rounded-full"></div>
+                        <div class="absolute bottom-4 left-4 w-16 h-16 bg-white rounded-full"></div>
+                    </div>
+
+                    <!-- Avatar de l'enfant -->
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+                        <div
+                            class="w-24 h-24 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+                            <span class="text-3xl font-bold text-gray-700">
+                                {{ getChildInitials(child) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenu de la carte -->
+                <div class="pt-16 pb-6 px-6">
+                    <!-- Nom et niveau -->
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                            {{ getChildFullName(child) }}
+                        </h3>
+                        <div
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full">
+                            <i class="fa-solid fa-star text-yellow-500"></i>
+                            <span class="text-sm font-medium text-blue-800">{{ getChildLevel(child) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Barre de progression globale -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-600">Progression globale</span>
+                            <span class="text-sm font-bold text-blue-600">{{ getChildProgress(child) }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500"
+                                [style.width.%]="getChildProgress(child)"></div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="text-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                            <div class="text-2xl font-bold text-green-600">{{ getChildStats(child).coursesCompleted }}
+                            </div>
+                            <div class="text-xs text-green-700">Cours terminés</div>
+                        </div>
+                        <div class="text-center p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+                            <div class="text-2xl font-bold text-purple-600">{{ getChildStats(child).quizzesPassed }}
+                            </div>
+                            <div class="text-xs text-purple-700">Quiz réussis</div>
+                        </div>
+                    </div>
+
+                    <!-- XP et streak -->
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-fire text-orange-500"></i>
+                            <span class="text-gray-600">{{ getChildStats(child).totalXP }} XP</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-check text-green-500"></i>
+                            <span class="text-gray-600">{{ getChildStats(child).currentStreak }} jours</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bouton de sélection -->
+                <div class="px-6 pb-6">
+                    <button
+                        class="w-full group relative py-3 px-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                        <span class="relative z-10 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play text-sm"></i>
+                            Commencer l'apprentissage
+                        </span>
+                        <!-- Effet de brillance -->
+                        <div
+                            class="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-sm">
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Indicateur de sélection actuelle -->
+                <div *ngIf="childContext.selectedChild()?.id === child.id"
+                    class="absolute top-4 right-4 w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-check text-white text-sm"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message si aucun enfant -->
+        <div *ngIf="!loading && children.length === 0" class="text-center py-16">
+            <div class="bg-white rounded-3xl shadow-lg p-12 max-w-md mx-auto">
+                <i class="fa-solid fa-child text-6xl text-gray-400 mb-6"></i>
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Aucun enfant trouvé</h3>
+                <p class="text-gray-600 mb-6">
+                    Il semble qu'aucun enfant ne soit configuré pour ce compte parent.
+                </p>
+                <button
+                    class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300">
+                    Ajouter un enfant
+                </button>
+            </div>
+        </div>
+    </div>
+</main>

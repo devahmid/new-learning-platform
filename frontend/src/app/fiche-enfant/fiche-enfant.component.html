@@ -1,0 +1,147 @@
+<div *ngIf="visible" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl overflow-y-auto animate-fade-in">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-100">
+            <div class="flex items-center space-x-4">
+                <div
+                    class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl shadow">
+                    <i class="fa-solid fa-child-reaching"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">Fiche de l’enfant</h2>
+                    <p class="text-sm text-gray-500">
+                        {{ child?.firstName }} {{ child?.lastName }}
+                    </p>
+                </div>
+            </div>
+            <button class="text-gray-400 hover:text-gray-600" (click)="close.emit()">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Body with scroll if needed -->
+        <div class="p-6 space-y-8">
+            <!-- Infos -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-gray-700">
+                <div>
+                    <p class="text-gray-500 font-medium">Nom</p>
+                    <p>{{ child?.lastName }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 font-medium">Prénom</p>
+                    <p>{{ child?.firstName }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 font-medium">Âge :</p>
+                    <p>{{ getAge(child?.dateOfBirth) }} ans</p>
+                </div>
+
+
+                <!-- <div>
+                    <p class="text-gray-500 font-medium">Niveau</p>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" [ngClass]="{
+              'bg-green-100 text-green-800': child?.level?.name === 'Débutant',
+              'bg-yellow-100 text-yellow-800': child?.level?.name === 'Intermédiaire',
+              'bg-red-100 text-red-700': child?.level?.name === 'Avancé'
+            }">
+                        <i class="fa-solid fa-circle-dot mr-1 text-xs"></i>
+                        {{ child?.level?.name || 'Non attribué' }}
+                    </span>
+                </div> -->
+                <div>
+                    <p class="text-gray-500 font-medium">Date d’ajout</p>
+                    <p>{{ child?.createdAt && (child?.createdAt | date: 'd MMMM y' : '' : 'fr-FR') }}</p>
+
+
+                </div>
+                <div>
+                    <p class="text-gray-500 font-medium">ID</p>
+                    <p class="font-mono text-gray-600">#{{ child?.id }}</p>
+                </div>
+            </div>
+            <!-- Profil enfant -->
+            <div *ngIf="child?.childProfile" class="pt-6 border-t border-gray-100">
+                <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">Profil spécifique</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-gray-700">
+                    <div>
+                        <p class="text-gray-500 font-medium">Genre</p>
+                        <p>{{ child.childProfile.gender || 'Non spécifié' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 font-medium">Dispo mercredi matin</p>
+                        <p>{{ child.childProfile.isAvailableWednesdayMorning ? 'Oui' : 'Non' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 font-medium">Activité extra-scolaire</p>
+                        <p>{{ child.childProfile.hasExtracurricularActivity ? 'Oui' : 'Non' }}</p>
+                    </div>
+                    <div *ngIf="child.childProfile.extracurricularDetails">
+                        <p class="text-gray-500 font-medium">Détails activité</p>
+                        <p>{{ child.childProfile.extracurricularDetails }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 font-medium">Expérience arabe</p>
+                        <p>{{ child.childProfile.priorArabicExperience || 'Non renseigné' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 font-medium">Niveau arabe</p>
+                        <p>{{ child.childProfile.arabicLevel || 'Non précisé' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 font-medium">Besoin accompagnement (Troubles d'apprentissage)</p>
+                        <p>
+                            {{
+                            child.childProfile.hasLearningDisability
+                            ? 'Oui'
+                            : 'Aucun'
+                            }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progression -->
+            <div>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">
+                    Progression
+                </h3>
+                <div class="space-y-5">
+                    <div *ngFor="let subject of progress">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-600">{{ subject.name }}</span>
+                            <span class="font-medium text-gray-800">{{ subject.value }}%</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 rounded-full">
+                            <div class="h-2 bg-indigo-500 rounded-full" [style.width.%]="subject.value"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">
+                    Statistiques
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div *ngFor="let stat of stats" class="bg-gray-50 rounded-xl p-4 text-center">
+                        <p class="text-sm text-gray-500">{{ stat.label }}</p>
+                        <p class="mt-1 text-2xl font-bold text-gray-800">{{ stat.value }}</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 border-t border-gray-100 flex justify-end space-x-3 sticky bottom-0 bg-white">
+            <button class="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm" (click)="close.emit()">
+                Annuler
+            </button>
+            <button class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow"
+                (click)="close.emit()">
+                Fermer
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+// Styles spécifiques pour la liste des exercices
+.exercise-card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.type-badge {
+  &.flashcard {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  &.translation {
+    @apply bg-green-100 text-green-800;
+  }
+
+  &.listening {
+    @apply bg-purple-100 text-purple-800;
+  }
+
+  &.multiple_choice {
+    @apply bg-orange-100 text-orange-800;
+  }
+
+  &.fill_blank {
+    @apply bg-pink-100 text-pink-800;
+  }
+}
+
+.status-indicator {
+  &.active {
+    @apply bg-green-100 text-green-800;
+  }
+
+  &.inactive {
+    @apply bg-gray-100 text-gray-800;
+  }
+}
+
+.action-button {
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+}

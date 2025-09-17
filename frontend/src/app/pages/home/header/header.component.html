@@ -1,0 +1,262 @@
+<header class="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200/50 z-50 shadow-sm dark:bg-gray-800">
+  <div class="container mx-auto px-4 py-3">
+    <div class="flex items-center justify-between">
+      
+      <!-- Logo -->
+      <a routerLink="/matières" class="flex items-center gap-3 group">
+        <div class="relative">
+          <img src="../assets/cropped-logo-3.webp" alt="logo" 
+               class="h-10 w-10 object-contain rounded-lg border border-emerald-200 shadow-sm group-hover:shadow-md transition-all duration-300" />
+          <div class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+        </div>
+       
+      </a>
+
+      <!-- Navigation Desktop -->
+      <nav class="hidden lg:flex items-center gap-1">
+        <ng-container *ngIf="!isLoggedIn()">
+          <a routerLink="/matières" 
+             class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline">
+            <i class="fa-solid fa-home text-emerald-500"></i>
+            Accueil
+          </a>
+          <a routerLink="/login" 
+             class="px-4 py-2 text-sm font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline">
+            <i class="fa-solid fa-sign-in-alt"></i>
+            Connexion
+          </a>
+          <a routerLink="/register" 
+             class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md no-underline">
+            <i class="fa-solid fa-user-plus"></i>
+            Inscription
+          </a>
+        </ng-container>
+
+        <ng-container *ngIf="isLoggedIn()">
+          <!-- Indicateur de statut de validation -->
+          <div *ngIf="validationService.isPending()" 
+               class="px-3 py-2 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-lg flex items-center gap-2">
+            <i class="fa-solid fa-clock animate-pulse"></i>
+            En attente de validation
+          </div>
+          
+          <a [routerLink]="validationService.isMenuItemDisabled('matières') ? null : '/matières'"
+             [class]="validationService.isMenuItemDisabled('matières') ? 
+               'px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-50 flex items-center gap-2 no-underline' :
+               'px-4 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline'"
+             (click)="validationService.isMenuItemDisabled('matières') ? $event.preventDefault() : null">
+            <i class="fa-solid fa-book text-emerald-500"></i>
+            Matières
+            <i *ngIf="validationService.isMenuItemDisabled('matières')" 
+               class="fa-solid fa-lock text-gray-400 ml-1" 
+               title="Disponible après validation"></i>
+          </a>
+          
+          <a [routerLink]="validationService.isMenuItemDisabled('calendar') ? null : '/calendar'"
+             [class]="validationService.isMenuItemDisabled('calendar') ? 
+               'px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-50 flex items-center gap-2 no-underline' :
+               'px-4 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline'"
+             (click)="validationService.isMenuItemDisabled('calendar') ? $event.preventDefault() : null">
+            <i class="fa-solid fa-calendar-alt text-emerald-500"></i>
+            Planning
+            <i *ngIf="validationService.isMenuItemDisabled('calendar')" 
+               class="fa-solid fa-lock text-gray-400 ml-1" 
+               title="Disponible après validation"></i>
+          </a>
+          
+          <a *ngIf="role() === 'admin'" 
+             [routerLink]="validationService.isMenuItemDisabled('admin') ? null : '/admin'"
+             [class]="validationService.isMenuItemDisabled('admin') ? 
+               'px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-50 flex items-center gap-2 no-underline' :
+               'px-4 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline'"
+             (click)="validationService.isMenuItemDisabled('admin') ? $event.preventDefault() : null">
+            <i class="fa-solid fa-shield-alt text-emerald-500"></i>
+            Admin
+            <i *ngIf="validationService.isMenuItemDisabled('admin')" 
+               class="fa-solid fa-lock text-gray-400 ml-1" 
+               title="Disponible après validation"></i>
+          </a>
+        </ng-container>
+      </nav>
+
+      <!-- Centre: Sélecteur d'enfant (si connecté) -->
+      <div class="hidden lg:flex items-center" *ngIf="isLoggedIn()">
+        <button (click)="validationService.isMenuItemDisabled('child-selector') ? null : openChildSelectionModal()" 
+                [class]="validationService.isMenuItemDisabled('child-selector') ? 
+                  'flex items-center gap-3 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed opacity-50' :
+                  'flex items-center gap-3 px-4 py-2 bg-white hover:bg-emerald-50 border border-emerald-200 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md'"
+                [disabled]="validationService.isMenuItemDisabled('child-selector')">
+          <!-- Avatar enfant -->
+          <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+            {{ getChildInitials() }}
+          </div>
+          
+          <!-- Info enfant -->
+          <div class="text-left">
+            <div class="text-sm font-medium text-gray-800">{{ getSelectedChildName() }}</div>
+            <div *ngIf="selectedChild()" class="text-xs text-emerald-600">
+              Niveau {{ getLevelName(selectedChild()?.level?.id) }}
+            </div>
+          </div>
+          
+          <!-- Icône de verrouillage si désactivé -->
+          <i *ngIf="validationService.isMenuItemDisabled('child-selector')" 
+             class="fa-solid fa-lock text-gray-400 ml-2" 
+             title="Disponible après validation"></i>
+        </button>
+      </div>
+
+      <!-- Actions groupées (si connecté) -->
+      <div class="flex items-center gap-2" *ngIf="isLoggedIn()">
+        <!-- Dark Mode -->
+        <button (click)="toggleDarkMode()" 
+                class="p-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200"
+                title="Mode sombre">
+          <i *ngIf="!isDarkMode()" class="fa-solid fa-moon text-sm"></i>
+          <i *ngIf="isDarkMode()" class="fa-solid fa-sun text-sm text-emerald-600"></i>
+        </button>
+
+        <!-- Menu User -->
+        <app-user-menu></app-user-menu>
+      </div>
+
+      <!-- Menu Burger Mobile -->
+      <button (click)="toggleMenu($event)" 
+              data-burger-button
+              class="lg:hidden p-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200 group">
+        <div class="w-6 h-6 flex flex-col justify-center items-center gap-1">
+          <span class="w-5 h-0.5 bg-current transition-all duration-200" 
+                [class.rotate-45]="menuOpenBoolean" 
+                [class.translate-y-1.5]="menuOpenBoolean"></span>
+          <span class="w-5 h-0.5 bg-current transition-all duration-200" 
+                [class.opacity-0]="menuOpenBoolean"></span>
+          <span class="w-5 h-0.5 bg-current transition-all duration-200" 
+                [class.-rotate-45]="menuOpenBoolean" 
+                [class.-translate-y-1.5]="menuOpenBoolean"></span>
+        </div>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Menu Mobile -->
+  <div *ngIf="menuOpenBoolean" 
+       class="lg:hidden mt-3 p-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-lg border border-gray-200/50 dark:border-gray-700/50 shadow-lg space-y-2 mobile-menu">
+    
+    
+    <!-- Sélecteur d'enfant mobile -->
+    <div *ngIf="isLoggedIn()" 
+         [class]="validationService.isMenuItemDisabled('child-selector') ? 
+           'mb-3 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600' :
+           'mb-3 p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-700'">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+          {{ getChildInitials() }}
+        </div>
+        <div class="flex-1">
+          <div class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ getSelectedChildName() }}</div>
+          <div *ngIf="selectedChild()" class="text-xs text-emerald-600 dark:text-emerald-400">
+            Niveau {{ getLevelName(selectedChild()?.level?.id) }}
+          </div>
+        </div>
+        <button (click)="validationService.isMenuItemDisabled('child-selector') ? null : openChildSelectionModal()" 
+                [class]="validationService.isMenuItemDisabled('child-selector') ? 
+                  'px-2 py-1 text-xs text-gray-400 bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded cursor-not-allowed opacity-50' :
+                  'px-2 py-1 text-xs text-emerald-600 dark:text-emerald-400 bg-white dark:bg-gray-700 border border-emerald-200 dark:border-emerald-600 rounded hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors duration-200'"
+                [disabled]="validationService.isMenuItemDisabled('child-selector')">
+          Changer
+          <i *ngIf="validationService.isMenuItemDisabled('child-selector')" 
+             class="fa-solid fa-lock text-gray-400 ml-1" 
+             title="Disponible après validation"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation mobile -->
+    <div class="space-y-1">
+      <ng-container *ngIf="!isLoggedIn()">
+        <a (click)="navigate('/matières')" 
+           class="flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline">
+          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
+            <i class="fa-solid fa-home text-emerald-600 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Accueil</span>
+        </a>
+        <a (click)="navigate('/login')" 
+           class="flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline">
+          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
+            <i class="fa-solid fa-sign-in-alt text-emerald-600 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Connexion</span>
+        </a>
+        <a (click)="navigate('/register')" 
+           class="flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline">
+          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
+            <i class="fa-solid fa-user-plus text-emerald-600 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Inscription</span>
+        </a>
+      </ng-container>
+
+      <ng-container *ngIf="isLoggedIn()">
+        <!-- Indicateur de statut mobile -->
+        <div *ngIf="validationService.isPending()" 
+             class="p-2 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-lg flex items-center gap-2 mb-2">
+          <i class="fa-solid fa-clock animate-pulse"></i>
+          En attente de validation
+        </div>
+        
+        <a (click)="validationService.isMenuItemDisabled('matières') ? null : navigate('/matières')" 
+           [class]="validationService.isMenuItemDisabled('matières') ? 
+             'flex items-center gap-2 p-2 text-gray-400 cursor-not-allowed opacity-50 group no-underline' :
+             'flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline'">
+          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
+            <i class="fa-solid fa-book text-emerald-600 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Matières</span>
+          <i *ngIf="validationService.isMenuItemDisabled('matières')" 
+             class="fa-solid fa-lock text-gray-400 ml-auto" 
+             title="Disponible après validation"></i>
+        </a>
+        
+        <a (click)="validationService.isMenuItemDisabled('calendar') ? null : navigate('/calendar')" 
+           [class]="validationService.isMenuItemDisabled('calendar') ? 
+             'flex items-center gap-2 p-2 text-gray-400 cursor-not-allowed opacity-50 group no-underline' :
+             'flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline'">
+          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
+            <i class="fa-solid fa-calendar-alt text-emerald-600 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Planning</span>
+          <i *ngIf="validationService.isMenuItemDisabled('calendar')" 
+             class="fa-solid fa-lock text-gray-400 ml-auto" 
+             title="Disponible après validation"></i>
+        </a>
+        
+        <a *ngIf="role() === 'admin'" 
+           (click)="validationService.isMenuItemDisabled('admin') ? null : navigate('/admin')" 
+           [class]="validationService.isMenuItemDisabled('admin') ? 
+             'flex items-center gap-2 p-2 text-gray-400 cursor-not-allowed opacity-50 group no-underline' :
+             'flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline'">
+          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
+            <i class="fa-solid fa-shield-alt text-emerald-600 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Admin</span>
+          <i *ngIf="validationService.isMenuItemDisabled('admin')" 
+             class="fa-solid fa-lock text-gray-400 ml-auto" 
+             title="Disponible après validation"></i>
+        </a>
+      </ng-container>
+    </div>
+
+    <!-- Actions mobile -->
+    <div *ngIf="isLoggedIn()" class="pt-2 border-t border-gray-200 dark:border-gray-700">
+      <button (click)="toggleDarkMode()" 
+              class="w-full flex items-center justify-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded transition-all duration-200">
+        <i *ngIf="!isDarkMode()" class="fa-solid fa-moon text-sm"></i>
+        <i *ngIf="isDarkMode()" class="fa-solid fa-sun text-sm text-emerald-600"></i>
+        <span class="text-sm font-medium">Mode sombre</span>
+      </button>
+    </div>
+  </div>
+
+</header>

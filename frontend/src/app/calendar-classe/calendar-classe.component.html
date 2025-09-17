@@ -1,0 +1,465 @@
+<div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+  <!-- Header du calendrier -->
+  <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-6 py-4">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <!-- Titre et navigation -->
+      <div class="flex items-center space-x-4">
+        <h2 class="text-2xl font-bold text-white">Calendrier des Classes</h2>
+        <div class="flex items-center space-x-2">
+          <button
+            (click)="previousPeriod()"
+            class="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200"
+            title="Période précédente"
+          >
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+          <button
+            (click)="goToToday()"
+            class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200 text-white font-medium"
+          >
+            Aujourd'hui
+          </button>
+          <button
+            (click)="nextPeriod()"
+            class="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200"
+            title="Période suivante"
+          >
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contrôles de vue et filtres -->
+      <div class="flex items-center space-x-4">
+        <!-- Filtres -->
+        <button
+          (click)="showFilters = !showFilters"
+          class="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200 text-white"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+          </svg>
+          <span>Filtres</span>
+        </button>
+
+        <!-- Bouton d'ajout -->
+        <button
+          *ngIf="isEditable"
+          (click)="openCreateEvent()"
+          class="flex items-center space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg transition-all duration-200 text-white font-medium"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          <span>Ajouter</span>
+        </button>
+
+        <!-- Sélecteur de vue -->
+        <div class="flex bg-white/20 rounded-lg p-1">
+          <button
+            (click)="setViewMode('month')"
+            [class]="'px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ' + 
+              (viewMode === 'month' ? 'bg-white text-indigo-600' : 'text-white hover:bg-white/20')"
+          >
+            Mois
+          </button>
+          <button
+            (click)="setViewMode('week')"
+            [class]="'px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ' + 
+              (viewMode === 'week' ? 'bg-white text-indigo-600' : 'text-white hover:bg-white/20')"
+          >
+            Semaine
+          </button>
+          <button
+            (click)="setViewMode('day')"
+            [class]="'px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ' + 
+              (viewMode === 'day' ? 'bg-white text-indigo-600' : 'text-white hover:bg-white/20')"
+          >
+            Jour
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date actuelle -->
+    <div class="mt-2 text-indigo-100">
+      <span class="text-lg font-semibold">
+        {{ months[currentDate.getMonth()] }} {{ currentDate.getFullYear() }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Panel de filtres -->
+  <div *ngIf="showFilters" class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Filtre par classe -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Classe</label>
+        <select
+          [(ngModel)]="selectedClassFilter"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        >
+          <option [value]="null">Toutes les classes</option>
+          <option *ngFor="let classe of filteredClasses" [value]="classe.id">
+            {{ classe.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtre par enseignant -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Enseignant</label>
+        <select
+          [(ngModel)]="selectedTeacherFilter"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        >
+          <option [value]="null">Tous les enseignants</option>
+          <option *ngFor="let teacher of teachers" [value]="teacher.id">
+            {{ teacher.firstName }} {{ teacher.lastName }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Actions des filtres -->
+      <div class="flex items-end space-x-2">
+        <button
+          (click)="applyFilters()"
+          class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all duration-200 font-medium"
+        >
+          Appliquer
+        </button>
+        <button
+          (click)="clearFilters()"
+          class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-all duration-200 font-medium"
+        >
+          Effacer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucune classe pour le parent -->
+  <div *ngIf="parentId && filteredClasses.length === 0" class="text-center py-12">
+    <div class="text-gray-500 text-lg mb-4">
+      <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      </svg>
+      <p class="text-xl font-medium text-gray-600 mb-2">Aucune classe trouvée</p>
+      <p class="text-gray-500">Vos enfants ne sont pas encore inscrits dans des classes.</p>
+    </div>
+  </div>
+
+  <!-- Contenu du calendrier -->
+  <div *ngIf="!parentId || filteredClasses.length > 0" class="p-6">
+    <!-- Vue Mois -->
+    <div *ngIf="viewMode === 'month'" class="calendar-month">
+      <!-- En-têtes des jours -->
+      <div class="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden mb-4">
+        <div *ngFor="let day of weekDays" class="bg-gray-100 px-4 py-3 text-center font-semibold text-gray-700">
+          {{ day }}
+        </div>
+      </div>
+
+      <!-- Grille du mois -->
+      <div class="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
+        <div
+          *ngFor="let day of calendarDays"
+          (click)="selectDate(day.date)"
+          [class]="'bg-white min-h-[120px] p-3 cursor-pointer hover:bg-gray-50 transition-colors duration-200 group ' +
+            (!day.isCurrentMonth ? 'text-gray-400' : '') +
+            (day.isToday ? 'ring-2 ring-indigo-500' : '')"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <span class="font-semibold">{{ day.date.getDate() }}</span>
+            <button
+              *ngIf="isEditable"
+              (click)="openCreateEvent(day.date); $event.stopPropagation()"
+              class="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded transition-all duration-200"
+            >
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Événements du jour -->
+          <div class="space-y-1">
+            <div
+              *ngFor="let event of day.events.slice(0, 3)"
+              (click)="selectEvent(event); $event.stopPropagation()"
+              [class]="'px-2 py-1 rounded text-xs font-medium cursor-pointer transition-all duration-200 ' +
+                (event.isConflict ? 'bg-red-100 text-red-800 border border-red-300' : 'text-white')"
+              [style.background-color]="event.isConflict ? '' : event.color"
+            >
+              <div class="truncate">{{ event.title }}</div>
+              <div class="text-xs opacity-90">{{ getEventTimeRange(event) }}</div>
+            </div>
+            <div *ngIf="day.events.length > 3" class="text-xs text-gray-500 text-center">
+              +{{ day.events.length - 3 }} autres
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vue Semaine -->
+    <div *ngIf="viewMode === 'week'" class="calendar-week">
+      <!-- En-têtes des jours -->
+      <div class="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden mb-4">
+        <div *ngFor="let day of calendarDays" class="bg-gray-100 px-4 py-3 text-center">
+          <div class="font-semibold text-gray-700">{{ weekDays[day.date.getDay() === 0 ? 6 : day.date.getDay() - 1] }}</div>
+          <div class="text-sm text-gray-500">{{ day.date.getDate() }}</div>
+        </div>
+      </div>
+
+      <!-- Grille de la semaine -->
+      <div class="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden min-h-[400px]">
+        <div
+          *ngFor="let day of calendarDays"
+          class="bg-white p-3 min-h-[400px]"
+        >
+          <!-- Événements du jour -->
+          <div class="space-y-2">
+            <div
+              *ngFor="let event of day.events"
+              (click)="selectEvent(event)"
+              [class]="'p-2 rounded-lg cursor-pointer transition-all duration-200 ' +
+                (event.isConflict ? 'bg-red-100 text-red-800 border border-red-300' : 'text-white')"
+              [style.background-color]="event.isConflict ? '' : event.color"
+            >
+              <div class="font-medium text-sm">{{ event.title }}</div>
+              <div class="text-xs opacity-90">{{ getEventTimeRange(event) }}</div>
+              <div *ngIf="event.schedule.description" class="text-xs opacity-75 mt-1">
+                {{ event.schedule.description }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vue Jour -->
+    <div *ngIf="viewMode === 'day'" class="calendar-day">
+      <div class="bg-gray-100 rounded-lg p-4 mb-4">
+        <h3 class="text-lg font-semibold text-gray-700">
+          {{ weekDays[selectedDate?.getDay() === 0 ? 6 : (selectedDate?.getDay() || 1) - 1] }}
+          {{ selectedDate?.getDate() }} {{ months[selectedDate?.getMonth() || 0] }} {{ selectedDate?.getFullYear() }}
+        </h3>
+      </div>
+
+      <div class="space-y-3">
+        <div
+          *ngFor="let event of calendarDays[0]?.events || []"
+          (click)="selectEvent(event)"
+          [class]="'p-4 rounded-lg cursor-pointer transition-all duration-200 ' +
+            (event.isConflict ? 'bg-red-100 text-red-800 border border-red-300' : 'text-white')"
+          [style.background-color]="event.isConflict ? '' : event.color"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="font-semibold text-lg">{{ event.title }}</div>
+              <div class="text-sm opacity-90">{{ getEventTimeRange(event) }}</div>
+              <div *ngIf="event.schedule.description" class="text-sm opacity-75 mt-2">
+                {{ event.schedule.description }}
+              </div>
+            </div>
+            <div *ngIf="event.isConflict" class="flex items-center space-x-1 text-red-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <span class="text-xs font-medium">Conflit</span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!calendarDays[0]?.events?.length" class="text-center py-12 text-gray-500">
+          <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <p class="text-lg font-medium">Aucun cours programmé</p>
+          <p class="text-sm">Ce jour ne contient aucun créneau horaire</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de détails d'événement -->
+<div *ngIf="showEventDetails && selectedEvent" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden">
+    <!-- Header -->
+    <div class="px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-bold">Détails du créneau</h3>
+        <button
+          (click)="showEventDetails = false"
+          class="p-2 hover:bg-white/20 rounded-lg transition-all duration-200"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenu -->
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Classe</label>
+        <p class="text-lg font-semibold text-gray-900">{{ selectedEvent.classe.name }}</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Jour</label>
+        <p class="text-gray-900">{{ selectedEvent.day }}</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Horaires</label>
+        <p class="text-gray-900">{{ getEventTimeRange(selectedEvent) }}</p>
+      </div>
+
+      <div *ngIf="selectedEvent.schedule.description">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <p class="text-gray-900">{{ selectedEvent.schedule.description }}</p>
+      </div>
+
+      <div *ngIf="selectedEvent.isConflict" class="p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex items-center space-x-2 text-red-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          <span class="font-medium">Conflit détecté</span>
+        </div>
+        <p class="text-sm text-red-700 mt-1">Ce créneau entre en conflit avec un autre cours</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+      <button
+        (click)="showEventDetails = false"
+        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-all duration-200 font-medium"
+      >
+        Fermer
+      </button>
+      <button
+        *ngIf="isEditable"
+        (click)="deleteSchedule(selectedEvent.schedule.id); showEventDetails = false"
+        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 font-medium"
+      >
+        Supprimer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de création d'événement -->
+<div *ngIf="showCreateEvent" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+    <!-- Header -->
+    <div class="px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-bold">Nouveau créneau</h3>
+        <button
+          (click)="showCreateEvent = false"
+          class="p-2 hover:bg-white/20 rounded-lg transition-all duration-200"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenu -->
+    <form (ngSubmit)="createSchedule()" class="p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Classe <span class="text-red-500">*</span></label>
+        <select
+          [(ngModel)]="selectedClassFilter"
+          name="classeId"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        >
+          <option value="">Sélectionnez une classe</option>
+          <option *ngFor="let classe of filteredClasses" [value]="classe.id">
+            {{ classe.name }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Jour <span class="text-red-500">*</span></label>
+        <select
+          [(ngModel)]="newSchedule.day"
+          name="day"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        >
+          <option value="">Sélectionnez un jour</option>
+          <option *ngFor="let day of weekDays" [value]="day">{{ day }}</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Heure de début <span class="text-red-500">*</span></label>
+          <input
+            type="time"
+            [(ngModel)]="newSchedule.startHour"
+            name="startHour"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Heure de fin <span class="text-red-500">*</span></label>
+          <input
+            type="time"
+            [(ngModel)]="newSchedule.endHour"
+            name="endHour"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+        <textarea
+          [(ngModel)]="newSchedule.description"
+          name="description"
+          rows="3"
+          placeholder="Description du créneau (optionnel)"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        ></textarea>
+      </div>
+    </form>
+
+    <!-- Actions -->
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+      <button
+        (click)="showCreateEvent = false"
+        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-all duration-200 font-medium"
+      >
+        Annuler
+      </button>
+      <button
+        (click)="createSchedule()"
+        [disabled]="!newSchedule.day || !newSchedule.startHour || !newSchedule.endHour || !selectedClassFilter"
+        [class]="'px-4 py-2 rounded-lg transition-all duration-200 font-medium ' +
+          (!newSchedule.day || !newSchedule.startHour || !newSchedule.endHour || !selectedClassFilter
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : 'bg-green-600 hover:bg-green-700 text-white')"
+      >
+        Créer le créneau
+      </button>
+    </div>
+  </div>
+</div>

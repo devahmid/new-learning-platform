@@ -1,0 +1,347 @@
+<!-- Dashboard parent - Vue d'ensemble de la progression -->
+<div class="parent-progress-overview" *ngIf="!isLoading; else loadingTemplate">
+  
+  <!-- En-tête avec statistiques globales -->
+  <div class="overview-header mb-8">
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div>
+          <h1 class="text-4xl font-bold mb-2">Vue d'Ensemble Parent</h1>
+          <p class="text-blue-100 text-lg">Suivi de la progression de vos enfants</p>
+        </div>
+        
+        <div class="flex flex-wrap gap-4">
+          <!-- Filtre par période -->
+          <select 
+            [(ngModel)]="selectedPeriod" 
+            (ngModelChange)="onPeriodChange($event)"
+            class="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-transparent">
+            <option value="day">Aujourd'hui</option>
+            <option value="week">Cette semaine</option>
+            <option value="month">Ce mois</option>
+            <option value="year">Cette année</option>
+          </select>
+          
+          <!-- Bouton de rafraîchissement -->
+          <button 
+            (click)="refreshData()"
+            class="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white hover:bg-white/30 focus:ring-2 focus:ring-white/50 transition-colors">
+            <i class="fa-solid fa-refresh mr-2"></i>
+            Actualiser
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques globales -->
+  <div class="global-stats mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- Nombre total d'enfants -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Enfants Inscrits</p>
+            <p class="text-3xl font-bold text-gray-900">{{ totalChildren }}</p>
+          </div>
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-users text-blue-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progression moyenne -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Progression Moyenne</p>
+            <p class="text-3xl font-bold text-gray-900">{{ averageProgress }}%</p>
+          </div>
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-chart-line text-green-600 text-xl"></i>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="h-2 rounded-full transition-all duration-500" 
+                 [ngClass]="getProgressColor(averageProgress)"
+                 [style.width.%]="averageProgress"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enfants nécessitant une attention -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Besoin d'Attention</p>
+            <p class="text-3xl font-bold text-gray-900">{{ childrenNeedingAttention }}</p>
+          </div>
+          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-exclamation-triangle text-orange-600 text-xl"></i>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">
+          {{ childrenNeedingAttention > 0 ? 'Surveillance recommandée' : 'Tout va bien' }}
+        </p>
+      </div>
+
+      <!-- Temps d'étude total -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Temps d'Étude Total</p>
+            <p class="text-3xl font-bold text-gray-900">{{ formatStudyTime(totalStudyTime) }}</p>
+          </div>
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-clock text-purple-600 text-xl"></i>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">Cumulé cette semaine</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques de Quiz -->
+  <div class="quiz-stats-section mb-8">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Statistiques des Quiz</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- Total des quiz complétés -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Quiz Complétés</p>
+            <p class="text-3xl font-bold text-gray-900">
+              <span *ngIf="isLoadingQuizStats" class="text-gray-400">...</span>
+              <span *ngIf="!isLoadingQuizStats">{{ totalQuizzesCompleted }}</span>
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-trophy text-blue-600 text-xl"></i>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">Total réalisés</p>
+      </div>
+
+      <!-- Score moyen -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Score Moyen</p>
+            <p class="text-3xl font-bold text-gray-900">
+              <span *ngIf="isLoadingQuizStats" class="text-gray-400">...</span>
+              <span *ngIf="!isLoadingQuizStats">{{ averageQuizScore }}%</span>
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-chart-line text-green-600 text-xl"></i>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">Performance moyenne</p>
+      </div>
+
+      <!-- Meilleur score -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Meilleur Score</p>
+            <p class="text-3xl font-bold text-gray-900">
+              <span *ngIf="isLoadingQuizStats" class="text-gray-400">...</span>
+              <span *ngIf="!isLoadingQuizStats">{{ bestQuizScore }}%</span>
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-star text-yellow-600 text-xl"></i>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">Record personnel</p>
+      </div>
+
+      <!-- Quiz excellents -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Quiz Excellents</p>
+            <p class="text-3xl font-bold text-gray-900">
+              <span *ngIf="isLoadingQuizStats" class="text-gray-400">...</span>
+              <span *ngIf="!isLoadingQuizStats">{{ excellentQuizCount }}</span>
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-medal text-red-600 text-xl"></i>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">Score ≥ 90%</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtres et contrôles -->
+  <div class="filters-controls mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <h2 class="text-xl font-bold text-gray-900">Progression par Enfant</h2>
+        <span class="text-sm text-gray-500">({{ filteredChildren.length }} enfant{{ filteredChildren.length > 1 ? 's' : '' }})</span>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <!-- Filtre d'attention -->
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="showOnlyNeedingAttention"
+            (ngModelChange)="toggleAttentionFilter()"
+            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <span class="text-sm text-gray-700">Besoin d'attention uniquement</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des enfants -->
+  <div class="children-grid mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let child of filteredChildren" 
+           (click)="selectChild(child)"
+           class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group">
+        
+        <!-- En-tête de l'enfant -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+              {{ child.childName.charAt(0) }}
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">{{ child.childName }}</h3>
+              <p class="text-sm text-gray-500">ID: {{ child.childId }}</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <i [class]="'fa-solid fa-' + getChildStatusIcon(child) + ' text-lg ' + getChildStatusColor(child)"></i>
+            <i class="fa-solid fa-chevron-right text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+          </div>
+        </div>
+
+        <!-- Progression -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-gray-600">Progression</span>
+            <span class="text-lg font-bold text-gray-900">{{ child.overallProgress }}%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-3">
+            <div class="h-3 rounded-full transition-all duration-500" 
+                 [ngClass]="getProgressColor(child.overallProgress)"
+                 [style.width.%]="child.overallProgress"></div>
+          </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="text-center">
+            <p class="text-2xl font-bold text-gray-900">{{ child.coursesInProgress }}</p>
+            <p class="text-xs text-gray-500">Cours en cours</p>
+          </div>
+          <div class="text-center">
+            <p class="text-2xl font-bold text-gray-900">{{ child.studyStreak }}</p>
+            <p class="text-xs text-gray-500">Série (jours)</p>
+          </div>
+        </div>
+
+        <!-- Score de motivation -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-sm font-medium text-gray-600">Motivation</span>
+            <span class="text-sm font-bold text-gray-900">{{ getChildMotivationScore(child) }}/100</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="h-2 rounded-full transition-all duration-500" 
+                 [ngClass]="getProgressColor(getChildMotivationScore(child))"
+                 [style.width.%]="getChildMotivationScore(child)"></div>
+          </div>
+        </div>
+
+        <!-- Dernière activité -->
+        <div class="text-center">
+          <p class="text-sm text-gray-500">
+            <i class="fa-solid fa-calendar mr-1"></i>
+            Dernière activité: {{ formatLastActivity(child.lastActivity) }}
+          </p>
+        </div>
+
+        <!-- Recommandations rapides -->
+        <div class="mt-4" *ngIf="getChildRecommendations(child).length > 0">
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p class="text-xs text-yellow-800 font-medium mb-1">Recommandation:</p>
+            <p class="text-xs text-yellow-700">{{ getChildRecommendations(child)[0] }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucun enfant -->
+  <div *ngIf="filteredChildren.length === 0" class="text-center py-12">
+    <i class="fa-solid fa-users text-4xl text-gray-400 mb-4"></i>
+    <p class="text-gray-500 text-lg">Aucun enfant trouvé</p>
+    <p class="text-gray-400 text-sm mt-2">
+      {{ showOnlyNeedingAttention ? 'Aucun enfant ne nécessite d\'attention particulière' : 'Aucun enfant inscrit' }}
+    </p>
+  </div>
+
+  <!-- Détails de l'enfant sélectionné -->
+  <div *ngIf="selectedChild" class="child-details-modal fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      
+      <!-- En-tête du modal -->
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold">{{ selectedChild.childName }}</h2>
+            <p class="text-blue-100">Progression détaillée</p>
+          </div>
+          <button 
+            (click)="closeChildDetails()"
+            class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenu du modal -->
+      <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div *ngIf="isLoadingChildDetails; else childDetailsContent">
+          <div class="flex items-center justify-center py-12">
+            <div class="text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p class="text-gray-600">Chargement des détails...</p>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #childDetailsContent>
+          <!-- Ici, on peut intégrer le composant de progression détaillée -->
+          <app-progress-dashboard 
+            [childId]="selectedChild.childId"
+            [showAnalytics]="true"
+            [showRecommendations]="true"
+            [showAchievements]="true">
+          </app-progress-dashboard>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Template de chargement -->
+<ng-template #loadingTemplate>
+  <div class="flex items-center justify-center py-12">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">Chargement de la vue d'ensemble...</p>
+    </div>
+  </div>
+</ng-template>

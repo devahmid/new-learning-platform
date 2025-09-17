@@ -1,0 +1,59 @@
+// ✅ Style global du composant
+.cours-detail-card {
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  // ✅ Titre du cours
+  .cours-title {
+    text-align: center;
+    color: #007bff;
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+  
+  // ✅ Description
+  .cours-description {
+    font-size: 16px;
+    color: #444;
+    line-height: 1.5;
+  }
+  
+  // ✅ Enseignant
+  .cours-enseignant {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  // ✅ Vidéo du cours
+  .cours-video {
+    margin-top: 20px;
+    text-align: center;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  // ✅ Document PDF
+  .cours-document {
+    margin-top: 20px;
+    text-align: center;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  // ✅ Bouton Retour
+  .p-button-outlined {
+    width: 100%;
+    margin-top: 15px;
+  }
+  

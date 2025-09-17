@@ -1,0 +1,17 @@
+<div class="p-6 max-w-md mx-auto bg-white shadow rounded space-y-4">
+    <h2 class="text-xl font-semibold">Paiement</h2>
+
+    <div id="card-element" class="border p-4 rounded-md min-h-[60px]"></div>
+
+    <button
+        [disabled]="loading"
+        (click)="pay()"
+        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+    >
+        {{ loading ? 'Paiement...' : 'Payer maintenant' }}
+    </button>
+
+    <div *ngIf="message" class="mt-4 text-sm text-gray-700">
+        {{ message }}
+    </div>
+</div>

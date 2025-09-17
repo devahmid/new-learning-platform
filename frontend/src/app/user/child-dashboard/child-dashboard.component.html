@@ -1,0 +1,185 @@
+<main class="pt-20 bg-gray-50 min-h-screen">
+    <!-- Loading -->
+    <div *ngIf="loading" class="container mx-auto py-12 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-green-600"></div>
+            <p class="mt-4 text-xl text-gray-600">Chargement du tableau de bord...</p>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error && !loading" class="container mx-auto py-12 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg max-w-md mx-auto">
+                <p class="text-lg">{{ error }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div *ngIf="!loading && !error" class="container mx-auto py-12 px-4">
+        <div class="max-w-6xl mx-auto">
+
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Tableau de Bord de l'Enfant</h1>
+                <p class="text-xl text-gray-600">Suivez la progression et les accomplissements</p>
+            </div>
+
+            <!-- Level and XP Section -->
+            <div *ngIf="childLevel" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Current Level -->
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <div class="text-center">
+                        <div class="inline-block p-3 rounded-full mb-4"
+                            [ngClass]="getLevelColor(childLevel.currentLevel)">
+                            <i class="fa-solid fa-star text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Niveau Actuel</h3>
+                        <p class="text-2xl font-bold text-gray-700 capitalize">{{ childLevel.currentLevel }}</p>
+                        <p class="text-sm text-gray-500">Niveau {{ childLevel.levelNumber }}</p>
+                    </div>
+                </div>
+
+                <!-- Experience Points -->
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <div class="text-center">
+                        <div class="inline-block p-3 rounded-full mb-4 bg-blue-500">
+                            <i class="fa-solid fa-bolt text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Points d'Expérience</h3>
+                        <p class="text-2xl font-bold text-blue-600">{{ childLevel.experiencePoints }}</p>
+                        <p class="text-sm text-gray-500">{{ getNextLevelXP() }} XP pour le prochain niveau</p>
+                    </div>
+                </div>
+
+                <!-- Streak -->
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <div class="text-center">
+                        <div class="inline-block p-3 rounded-full mb-4 bg-orange-500">
+                            <i class="fa-solid fa-fire text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Série Actuelle</h3>
+                        <p class="text-2xl font-bold text-orange-600">{{ childLevel.streakDays }}</p>
+                        <p class="text-sm text-gray-500">jours consécutifs</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level Progress Bar -->
+            <div *ngIf="childLevel" class="bg-white rounded-xl p-6 shadow-sm mb-8">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Progression du Niveau</h3>
+                <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                    <div class="bg-blue-600 h-4 rounded-full transition-all duration-300"
+                        [style.width.%]="getLevelProgress()"></div>
+                </div>
+                <div class="flex justify-between text-sm text-gray-600">
+                    <span>{{ childLevel.experiencePoints }} XP</span>
+                    <span>{{ getNextLevelXP() }} XP restants</span>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div *ngIf="statistics" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-6 shadow-sm text-center">
+                    <div class="text-3xl font-bold text-green-600 mb-2">{{ statistics.totalLessons }}</div>
+                    <p class="text-gray-600">Leçons Totales</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-sm text-center">
+                    <div class="text-3xl font-bold text-blue-600 mb-2">{{ statistics.completedLessons }}</div>
+                    <p class="text-gray-600">Leçons Terminées</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-sm text-center">
+                    <div class="text-3xl font-bold text-purple-600 mb-2">{{ statistics.averageScore }}%</div>
+                    <p class="text-gray-600">Score Moyen</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-sm text-center">
+                    <div class="text-3xl font-bold text-orange-600 mb-2">{{ formatTime(statistics.totalTimeSpent) }}
+                    </div>
+                    <p class="text-gray-600">Temps Total</p>
+                </div>
+            </div>
+
+            <!-- Progress by Course -->
+            <div class="bg-white rounded-xl p-6 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">Progression par Cours</h3>
+
+                <div *ngIf="childProgress.length === 0" class="text-center py-8">
+                    <i class="fa-solid fa-book-open text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500">Aucune progression enregistrée pour le moment</p>
+                </div>
+
+                <div *ngFor="let progress of childProgress" class="border-b border-gray-100 py-4 last:border-b-0">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-900">
+                                {{ progress.course?.title || 'Cours inconnu' }}
+                            </h4>
+                            <p class="text-sm text-gray-600">
+                                {{ progress.lesson?.title || 'Leçon inconnue' }}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <!-- Progress Bar -->
+                            <div class="w-24 bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full transition-all duration-300"
+                                    [ngClass]="getProgressColor(progress.progressPercentage)"
+                                    [style.width.%]="progress.progressPercentage"></div>
+                            </div>
+
+                            <!-- Score -->
+                            <div class="text-right">
+                                <div class="font-semibold text-gray-900">{{ progress.progressPercentage }}%</div>
+                                <div class="text-sm text-gray-500">{{ progress.score }}/100</div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="text-right">
+                                <span class="inline-block px-2 py-1 text-xs rounded-full" [ngClass]="{
+                        'bg-green-100 text-green-800': progress.status === 'completed',
+                        'bg-yellow-100 text-yellow-800': progress.status === 'in_progress',
+                        'bg-gray-100 text-gray-800': progress.status === 'not_started'
+                      }">
+                                    {{ progress.status === 'completed' ? 'Terminé' :
+                                    progress.status === 'in_progress' ? 'En cours' : 'Non commencé' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div *ngIf="childLevel?.achievements?.length" class="bg-white rounded-xl p-6 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">Succès Débloqués</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div *ngFor="let achievement of childLevel?.achievements"
+                        class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg p-4 text-white text-center">
+                        <i [class]="achievement.icon + ' text-2xl mb-2'"></i>
+                        <h4 class="font-bold mb-1">{{ achievement.name }}</h4>
+                        <p class="text-sm opacity-90">{{ achievement.description }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Path -->
+            <div *ngIf="childLevel?.learningPath?.length" class="bg-white rounded-xl p-6 shadow-sm">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">Parcours d'Apprentissage</h3>
+                <div class="space-y-4">
+                    <div *ngFor="let path of childLevel?.learningPath" class="border-l-4 border-blue-500 pl-4">
+                        <h4 class="font-semibold text-gray-900">{{ path.subject }}</h4>
+                        <p class="text-sm text-gray-600 mb-2">
+                            Unité {{ path.currentUnit }} sur {{ path.totalUnits }}
+                        </p>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                [style.width.%]="path.unitProgress"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">{{ path.unitProgress }}% terminé</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

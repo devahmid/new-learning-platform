@@ -1,0 +1,213 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">⭐ Cours Populaires</h1>
+                    <p class="text-gray-600 mt-2">Découvrez les cours les plus appréciés et suivis</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button (click)="router.navigate(['/admin/courses/ajout'])"
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                        <span class="text-xl">➕</span>
+                        Nouveau Cours
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistiques globales -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-100 rounded-lg">
+                            <span class="text-2xl">👥</span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Inscriptions</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ stats.totalEnrollments }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-yellow-100 rounded-lg">
+                            <span class="text-2xl">⭐</span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Note Moyenne</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ stats.averageRating | number:'1.1-1' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <span class="text-2xl">🏷️</span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Catégorie Top</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ stats.topCategory }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-purple-100 rounded-lg">
+                            <span class="text-2xl">👨‍🏫</span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Instructeur Top</p>
+                            <p class="text-lg font-bold text-gray-900">{{ stats.mostActiveInstructor }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <app-form-loader *ngIf="isLoading" text="Chargement des cours populaires..."></app-form-loader>
+
+        <!-- Classement des cours populaires -->
+        <div *ngIf="!isLoading" class="space-y-6">
+
+            <!-- Top 3 avec médailles -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div *ngFor="let course of popularCourses.slice(0, 3); let i = index"
+                    class="relative bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl shadow-xl border-2 border-yellow-200 overflow-hidden">
+
+                    <!-- Médaille -->
+                    <div
+                        class="absolute -top-4 -right-4 w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center text-3xl shadow-lg">
+                        {{ getRankBadge(i + 1) }}
+                    </div>
+
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ course.title }}</h3>
+                            <p class="text-sm text-gray-600 line-clamp-2">{{ course.description }}</p>
+                        </div>
+
+                        <!-- Statistiques du cours -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="text-center p-3 bg-white rounded-lg shadow-sm">
+                                <p class="text-2xl font-bold text-blue-600">{{ course.studentsCount }}</p>
+                                <p class="text-xs text-gray-600">Élèves</p>
+                            </div>
+                            <div class="text-center p-3 bg-white rounded-lg shadow-sm">
+                                <p class="text-2xl font-bold text-yellow-600">{{ course.rating }}</p>
+                                <p class="text-xs text-gray-600">Note</p>
+                            </div>
+                        </div>
+
+                        <!-- Métadonnées -->
+                        <div class="space-y-2 text-sm text-gray-600 mb-4">
+                            <div class="flex items-center justify-between">
+                                <span>👨‍🏫 {{ course.instructor.pseudo }}</span>
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">{{
+                                    course.level.name }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>🏷️ {{ course.category?.name }}</span>
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">{{
+                                    course.completionRate }}% complétion</span>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex space-x-2">
+                            <button (click)="viewCourse(course.id)"
+                                class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-sm">
+                                👁️ Voir
+                            </button>
+                            <button (click)="editCourse(course.id)"
+                                class="flex-1 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors text-sm">
+                                ✏️ Modifier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des autres cours populaires -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">📊 Classement Complet</h2>
+
+                <div class="space-y-4">
+                    <div *ngFor="let course of popularCourses.slice(3); let i = index"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+
+                        <!-- Rang -->
+                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mr-4">
+                            <span class="font-bold text-gray-700">{{ i + 4 }}</span>
+                        </div>
+
+                        <!-- Informations du cours -->
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">{{ course.title }}</h3>
+                            <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                <span>👨‍🏫 {{ course.instructor.pseudo }}</span>
+                                <span>🏷️ {{ course.category?.name }}</span>
+                                <span>📊 {{ course.level.name }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Statistiques -->
+                        <div class="flex items-center space-x-6 mr-6">
+                            <div class="text-center">
+                                <p class="text-lg font-bold text-blue-600">{{ course.studentsCount }}</p>
+                                <p class="text-xs text-gray-500">Élèves</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-lg font-bold text-yellow-600">{{ course.rating }}</p>
+                                <p class="text-xs text-gray-500">Note</p>
+                            </div>
+                            <div class="text-center">
+                                <p [class]="'text-lg font-bold ' + getCompletionRateColor(course.completionRate)">
+                                    {{ course.completionRate }}%
+                                </p>
+                                <p class="text-xs text-gray-500">Complétion</p>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex space-x-2">
+                            <button (click)="viewCourse(course.id)"
+                                class="px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
+                                👁️
+                            </button>
+                            <button (click)="editCourse(course.id)"
+                                class="px-3 py-2 text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors">
+                                ✏️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphique de tendances (simulé) -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">📈 Tendances des Inscriptions</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div *ngFor="let course of popularCourses.slice(0, 6)"
+                        class="text-center p-4 border border-gray-200 rounded-lg">
+                        <h4 class="font-medium text-gray-900 mb-2 line-clamp-2">{{ course.title }}</h4>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                            <div class="bg-blue-600 h-2 rounded-full transition-all duration-1000"
+                                [style.width.%]="(course.weeklyEnrollments / 20) * 100">
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">{{ course.weeklyEnrollments }} inscriptions/semaine</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

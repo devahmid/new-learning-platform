@@ -1,0 +1,251 @@
+<!-- Section Exercices -->
+<div *ngIf="currentSection === 'exercises'" class="space-y-8">
+    <!-- En-tête des Exercices -->
+    <div class="text-center">
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Exercices pratiques</h2>
+        <p class="text-gray-600">Renforcez vos connaissances avec des exercices interactifs</p>
+    </div>
+
+    <!-- Navigation des types d'exercices -->
+    <div class="flex justify-center">
+        <div class="bg-white rounded-full p-2 shadow-lg">
+            <div class="flex gap-2">
+                <button (click)="setExerciseType('flashcard')"
+                    [class]="currentExerciseType === 'flashcard' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                    class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-clone"></i>
+                    <span>Flashcards</span>
+                </button>
+                <button (click)="setExerciseType('translation')"
+                    [class]="currentExerciseType === 'translation' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                    class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-language"></i>
+                    <span>Traduction</span>
+                </button>
+                <button (click)="setExerciseType('listening')"
+                    [class]="currentExerciseType === 'listening' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                    class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-volume-up"></i>
+                    <span>Écoute</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progression des exercices -->
+    <div class="bg-white rounded-xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-600">Exercice {{ currentExerciseIndex + 1 }} sur {{
+                getCurrentExercise()?.cards?.length || getCurrentExercise()?.questions?.length ||
+                getCurrentExercise()?.audioExercises?.length || 0 }}</span>
+            <span class="text-sm font-medium text-gray-600">{{ getExerciseProgress() }}%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-purple-500 h-2 rounded-full transition-all duration-300"
+                [style.width.%]="getExerciseProgress()"></div>
+        </div>
+    </div>
+
+    <!-- Exercice Flashcards -->
+    <div *ngIf="currentExerciseType === 'flashcard' && !showExerciseResults" class="bg-white rounded-xl p-8 shadow-sm">
+        <div class="text-center mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ getCurrentExercise()?.title }}</h3>
+            <p class="text-gray-600">{{ getCurrentExercise()?.description }}</p>
+        </div>
+
+        <div *ngIf="getCurrentExercise()?.cards" class="max-w-md mx-auto">
+            <div
+                class="bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl p-8 min-h-[300px] flex items-center justify-center">
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-gray-800 mb-4">
+                        {{ getCurrentExercise()?.cards[currentExerciseIndex]?.front }}
+                    </div>
+                    <div class="text-lg text-gray-600 mb-4">
+                        {{ getCurrentExercise()?.cards[currentExerciseIndex]?.pronunciation }}
+                    </div>
+                    <button (click)="nextExercise()"
+                        class="px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-all duration-200">
+                        Voir la réponse
+                    </button>
+                </div>
+            </div>
+
+            <!-- Réponse -->
+            <div class="mt-4 text-center">
+                <div class="text-3xl font-bold text-purple-600 mb-2">
+                    {{ getCurrentExercise()?.cards[currentExerciseIndex]?.back }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Flashcards -->
+        <div class="flex justify-between mt-8">
+            <button (click)="previousExercise()" [disabled]="currentExerciseIndex === 0"
+                [class]="currentExerciseIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Précédent</span>
+            </button>
+
+            <button (click)="nextExercise()"
+                class="px-6 py-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all duration-200 flex items-center gap-2">
+                <span>{{ currentExerciseIndex === (getCurrentExercise()?.cards?.length || 0) - 1 ? 'Terminer' :
+                    'Suivant' }}</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Exercice Traduction -->
+    <div *ngIf="currentExerciseType === 'translation' && !showExerciseResults"
+        class="bg-white rounded-xl p-8 shadow-sm">
+        <div class="text-center mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ getCurrentExercise()?.title }}</h3>
+            <p class="text-gray-600">{{ getCurrentExercise()?.description }}</p>
+        </div>
+
+        <div *ngIf="getCurrentExercise()?.questions" class="max-w-2xl mx-auto">
+            <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                    {{ getCurrentExercise()?.questions[currentExerciseIndex]?.text }}
+                </h4>
+                <div class="space-y-4">
+                    <input type="text" [value]="getCurrentExercise()?.questions[currentExerciseIndex]?.userAnswer || ''"
+                        (input)="updateTranslationAnswer(getCurrentExercise()?.questions[currentExerciseIndex]?.id, $event.target.value)"
+                        placeholder="Votre réponse..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+
+                    <div *ngIf="getCurrentExercise()?.questions[currentExerciseIndex]?.userAnswer" class="mt-4">
+                        <div [class]="checkTranslationAnswer(getCurrentExercise()?.questions[currentExerciseIndex]?.id) ? 'text-green-600' : 'text-red-600'"
+                            class="font-medium">
+                            <i [class]="checkTranslationAnswer(getCurrentExercise()?.questions[currentExerciseIndex]?.id) ? 'fa-solid fa-check-circle' : 'fa-solid fa-times-circle'"
+                                class="mr-2"></i>
+                            {{ checkTranslationAnswer(getCurrentExercise()?.questions[currentExerciseIndex]?.id) ?
+                            'Correct !' : 'Incorrect' }}
+                        </div>
+                        <div class="text-sm text-gray-600 mt-2">
+                            Réponse attendue : <span class="font-medium">{{
+                                getCurrentExercise()?.questions[currentExerciseIndex]?.answer }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Traduction -->
+        <div class="flex justify-between mt-8">
+            <button (click)="previousExercise()" [disabled]="currentExerciseIndex === 0"
+                [class]="currentExerciseIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Précédent</span>
+            </button>
+
+            <button (click)="nextExercise()"
+                [disabled]="!getCurrentExercise()?.questions[currentExerciseIndex]?.userAnswer"
+                [class]="!getCurrentExercise()?.questions[currentExerciseIndex]?.userAnswer ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'"
+                class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                <span>{{ currentExerciseIndex === (getCurrentExercise()?.questions?.length || 0) - 1 ? 'Terminer' :
+                    'Suivant' }}</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Exercice Écoute -->
+    <div *ngIf="currentExerciseType === 'listening' && !showExerciseResults" class="bg-white rounded-xl p-8 shadow-sm">
+        <div class="text-center mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ getCurrentExercise()?.title }}</h3>
+            <p class="text-gray-600">{{ getCurrentExercise()?.description }}</p>
+        </div>
+
+        <div *ngIf="getCurrentAudioExercise()" class="max-w-md mx-auto">
+            <div class="bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl p-8 text-center">
+                <div class="text-4xl font-bold text-gray-800 mb-4">
+                    {{ getCurrentAudioExercise()?.word }}
+                </div>
+                <div class="text-lg text-gray-600 mb-6">
+                    {{ getCurrentAudioExercise()?.translation }}
+                </div>
+
+                <div class="space-y-4">
+                    <button
+                        (click)="playAudio(getCurrentAudioExercise()?.audioUrl || ''); speakText(getCurrentAudioExercise()?.word || '')"
+                        class="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 mx-auto">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Écouter</span>
+                    </button>
+
+                    <div class="flex justify-center gap-4">
+                        <button (click)="markAudioExerciseCorrect()"
+                            class="px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button (click)="markAudioExerciseIncorrect()"
+                            class="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-200">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Écoute -->
+        <div class="flex justify-between mt-8">
+            <button (click)="previousExercise()" [disabled]="currentExerciseIndex === 0"
+                [class]="currentExerciseIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Précédent</span>
+            </button>
+
+            <button (click)="nextExercise()"
+                class="px-6 py-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all duration-200 flex items-center gap-2">
+                <span>{{ currentExerciseIndex === (getCurrentExercise()?.audioExercises?.length || 0) - 1 ? 'Terminer' :
+                    'Suivant' }}</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Résultats des exercices -->
+    <div *ngIf="showExerciseResults" class="bg-white rounded-xl p-8 shadow-sm text-center">
+        <div class="mb-6">
+            <div [class]="exerciseScore >= 70 ? 'text-green-500' : exerciseScore >= 50 ? 'text-yellow-500' : 'text-red-500'"
+                class="text-6xl mb-4">
+                <i
+                    [class]="exerciseScore >= 70 ? 'fa-solid fa-trophy' : exerciseScore >= 50 ? 'fa-solid fa-medal' : 'fa-solid fa-exclamation-triangle'"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-2">Exercices terminés !</h3>
+            <p class="text-gray-600 mb-4">Votre score : <span
+                    [class]="exerciseScore >= 70 ? 'text-green-600' : exerciseScore >= 50 ? 'text-yellow-600' : 'text-red-600'"
+                    class="font-bold text-3xl">{{ exerciseScore }}%</span></p>
+
+            <div *ngIf="exerciseScore >= 70" class="text-green-600 font-medium">
+                <i class="fa-solid fa-check-circle mr-2"></i>
+                Excellent travail ! Vous maîtrisez bien ces exercices.
+            </div>
+            <div *ngIf="exerciseScore >= 50 && exerciseScore < 70" class="text-yellow-600 font-medium">
+                <i class="fa-solid fa-exclamation-circle mr-2"></i>
+                Pas mal ! Continuez à vous entraîner.
+            </div>
+            <div *ngIf="exerciseScore < 50" class="text-red-600 font-medium">
+                <i class="fa-solid fa-times-circle mr-2"></i>
+                N'hésitez pas à revoir la leçon et réessayer.
+            </div>
+        </div>
+
+        <div class="flex justify-center gap-4">
+            <button (click)="restartExercise()"
+                class="px-6 py-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-redo"></i>
+                <span>Recommencer</span>
+            </button>
+            <button (click)="setSection('video')"
+                class="px-6 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all duration-200 flex items-center gap-2">
+                <span>Retour à la vidéo</span>
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+        </div>
+    </div>
+</div>

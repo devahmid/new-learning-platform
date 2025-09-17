@@ -1,0 +1,72 @@
+/* Styles pour la page de gestion des cours */
+
+/* Animations d'entrée */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation pour les cartes */
+.group {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Effet de survol amélioré pour les cartes principales */
+.group:hover {
+  transform: translateY(-2px);
+}
+
+/* Gradient de fond pour les cartes de statistiques */
+.bg-gradient-to-r {
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .flex-wrap {
+    flex-direction: column;
+  }
+
+  .gap-3 > * {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Dark mode improvements */
+.dark .bg-gray-50 {
+  background-color: #111827;
+}
+
+.dark .border-gray-200 {
+  border-color: #374151;
+}
+
+/* Transitions fluides */
+* {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}

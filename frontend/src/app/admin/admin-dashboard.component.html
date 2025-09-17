@@ -1,0 +1,405 @@
+<div
+  class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+  <!-- En-tête du dashboard -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+            Dashboard Administrateur
+          </h1>
+          <p class="text-gray-600 dark:text-gray-300 mt-2 text-lg">Gérez votre plateforme éducative avec style</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <!-- Bouton Dark Mode -->
+          <button (click)="toggleDarkMode()"
+            class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 text-sm font-medium">
+            <i class="fa-solid" [ngClass]="isDarkMode ? 'fa-moon' : 'fa-sun'"></i>
+          </button>
+
+          <!-- Bouton Export -->
+          <button (click)="onExport()"
+            class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-all duration-300 text-sm font-medium">
+            <i class="fa-solid fa-download mr-2"></i>Export
+          </button>
+
+          <!-- Bouton Refresh -->
+          <button (click)="onRefresh()" [disabled]="isRefreshing"
+            class="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-all duration-300 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+            <i *ngIf="!isRefreshing" class="fa-solid fa-sync-alt mr-2"></i>
+            <i *ngIf="isRefreshing" class="fa-solid fa-spinner fa-spin mr-2"></i>
+            {{ isRefreshing ? 'Rafraîchissement...' : 'Actualiser' }}
+          </button>
+
+          <!-- Bouton Nouveau -->
+          <button
+            class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 text-sm font-medium hover:shadow-lg hover:scale-105">
+            <i class="fa-solid fa-plus mr-2"></i>Nouveau
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicateurs de chargement et d'erreur -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="flex items-center justify-center py-8">
+      <div class="flex items-center space-x-3 text-emerald-600">
+        <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+        <span class="text-lg font-medium">Chargement des données...</span>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="hasError" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+      <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-exclamation-triangle text-red-500 text-xl"></i>
+        <div>
+          <h3 class="text-red-800 font-medium">Erreur</h3>
+          <p class="text-red-600 text-sm">{{ errorMessage }}</p>
+        </div>
+        <button (click)="hasError = false" class="ml-auto text-red-400 hover:text-red-600">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques principales -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div
+        class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div
+              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300 shadow-lg">
+              <i class="fa-solid fa-users text-white text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
+                Utilisateurs Totaux</p>
+              <p class="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">{{
+                stats.totalUsers }}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-green-600 font-medium">+12%</div>
+            <div class="text-xs text-gray-500">ce mois</div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div
+              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center group-hover:from-emerald-600 group-hover:to-emerald-700 transition-all duration-300 shadow-lg">
+              <i class="fa-solid fa-user-check text-white text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
+                Utilisateurs Actifs</p>
+              <p class="text-3xl font-bold text-gray-900 group-hover:text-emerald-600 transition-colors duration-300">{{
+                stats.activeUsers }}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-emerald-600 font-medium">+8%</div>
+            <div class="text-xs text-gray-500">ce mois</div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div
+              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:from-purple-600 group-hover:to-purple-700 transition-all duration-300 shadow-lg">
+              <i class="fa-solid fa-book text-white text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
+                Cours Totaux</p>
+              <p class="text-3xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors duration-300">{{
+                stats.totalCourses }}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-purple-600 font-medium">+5%</div>
+            <div class="text-xs text-gray-500">ce mois</div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div
+              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center group-hover:from-amber-600 group-hover:to-amber-700 transition-all duration-300 shadow-lg">
+              <i class="fa-solid fa-euro-sign text-white text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
+                Revenus Totaux</p>
+              <p class="text-3xl font-bold text-gray-900 group-hover:text-amber-600 transition-colors duration-300">{{
+                totalRevenueFormatted }}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-amber-600 font-medium">+23%</div>
+            <div class="text-xs text-gray-500">ce mois</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre de recherche et filtres -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-6">
+        <div class="flex flex-col lg:flex-row gap-6 items-center justify-between">
+          <!-- Recherche -->
+          <div class="flex-1 max-w-md">
+            <div class="relative">
+              <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <input type="text" placeholder="Rechercher utilisateurs, cours..." [(ngModel)]="searchTerm"
+                (input)="onSearch()"
+                class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300">
+            </div>
+          </div>
+
+          <!-- Filtres -->
+          <div class="flex flex-wrap gap-3">
+            <!-- Filtre de statut -->
+            <select [(ngModel)]="selectedFilter" (change)="onFilterChange()"
+              class="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300">
+              <option *ngFor="let filter of filterOptions" [value]="filter.value">
+                {{ filter.label }}
+              </option>
+            </select>
+
+            <!-- Période -->
+            <select [(ngModel)]="selectedTimeRange" (change)="onTimeRangeChange(selectedTimeRange)"
+              class="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300">
+              <option *ngFor="let option of timeRangeOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions principales -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">Actions Rapides</h2>
+          <div class="text-sm text-gray-500">Accès direct aux fonctions principales</div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <button *ngFor="let action of mainActions" (click)="onMainActionClick(action)"
+            [disabled]="!hasPermission(action.permission)"
+            class="group flex flex-col items-center justify-center p-6 border border-gray-200 rounded-2xl hover:border-emerald-300 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 transition-all duration-300 hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+            <div
+              class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center group-hover:from-emerald-600 group-hover:to-emerald-700 transition-all duration-300 shadow-lg mb-4">
+              <i [class]="action.icon" class="text-white text-2xl"></i>
+            </div>
+            <span
+              class="font-semibold text-gray-800 group-hover:text-emerald-800 transition-colors duration-300 text-center">{{
+              action.label }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Utilisateurs en attente de validation -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <div class="w-8 h-8 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-clock text-white text-sm"></i>
+              </div>
+              Utilisateurs en Attente
+            </h2>
+            <p class="text-gray-500 mt-1">Utilisateurs en attente de validation par l'administrateur</p>
+          </div>
+          <button
+            class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-xl hover:bg-yellow-200 transition-all duration-300 text-sm font-medium">
+            <i class="fa-solid fa-eye mr-2"></i>Gérer les validations
+          </button>
+        </div>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+          <div class="flex items-center justify-center text-center">
+            <div>
+              <i class="fa-solid fa-exclamation-triangle text-yellow-500 text-4xl mb-4"></i>
+              <h3 class="text-lg font-semibold text-yellow-800 mb-2">Aucun utilisateur en attente</h3>
+              <p class="text-yellow-600">Tous les utilisateurs ont été validés ou aucun nouvel utilisateur n'est en attente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Utilisateurs récents -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">Utilisateurs Récents</h2>
+            <p class="text-gray-500 mt-1">Derniers utilisateurs inscrits sur la plateforme</p>
+          </div>
+          <button
+            class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-all duration-300 text-sm font-medium">
+            <i class="fa-solid fa-eye mr-2"></i>Voir tous
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50/50">
+              <tr>
+                <th *ngFor="let col of recentUsersColumns" (click)="onSort(col)"
+                  [class]="col.sortable ? 'cursor-pointer hover:bg-gray-100/50 transition-colors duration-200' : ''"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <div class="flex items-center gap-2">
+                    {{ col.header }}
+                    <i *ngIf="col.sortable"
+                      [class]="col.sortDirection === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'"
+                      class="text-emerald-500 text-xs"></i>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white/50 divide-y divide-gray-200">
+              <tr *ngFor="let user of filteredUsers" (click)="onUserRowClick(user)"
+                class="hover:bg-emerald-50/50 cursor-pointer transition-all duration-200 group">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div
+                      class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-bold mr-3">
+                      {{ user.name.charAt(0) }}
+                    </div>
+                    <span
+                      class="text-sm font-semibold text-gray-900 group-hover:text-emerald-800 transition-colors duration-200">
+                      {{ user.name }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {{ user.email }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                    {{ user.role }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ user.createdAt | date:'dd/MM/yyyy' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full"
+                    [class]="user.status === 'actif' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'">
+                    {{ user.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div class="flex space-x-2">
+                    <button *ngFor="let action of userActions"
+                      (click)="onUserAction(action, user); $event.stopPropagation()"
+                      class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-emerald-100 flex items-center justify-center text-gray-600 hover:text-emerald-700 transition-all duration-200">
+                      <i [class]="action.icon" class="text-sm"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cours populaires -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">Cours Populaires</h2>
+            <p class="text-gray-500 mt-1">Cours les plus suivis et appréciés</p>
+          </div>
+          <button
+            class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-all duration-300 text-sm font-medium">
+            <i class="fa-solid fa-chart-line mr-2"></i>Analytics
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50/50">
+              <tr>
+                <th *ngFor="let col of popularCoursesColumns" (click)="onSort(col)"
+                  [class]="col.sortable ? 'cursor-pointer hover:bg-gray-100/50 transition-colors duration-200' : ''"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <div class="flex items-center gap-2">
+                    {{ col.header }}
+                    <i *ngIf="col.sortable"
+                      [class]="col.sortDirection === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'"
+                      class="text-emerald-500 text-xs"></i>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white/50 divide-y divide-gray-200">
+              <tr *ngFor="let course of filteredCourses" (click)="onCourseRowClick(course)"
+                class="hover:bg-emerald-50/50 cursor-pointer transition-all duration-200 group">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div
+                      class="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold mr-3">
+                      <i class="fa-solid fa-book text-xs"></i>
+                    </div>
+                    <span
+                      class="text-sm font-semibold text-gray-900 group-hover:text-purple-800 transition-colors duration-200">
+                      {{ course.title }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                    {{ course.subject }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-right">
+                  <div class="flex items-center justify-end">
+                    <i class="fa-solid fa-users text-emerald-500 mr-2"></i>
+                    {{ course.enrollmentCount }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-right">
+                  <div class="flex items-center justify-end">
+                    <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                      <div class="bg-emerald-500 h-2 rounded-full" [style.width.%]="course.completionRate"></div>
+                    </div>
+                    {{ course.completionRate }}%
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div class="flex space-x-2">
+                    <button *ngFor="let action of courseActions"
+                      (click)="onCourseAction(action, course); $event.stopPropagation()"
+                      class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-purple-100 flex items-center justify-center text-gray-600 hover:text-purple-700 transition-all duration-200">
+                      <i [class]="action.icon" class="text-sm"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>

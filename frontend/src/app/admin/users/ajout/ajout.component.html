@@ -1,0 +1,276 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header Section -->
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mb-8">
+      <!-- Header avec gradient -->
+      <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <!-- Bouton de retour -->
+            <button
+              (click)="goBack()"
+              class="p-3 bg-white/20 hover:bg-white/30 rounded-xl backdrop-blur-sm transition-all duration-200 group"
+              title="Retour à la gestion des utilisateurs"
+            >
+              <svg class="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+            </button>
+            
+            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-3xl font-bold text-white">Ajouter un Utilisateur</h1>
+              <p class="text-emerald-100 mt-1">Créez un nouveau parent ou enfant dans le système</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="p-8">
+        
+        <!-- Messages de notification -->
+        <div *ngIf="showSuccessMessage" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-green-800 font-medium">{{ successMessage }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="showErrorMessage" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span class="text-red-800 font-medium">{{ errorMessage }}</span>
+          </div>
+        </div>
+
+        <!-- Sélection du type d'utilisateur -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Type d'utilisateur</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              *ngFor="let userType of userTypes"
+              (click)="onUserTypeChange(userType.value)"
+              [class]="'p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ' + 
+                (selectedUserType === userType.value 
+                  ? 'border-emerald-500 bg-emerald-50' 
+                  : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50')"
+            >
+              <div class="flex items-center space-x-3">
+                <div [class]="'w-10 h-10 rounded-lg flex items-center justify-center ' + 
+                  (selectedUserType === userType.value 
+                    ? 'bg-emerald-500 text-white' 
+                    : 'bg-gray-100 text-gray-600')">
+                  <i [class]="userType.icon + ' text-lg'"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium text-gray-900">{{ userType.label }}</h4>
+                  <p class="text-sm text-gray-600">
+                    {{ userType.value === 'parent' ? 'Créer un compte parent' : 'Créer un compte enfant' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations de base -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <!-- Prénom -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Prénom <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="firstName"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              [class.border-red-500]="firstName?.invalid && firstName?.touched"
+              placeholder="Entrez le prénom"
+            />
+            <div *ngIf="firstName?.invalid && firstName?.touched" class="mt-1 text-sm text-red-600">
+              <span *ngIf="firstName?.errors?.['required']">Le prénom est obligatoire</span>
+              <span *ngIf="firstName?.errors?.['minlength']">Le prénom doit contenir au moins 2 caractères</span>
+            </div>
+          </div>
+
+          <!-- Nom -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Nom <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="lastName"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              [class.border-red-500]="lastName?.invalid && lastName?.touched"
+              placeholder="Entrez le nom"
+            />
+            <div *ngIf="lastName?.invalid && lastName?.touched" class="mt-1 text-sm text-red-600">
+              <span *ngIf="lastName?.errors?.['required']">Le nom est obligatoire</span>
+              <span *ngIf="lastName?.errors?.['minlength']">Le nom doit contenir au moins 2 caractères</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email et Mot de passe -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <!-- Email -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Email <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              formControlName="email"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              [class.border-red-500]="email?.invalid && email?.touched"
+              placeholder="exemple@email.com"
+            />
+            <div *ngIf="email?.invalid && email?.touched" class="mt-1 text-sm text-red-600">
+              <span *ngIf="email?.errors?.['required']">L'email est obligatoire</span>
+              <span *ngIf="email?.errors?.['email']">Format d'email invalide</span>
+            </div>
+          </div>
+
+          <!-- Mot de passe -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Mot de passe <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="password"
+              formControlName="password"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              [class.border-red-500]="password?.invalid && password?.touched"
+              placeholder="Minimum 6 caractères"
+            />
+            <div *ngIf="password?.invalid && password?.touched" class="mt-1 text-sm text-red-600">
+              <span *ngIf="password?.errors?.['required']">Le mot de passe est obligatoire</span>
+              <span *ngIf="password?.errors?.['minlength']">Le mot de passe doit contenir au moins 6 caractères</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Champs conditionnels pour les enfants -->
+        <div *ngIf="selectedUserType === 'child'" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <!-- Date de naissance -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Date de naissance <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              formControlName="dateOfBirth"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              [class.border-red-500]="dateOfBirth?.invalid && dateOfBirth?.touched"
+            />
+            <div *ngIf="dateOfBirth?.invalid && dateOfBirth?.touched" class="mt-1 text-sm text-red-600">
+              <span *ngIf="dateOfBirth?.errors?.['required']">La date de naissance est obligatoire pour un enfant</span>
+            </div>
+          </div>
+
+          <!-- Niveau -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Niveau <span class="text-red-500">*</span>
+            </label>
+            <select
+              formControlName="levelId"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              [class.border-red-500]="levelId?.invalid && levelId?.touched"
+            >
+              <option value="">Sélectionnez un niveau</option>
+              <option *ngFor="let level of levels" [value]="level.id">{{ level.name }}</option>
+            </select>
+            <div *ngIf="levelId?.invalid && levelId?.touched" class="mt-1 text-sm text-red-600">
+              <span *ngIf="levelId?.errors?.['required']">Le niveau est obligatoire pour un enfant</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Téléphone et Rôle -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <!-- Téléphone -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Numéro de téléphone
+            </label>
+            <input
+              type="tel"
+              formControlName="phoneNumber"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              placeholder="+33 1 23 45 67 89"
+            />
+          </div>
+
+          <!-- Rôle -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Rôle <span class="text-red-500">*</span>
+            </label>
+            <select
+              formControlName="role"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              [class.border-red-500]="role?.invalid && role?.touched"
+            >
+              <option *ngFor="let role of roles" [value]="role.value">{{ role.label }}</option>
+            </select>
+            <div *ngIf="role?.invalid && role?.touched" class="mt-1 text-sm text-red-600">
+              <span *ngIf="role?.errors?.['required']">Le rôle est obligatoire</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="goBack()"
+            class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl transition-all duration-200 font-medium flex items-center space-x-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span>Annuler</span>
+          </button>
+
+          <div class="flex items-center space-x-4">
+            <button
+              type="button"
+              (click)="resetForm()"
+              class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-all duration-200 font-medium"
+            >
+              Réinitialiser
+            </button>
+            
+            <button
+              type="submit"
+              [disabled]="userForm.invalid || isSubmitting"
+              [class]="'px-8 py-3 rounded-xl font-medium flex items-center space-x-2 transition-all duration-200 ' + 
+                (userForm.invalid || isSubmitting 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl')"
+            >
+              <div *ngIf="isSubmitting" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <svg *ngIf="!isSubmitting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              <span>{{ isSubmitting ? 'Création...' : 'Créer l\'utilisateur' }}</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

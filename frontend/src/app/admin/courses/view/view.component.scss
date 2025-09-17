@@ -1,0 +1,18 @@
+// Styles spécifiques au composant de visualisation des cours
+.course-details {
+  .stat-card {
+    transition: transform 0.2s ease-in-out;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+  
+  .lesson-item {
+    transition: background-color 0.2s ease-in-out;
+    
+    &:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+  }
+}

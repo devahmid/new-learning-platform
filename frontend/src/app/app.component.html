@@ -1,0 +1,73 @@
+<!-- <p-menubar [model]="items"></p-menubar>
+<header class="fixed w-full bg-white shadow-sm z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-20">
+        <div class="flex items-center">
+          <a routerLink="/" class="text-2xl font-bold text-emerald-600 flex items-center">
+            <i class="pi pi-globe mr-2"></i> ArabicKids
+          </a>
+        </div>
+        <nav class="hidden md:flex space-x-6 text-sm font-medium">
+          <a *ngFor="let item of items" 
+             [routerLink]="item.routerLink" 
+             (click)="item.command()" 
+             class="text-gray-700 hover:text-emerald-600 transition flex items-center gap-2">
+            <i [class]="item.icon"></i> {{ item.label }}
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header> -->
+
+
+<!-- <p-toast></p-toast>
+ <app-header></app-header>
+<app-hero></app-hero>
+<app-features></app-features>
+<app-age-groups></app-age-groups>
+<app-testimonials></app-testimonials>
+<app-cta></app-cta>
+<router-outlet></router-outlet>
+<app-footer></app-footer>  -->
+
+<!-- <header class="fixed w-full bg-white shadow-sm z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-20">
+      
+        <div class="flex items-center">
+          <a routerLink="/" class="text-2xl font-bold text-emerald-600 flex items-center">
+            <i class="pi pi-globe mr-2"></i> ArabicKids
+          </a>
+        </div>
+  
+        <nav class="hidden md:flex space-x-6 text-sm font-medium items-center">
+          <a *ngFor="let item of items" 
+             [routerLink]="item.routerLink" 
+             (click)="item.command?.()" 
+             class="text-gray-700 hover:text-emerald-600 transition flex items-center gap-2">
+            <i [class]="item.icon"></i> {{ item.label }}
+          </a>
+  
+         
+  
+            <app-user-menu *ngIf="isLoggedIn"></app-user-menu>
+
+
+        </nav>
+      </div>
+    </div>
+  </header> -->
+<app-header></app-header>
+<main class="min-h-[calc(100vh-120px)] pt-20 flex flex-col">
+  <!-- <app-subject-grid></app-subject-grid> -->
+  <app-loader *ngIf="isLoading"></app-loader>
+  <router-outlet></router-outlet>
+</main>
+
+<!-- <app-footer class="mt-auto"></app-footer> -->
+
+
+
+<!-- Modal de sélection d'enfant global -->
+<app-child-selection-modal></app-child-selection-modal>
+<p-toast></p-toast>

@@ -1,0 +1,350 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">🏗️ Constructeur de Cours Complet</h1>
+                    <p class="text-gray-600 mt-2">Créez un cours complet avec ses leçons et quiz en une seule fois</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button (click)="navigateToAdminCourses()"
+                        class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                        <span class="text-xl">⬅️</span>
+                        Retour aux Cours
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sélection de la matière -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">📚 Sélection de la matière</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div *ngFor="let subject of subjects" (click)="selectSubject(subject)"
+                    [class]="'group bg-gray-50 rounded-lg p-4 cursor-pointer transition-all duration-200 border-2 ' + 
+                              (selectedSubject?.name === subject.name ? 'border-blue-500 bg-blue-50' : 'border-transparent hover:border-blue-200')">
+
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-xl text-white shadow-lg"
+                            [ngClass]="subject.color">
+                            <i [class]="subject.icon"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">{{ subject.name }}</h3>
+                            <p class="text-sm text-gray-600">{{ subject.ar }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="selectedSubject" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center text-2xl text-white shadow-lg"
+                        [ngClass]="selectedSubject.color">
+                        <i [class]="selectedSubject.icon"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ selectedSubject.name }} sélectionné</h3>
+                        <p class="text-gray-600">{{ selectedSubject.ar }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire principal du cours -->
+        <form [formGroup]="courseForm" (ngSubmit)="submitCourse()" class="space-y-8">
+
+            <!-- Informations générales du cours -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">📝 Informations générales du cours</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Titre et description -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Titre du cours *</label>
+                        <input type="text" formControlName="title" placeholder="Ex: Les lettres de l'alphabet arabe"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                        <textarea formControlName="description" rows="3" placeholder="Description détaillée du cours..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+
+                    <!-- Niveau et catégorie -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Niveau *</label>
+                        <div class="flex space-x-2">
+                            <button *ngFor="let level of [1, 2, 3]" type="button" (click)="selectLevel(level)"
+                                [class]="'px-4 py-2 rounded-lg font-medium transition-all duration-200 ' + 
+                                             (courseForm.get('levelId')?.value === level ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')">
+                                {{ getLevelLabel(level) }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie *</label>
+                        <select formControlName="categoryId"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Sélectionner une catégorie</option>
+                            <option value="1">Arabe</option>
+                            <option value="2">Religion</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Sous-catégorie *</label>
+                        <select formControlName="subcategoryId"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Sélectionner une sous-catégorie</option>
+                            <option value="1">Vocabulaire</option>
+                            <option value="2">Grammaire</option>
+                            <option value="3">Lecture</option>
+                            <option value="4">Écriture</option>
+                            <option value="5">Écoute</option>
+                            <option value="6">Conversation</option>
+                        </select>
+                    </div>
+
+                    <!-- Difficulté et durée -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Difficulté *</label>
+                        <select formControlName="difficulty"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="facile">Facile</option>
+                            <option value="moyen">Moyen</option>
+                            <option value="difficile">Difficile</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Durée estimée (minutes) *</label>
+                        <input type="number" formControlName="estimatedDuration" min="15" max="180"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- Aperçu de la catégorie -->
+                <div class="mt-6 flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fa-book text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">
+                            {{ getCategoryName(courseForm.get('categoryId')?.value) }} -
+                            {{ getSubcategoryName(courseForm.get('subcategoryId')?.value) }}
+                        </p>
+                        <p class="text-xs text-gray-500">Catégorie et sous-catégorie sélectionnées</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fichiers du cours -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">📁 Fichiers du cours</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Vidéo principale -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Vidéo principale (optionnel)</label>
+                        <input type="file" accept="video/*" (change)="onVideoUpload($event)"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <div *ngIf="previewVideoUrl" class="mt-2">
+                            <p class="text-sm text-green-600">✅ Vidéo sélectionnée</p>
+                        </div>
+                    </div>
+
+                    <!-- PDF principal -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">PDF principal (optionnel)</label>
+                        <input type="file" accept=".pdf" (change)="onPdfUpload($event)"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <div *ngIf="previewPdfUrl" class="mt-2">
+                            <p class="text-sm text-green-600">✅ PDF sélectionné</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leçons -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">📖 Leçons du cours</h2>
+                    <button type="button" (click)="addLesson()"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
+                        <span>➕</span>
+                        Ajouter une leçon
+                    </button>
+                </div>
+
+                <div formArrayName="lessons" class="space-y-6">
+                    <div *ngFor="let lesson of lessons.controls; let i = index" [formGroupName]="i"
+                        class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Leçon {{ i + 1 }}</h3>
+                            <button type="button" (click)="removeLesson(i)" [disabled]="lessons.length <= 1"
+                                class="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white text-sm rounded transition-colors">
+                                🗑️
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Titre de la leçon *</label>
+                                <input type="text" formControlName="title" placeholder="Ex: Introduction aux lettres"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Ordre</label>
+                                <input type="number" formControlName="order" readonly
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100">
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Contenu de la leçon
+                                    *</label>
+                                <textarea formControlName="content" rows="3"
+                                    placeholder="Contenu détaillé de la leçon..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Vidéo de la leçon</label>
+                                <input type="text" formControlName="videoUrl" placeholder="URL de la vidéo..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Fichier de la leçon</label>
+                                <input type="file" accept=".pdf,.doc,.docx" (change)="uploadLessonFile($event, lesson)"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">🧠 Quiz du cours</h2>
+                    <button type="button" (click)="addQuiz()"
+                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
+                        <span>➕</span>
+                        Ajouter un quiz
+                    </button>
+                </div>
+
+                <div formArrayName="quizzes" class="space-y-6">
+                    <div *ngFor="let quiz of quizzes.controls; let quizIndex = index" [formGroupName]="quizIndex"
+                        class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Quiz {{ quizIndex + 1 }}</h3>
+                            <button type="button" (click)="removeQuiz(quizIndex)" [disabled]="quizzes.length <= 1"
+                                class="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white text-sm rounded transition-colors">
+                                🗑️
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Titre du quiz *</label>
+                                <input type="text" formControlName="title" placeholder="Ex: Quiz sur les lettres"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                <input type="text" formControlName="description" placeholder="Description du quiz..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <!-- Questions du quiz -->
+                        <div formArrayName="questions" class="space-y-4">
+                            <div *ngFor="let question of getQuestionsArray(quizIndex).controls; let questionIndex = index"
+                                [formGroupName]="questionIndex" class="border border-gray-200 rounded-lg p-3 bg-white">
+
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="font-medium text-gray-900">Question {{ questionIndex + 1 }}</h4>
+                                    <button type="button" (click)="removeQuestion(quizIndex, questionIndex)"
+                                        [disabled]="getQuestionsArray(quizIndex).length <= 1"
+                                        class="px-2 py-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white text-xs rounded transition-colors">
+                                        🗑️
+                                    </button>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Question *</label>
+                                    <input type="text" formControlName="text"
+                                        placeholder="Ex: Quelle est la première lettre de l'alphabet arabe ?"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <!-- Réponses -->
+                                <div formArrayName="answers" class="space-y-2">
+                                    <div *ngFor="let answer of getAnswersArray(question).controls; let answerIndex = index"
+                                        [formGroupName]="answerIndex" class="flex items-center space-x-3">
+
+                                        <input type="radio" formControlName="isCorrect" [value]="true"
+                                            class="text-blue-600 focus:ring-blue-500">
+
+                                        <input type="text" formControlName="text"
+                                            placeholder="Réponse {{ answerIndex + 1 }}..."
+                                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
+                                        <button type="button" (click)="removeAnswer(question, answerIndex)"
+                                            [disabled]="getAnswersArray(question).length <= 2"
+                                            class="px-2 py-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white text-xs rounded transition-colors">
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button type="button" (click)="addAnswer(question)"
+                                    class="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors">
+                                    ➕ Ajouter une réponse
+                                </button>
+                            </div>
+
+                            <button type="button" (click)="addQuestion(quizIndex)"
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                ➕ Ajouter une question
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" (click)="resetForm()"
+                    class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium rounded-lg transition-colors">
+                    🔄 Réinitialiser
+                </button>
+
+                <app-submit-button text="Créer le cours complet" loadingText="Création en cours..."
+                    [loading]="isLoading" icon="plus" variant="primary" (onClick)="submitCourse()">
+                </app-submit-button>
+            </div>
+        </form>
+
+        <!-- Message si aucune matière sélectionnée -->
+        <div *ngIf="!selectedSubject" class="text-center py-12 bg-white rounded-xl shadow-lg">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="text-4xl">📚</span>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Sélectionnez une matière</h3>
+            <p class="text-gray-600">Choisissez une matière ci-dessus pour commencer à créer votre cours complet</p>
+        </div>
+
+    </div>
+</div>

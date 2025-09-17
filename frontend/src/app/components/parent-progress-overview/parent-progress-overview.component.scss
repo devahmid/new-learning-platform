@@ -1,0 +1,372 @@
+// =====================================================
+// STYLES POUR LE DASHBOARD PARENT
+// =====================================================
+
+.parent-progress-overview {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+
+  // En-tête avec gradient
+  .overview-header {
+    .gradient-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+  }
+
+  // Grille des statistiques globales
+  .global-stats {
+    .stat-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        border-left-color: #3b82f6;
+      }
+    }
+  }
+
+  // Grille des enfants
+  .children-grid {
+    .child-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid transparent;
+      
+      &:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: #3b82f6;
+      }
+    }
+
+    // Avatar de l'enfant
+    .child-avatar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    // Barres de progression
+    .progress-bar {
+      position: relative;
+      overflow: hidden;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: shimmer 2s infinite;
+      }
+    }
+
+    // Recommandations
+    .recommendation-box {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #f59e0b;
+      animation: pulse 2s infinite;
+    }
+  }
+
+  // Modal de détails
+  .child-details-modal {
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease-out;
+    
+    .modal-content {
+      animation: slideInUp 0.3s ease-out;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  // Animations
+  @keyframes shimmer {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // États des enfants
+  .child-status {
+    &.needs-attention {
+      .status-icon {
+        color: #ef4444;
+        animation: pulse 1.5s infinite;
+      }
+    }
+    
+    &.excellent {
+      .status-icon {
+        color: #10b981;
+      }
+    }
+    
+    &.good {
+      .status-icon {
+        color: #3b82f6;
+      }
+    }
+    
+    &.average {
+      .status-icon {
+        color: #f59e0b;
+      }
+    }
+    
+    &.poor {
+      .status-icon {
+        color: #6b7280;
+      }
+    }
+  }
+
+  // Barres de progression colorées
+  .progress-excellent {
+    background: linear-gradient(90deg, #10b981, #059669);
+  }
+  
+  .progress-good {
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+  }
+  
+  .progress-average {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+  }
+  
+  .progress-poor {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    
+    .overview-header {
+      .gradient-header {
+        padding: 1.5rem;
+      }
+    }
+    
+    .global-stats {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .children-grid {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .child-card {
+        &:hover {
+          transform: translateY(-2px) scale(1.01);
+        }
+      }
+    }
+    
+    .child-details-modal {
+      .modal-content {
+        margin: 1rem;
+        max-height: calc(100vh - 2rem);
+      }
+    }
+  }
+
+  // États de chargement
+  .loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 0.5rem;
+  }
+
+  @keyframes loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  // Filtres et contrôles
+  .filters-controls {
+    .filter-checkbox {
+      position: relative;
+      
+      input[type="checkbox"] {
+        appearance: none;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid #d1d5db;
+        border-radius: 0.25rem;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        
+        &:checked {
+          background: #3b82f6;
+          border-color: #3b82f6;
+          
+          &::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+          }
+        }
+        
+        &:hover {
+          border-color: #3b82f6;
+        }
+      }
+    }
+  }
+
+  // Indicateurs de performance
+  .performance-indicator {
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #e5e7eb;
+      transform: translateY(-50%);
+      z-index: 1;
+    }
+    
+    .performance-fill {
+      position: relative;
+      z-index: 2;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  // Tooltips
+  .tooltip {
+    position: relative;
+    
+    &::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
+    
+    &:hover::after {
+      opacity: 1;
+    }
+  }
+
+  // Animations d'entrée
+  .fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .slide-in-up {
+    animation: slideInUp 0.6s ease-out;
+  }
+
+  .slide-in-left {
+    animation: slideInLeft 0.6s ease-out;
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  // États interactifs
+  .interactive {
+    cursor: pointer;
+    user-select: none;
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  // Scrollbar personnalisée
+  .custom-scrollbar {
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+      
+      &:hover {
+        background: #94a3b8;
+      }
+    }
+  }
+}

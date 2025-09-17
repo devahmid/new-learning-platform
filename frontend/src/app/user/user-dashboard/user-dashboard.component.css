@@ -1,0 +1,159 @@
+/* Responsive breakpoints personnalisés */
+@media (max-width: 475px) {
+  .xs\:inline {
+    display: inline;
+  }
+
+  .xs\:hidden {
+    display: none;
+  }
+}
+
+/* Optimisations pour les petits écrans */
+@media (max-width: 640px) {
+  .dashboard-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .button-mobile {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .button-mobile:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Amélioration de la navigation sur mobile */
+@media (max-width: 768px) {
+  .nav-tabs {
+    padding-bottom: 0.5rem;
+  }
+
+  .nav-tab {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Optimisations pour les tablettes */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet\:w-auto {
+    width: auto;
+  }
+
+  .tablet\:px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Animations fluides pour les boutons */
+.button-responsive {
+  transition: all 0.2s ease-in-out;
+}
+
+.button-responsive:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.button-responsive:active {
+  transform: translateY(0);
+}
+
+/* États des boutons responsifs */
+.button-responsive:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Grille responsive améliorée */
+.grid-responsive {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Espacement responsive */
+.space-responsive > * + * {
+  margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .space-responsive > * + * {
+    margin-top: 0;
+    margin-left: 1rem;
+  }
+}
+
+/* Boutons de navigation responsive */
+.nav-button-responsive {
+  @apply flex items-center justify-center px-3 py-2 text-sm font-medium transition-all duration-200;
+  @apply border-b-2 border-transparent;
+}
+
+.nav-button-responsive:hover {
+  @apply bg-gray-50;
+}
+
+.nav-button-responsive.active {
+  @apply bg-blue-600 text-white border-blue-600;
+}
+
+/* Boutons d'action responsive */
+.action-button-responsive {
+  @apply px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200;
+  @apply w-full sm:w-auto;
+}
+
+.action-button-responsive.primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.action-button-responsive.success {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+.action-button-responsive.warning {
+  @apply bg-yellow-600 text-white hover:bg-yellow-700;
+}
+
+.action-button-responsive.danger {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Boutons de formulaire responsive */
+.form-button-responsive {
+  @apply px-4 py-2 font-medium rounded-lg transition-all duration-200;
+  @apply w-full sm:w-auto;
+}
+
+.form-button-responsive.primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.form-button-responsive.secondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+/* Optimisations pour les très petits écrans */
+@media (max-width: 375px) {
+  .xs\:text-xs {
+    font-size: 0.75rem;
+  }
+
+  .xs\:px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .xs\:py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+}

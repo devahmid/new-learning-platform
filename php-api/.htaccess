@@ -1,0 +1,86 @@
+# Configuration Apache pour l'API PHP
+
+# Désactiver Xdebug pour éviter la pollution HTML
+php_flag xdebug.remote_enable Off
+php_flag xdebug.profiler_enable Off
+php_flag xdebug.var_display_max_depth 0
+
+# Activer le module de réécriture
+RewriteEngine On
+
+# Rediriger toutes les requêtes vers index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Headers de sécurité
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+
+# Headers CORS - Configuration sécurisée
+# Autoriser les domaines spécifiques
+SetEnvIf Origin "^https?://(localhost:4200|arrisala\.fr|www\.arrisala\.fr)$" CORS_ORIGIN=$0
+Header always set Access-Control-Allow-Origin "%{CORS_ORIGIN}e" env=CORS_ORIGIN
+Header always set Access-Control-Allow-Credentials "true"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+Header always set Access-Control-Max-Age "86400"
+
+# Gestion spéciale des requêtes OPTIONS (preflight CORS)
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Assurer que les headers CORS sont envoyés même en cas d'erreur
+Header always set Access-Control-Allow-Origin "%{CORS_ORIGIN}e" env=CORS_ORIGIN
+
+# Compression gzip pour améliorer les performances
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Cache des fichiers statiques
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/ico "access plus 1 year"
+    ExpiresByType image/icon "access plus 1 year"
+    ExpiresByType text/plain "access plus 1 month"
+    ExpiresByType application/json "access plus 0 seconds"
+</IfModule>
+
+# Sécurité : interdire l'accès aux fichiers sensibles
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.sql">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.log">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Limiter la taille des uploads (si nécessaire)
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+php_value max_input_time 300

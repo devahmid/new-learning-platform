@@ -1,0 +1,27 @@
+.schedule-entry {
+  @apply flex justify-between items-center bg-gray-100 rounded px-3 py-2 text-sm text-gray-700;
+}
+
+.schedule-entry strong {
+  @apply font-semibold;
+}
+
+.schedule-entry .actions {
+  @apply flex gap-2;
+}
+
+.grid {
+  margin-bottom: 2rem;
+}
+.card {
+  transition: all 0.2s ease-in-out;
+}
+.card:hover {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+/* PrimeNG encapsule ses composants, donc on utilise ::ng-deep pour atteindre
+   les <li> internes de la listbox */
+:host ::ng-deep .p-listbox .p-listbox-item.p-disabled {
+  opacity: 0.4 !important;        /* rend l’item visuellement grisé */
+  cursor: not-allowed !important; /* curseur “interdit” à l’hover */
+}

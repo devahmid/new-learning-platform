@@ -1,0 +1,230 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            🎯 Gestion des Niveaux
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-2">
+            Gérez les niveaux de difficulté pour vos cours
+          </p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg px-4 py-2 shadow-sm border border-gray-200 dark:border-gray-700">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
+            <span class="text-2xl font-bold text-blue-600 dark:text-blue-400 ml-2">{{ totalItems }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulaire d'ajout/modification -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        {{ editId ? '✏️ Modifier le niveau' : '➕ Ajouter un nouveau niveau' }}
+      </h2>
+
+      <form (ngSubmit)="save()" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Nom du niveau *
+            </label>
+            <input type="text" [(ngModel)]="newLevel.name" name="name" required
+              placeholder="Ex: Débutant, Intermédiaire, Avancé"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Description
+            </label>
+            <input type="text" [(ngModel)]="newLevel.description" name="description"
+              placeholder="Description du niveau (optionnel)"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200" />
+          </div>
+        </div>
+
+        <!-- Message d'erreur -->
+        <div *ngIf="hasError"
+          class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div class="flex items-center">
+            <i class="fa-solid fa-exclamation-triangle text-red-500 mr-3"></i>
+            <p class="text-red-700 dark:text-red-300">{{ errorMessage }}</p>
+          </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="flex items-center space-x-3">
+          <button type="submit" [disabled]="isSubmitting"
+            class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors duration-200">
+            <i *ngIf="isSubmitting" class="fa-solid fa-spinner fa-spin mr-2"></i>
+            <i *ngIf="!isSubmitting" class="fa-solid fa-save mr-2"></i>
+            {{ isSubmitting ? 'Sauvegarde...' : (editId ? 'Mettre à jour' : 'Ajouter') }}
+          </button>
+
+          <button type="button" (click)="reset()"
+            class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors duration-200">
+            <i class="fa-solid fa-times mr-2"></i>
+            Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Barre de recherche et filtres -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <div class="flex-1 max-w-md">
+          <div class="relative">
+            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un niveau..."
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200" />
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-500 dark:text-gray-400">
+            {{ filteredLevels.length }} niveau(s) trouvé(s)
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des niveaux -->
+    <div
+      class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span class="ml-3 text-gray-600 dark:text-gray-400">Chargement des niveaux...</span>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="hasError && !isLoading" class="flex items-center justify-center py-12">
+        <div class="text-center">
+          <i class="fa-solid fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
+          <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+          <button (click)="loadLevels()"
+            class="mt-3 inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+            <i class="fa-solid fa-redo mr-2"></i>
+            Réessayer
+          </button>
+        </div>
+      </div>
+
+      <!-- Tableau -->
+      <div *ngIf="!isLoading && !hasError" class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th
+                class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Niveau
+              </th>
+              <th
+                class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Description
+              </th>
+              <th
+                class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Cours
+              </th>
+              <th
+                class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Créé le
+              </th>
+              <th
+                class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tr *ngFor="let level of paginatedLevels"
+              class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <span
+                    [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ' + getLevelBadgeClass(level.name)">
+                    <i class="fa-solid fa-layer-group mr-2"></i>
+                    {{ level.name }}
+                  </span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-900 dark:text-white">
+                  {{ level.description || 'Aucune description' }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <i class="fa-solid fa-book text-blue-500 mr-2"></i>
+                  <span class="text-sm font-medium text-gray-900 dark:text-white">
+                    {{ level.courseCount || 0 }} cours
+                  </span>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                {{ level.createdAt | date:'dd/MM/yyyy' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end space-x-2">
+                  <button (click)="edit(level)"
+                    class="inline-flex items-center px-3 py-2 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-lg transition-colors duration-200">
+                    <i class="fa-solid fa-edit mr-1"></i>
+                    Modifier
+                  </button>
+                  <button (click)="remove(level)"
+                    class="inline-flex items-center px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-300 text-sm font-medium rounded-lg transition-colors duration-200">
+                    <i class="fa-solid fa-trash mr-1"></i>
+                    Supprimer
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Message si aucun résultat -->
+        <div *ngIf="filteredLevels.length === 0 && !isLoading" class="text-center py-12">
+          <i class="fa-solid fa-search text-gray-400 text-4xl mb-4"></i>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Aucun niveau trouvé</h3>
+          <p class="text-gray-500 dark:text-gray-400">
+            {{ searchTerm ? 'Aucun niveau ne correspond à votre recherche.' : 'Commencez par ajouter votre premier
+            niveau.' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="mt-6 flex items-center justify-between">
+      <div class="text-sm text-gray-700 dark:text-gray-300">
+        Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ getEndItem() }} sur {{ filteredLevels.length }}
+        résultats
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+          class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
+          Précédent
+        </button>
+
+        <div class="flex items-center space-x-1">
+          <button *ngFor="let page of [].constructor(totalPages); let i = index" (click)="changePage(i + 1)"
+            [class]="'px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ' + (currentPage === i + 1 ? 'bg-blue-600 text-white' : 'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700')">
+            {{ i + 1 }}
+          </button>
+        </div>
+
+        <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages"
+          class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
+          Suivant
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

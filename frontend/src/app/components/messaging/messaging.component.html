@@ -1,0 +1,325 @@
+<div class="messaging-container">
+  <!-- Header -->
+  <div class="messaging-header">
+    <h1>📧 Messagerie</h1>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="openCompose()">
+        <i class="fas fa-plus"></i> Nouveau message
+      </button>
+      <button class="btn-secondary" (click)="loadMessages()" [disabled]="loading">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <div class="messaging-content">
+    <!-- Sidebar - Conversations ou Filtres -->
+    <div class="messaging-sidebar" *ngIf="showConversations">
+      <!-- Onglets -->
+      <div class="tabs">
+        <button 
+          class="tab" 
+          [class.active]="activeTab === 'inbox'"
+          (click)="switchTab('inbox')">
+          <i class="fas fa-inbox"></i> Boîte de réception
+        </button>
+        <button 
+          class="tab" 
+          [class.active]="activeTab === 'sent'"
+          (click)="switchTab('sent')">
+          <i class="fas fa-paper-plane"></i> Envoyés
+        </button>
+        <button 
+          class="tab" 
+          [class.active]="activeTab === 'important'"
+          (click)="switchTab('important')">
+          <i class="fas fa-star"></i> Importants
+        </button>
+        <button 
+          class="tab" 
+          [class.active]="activeTab === 'archived'"
+          (click)="switchTab('archived')">
+          <i class="fas fa-archive"></i> Archivés
+        </button>
+      </div>
+
+      <!-- Recherche -->
+      <div class="search-box">
+        <div class="search-input">
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery"
+            placeholder="Rechercher des messages..."
+            (keyup.enter)="searchMessages()">
+          <button class="search-btn" (click)="searchMessages()">
+            <i class="fas fa-search"></i>
+          </button>
+          <button class="clear-btn" (click)="clearSearch()" *ngIf="searchQuery">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Liste des conversations -->
+      <div class="conversations-list">
+        <div 
+          class="conversation-item"
+          *ngFor="let conversation of (conversations || [])"
+          (click)="selectConversation(conversation)"
+          [class.unread]="conversation.unread_count > 0">
+          
+          <div class="conversation-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          
+          <div class="conversation-content">
+            <div class="conversation-header">
+              <h4>{{ getFullName(conversation.other_user_name, conversation.other_user_lastname) }}</h4>
+              <span class="conversation-time">{{ formatMessageDate(conversation.last_message_at) }}</span>
+            </div>
+            
+            <div class="conversation-preview">
+              <p>{{ truncateMessage(conversation.last_message_content) }}</p>
+            </div>
+            
+            <div class="conversation-footer" *ngIf="conversation.unread_count > 0">
+              <span class="unread-badge">{{ conversation.unread_count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenu principal - Messages -->
+    <div class="messaging-main">
+      <!-- Liste des messages -->
+      <div class="messages-list" *ngIf="!selectedMessage">
+        <div class="messages-header">
+          <h2>
+            <span *ngIf="selectedConversation">
+              Conversation avec {{ getFullName(selectedConversation.other_user_name, selectedConversation.other_user_lastname) }}
+            </span>
+            <span *ngIf="!selectedConversation">
+              {{ activeTab === 'inbox' ? 'Boîte de réception' : 
+                 activeTab === 'sent' ? 'Messages envoyés' : 
+                 activeTab === 'important' ? 'Messages importants' : 'Messages archivés' }}
+            </span>
+          </h2>
+          <button 
+            class="btn btn-secondary" 
+            (click)="backToConversations()" 
+            *ngIf="selectedConversation">
+            <i class="fas fa-arrow-left"></i> Retour
+          </button>
+        </div>
+
+        <div class="messages-container">
+          <div 
+            class="message-item"
+            *ngFor="let message of (messages || [])"
+            [class]="getMessageClass(message)"
+            (click)="selectMessage(message)">
+            
+            <div class="message-icon">
+              {{ getMessageIcon(message.message_type) }}
+            </div>
+            
+            <div class="message-content">
+              <div class="message-header">
+                <h4>{{ getFullName(message.sender_name, message.sender_lastname) }}</h4>
+                <span class="message-time">{{ formatMessageDate(message.created_at) }}</span>
+              </div>
+              
+              <div class="message-subject">
+                <strong>{{ message.subject }}</strong>
+                <i class="fas fa-star important-icon" *ngIf="message.is_important"></i>
+              </div>
+              
+              <div class="message-preview">
+                <p>{{ truncateMessage(message.content) }}</p>
+              </div>
+            </div>
+            
+            <div class="message-actions">
+              <button 
+                class="action-btn important-btn"
+                (click)="toggleImportant(message); $event.stopPropagation()"
+                [class.active]="message.is_important">
+                <i class="fas fa-star"></i>
+              </button>
+              
+              <button 
+                class="action-btn archive-btn"
+                (click)="archiveMessage(message); $event.stopPropagation()">
+                <i class="fas fa-archive"></i>
+              </button>
+              
+              <button 
+                class="action-btn delete-btn"
+                (click)="deleteMessage(message); $event.stopPropagation()">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Message vide -->
+          <div class="empty-state" *ngIf="messages.length === 0 && !loading">
+            <i class="fas fa-inbox"></i>
+            <h3>Aucun message</h3>
+            <p>Aucun message trouvé dans cette catégorie.</p>
+          </div>
+
+          <!-- Loading -->
+          <div class="loading-state" *ngIf="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Chargement des messages...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détail du message -->
+      <div class="message-detail" *ngIf="selectedMessage">
+        <div class="message-detail-header">
+          <button class="btn btn-secondary" (click)="selectedMessage = null">
+            <i class="fas fa-arrow-left"></i> Retour
+          </button>
+          
+          <div class="message-actions">
+            <button 
+              class="btn btn-outline"
+              (click)="replyToMessage(selectedMessage!)">
+              <i class="fas fa-reply"></i> Répondre
+            </button>
+            
+            <button 
+              class="btn btn-outline"
+              (click)="toggleImportant(selectedMessage!)">
+              <i class="fas fa-star" [class.fas]="selectedMessage!.is_important" [class.far]="!selectedMessage!.is_important"></i>
+              {{ selectedMessage!.is_important ? 'Ne plus marquer' : 'Marquer important' }}
+            </button>
+            
+            <button 
+              class="btn btn-outline"
+              (click)="archiveMessage(selectedMessage!)">
+              <i class="fas fa-archive"></i> Archiver
+            </button>
+            
+            <button 
+              class="btn btn-danger"
+              (click)="deleteMessage(selectedMessage!)">
+              <i class="fas fa-trash"></i> Supprimer
+            </button>
+          </div>
+        </div>
+
+        <div class="message-detail-content">
+          <div class="message-meta">
+            <div class="message-sender">
+              <div class="sender-avatar">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="sender-info">
+                <h3>{{ getFullName(selectedMessage!.sender_name, selectedMessage!.sender_lastname) }}</h3>
+                <p>{{ selectedMessage!.sender_email }}</p>
+              </div>
+            </div>
+            
+            <div class="message-date">
+              <i class="fas fa-clock"></i>
+              {{ formatMessageDate(selectedMessage!.created_at) }}
+            </div>
+          </div>
+
+          <div class="message-subject-detail">
+            <h2>{{ selectedMessage!.subject }}</h2>
+            <span class="message-type-badge">
+              {{ getMessageIcon(selectedMessage!.message_type) }}
+            </span>
+          </div>
+
+          <div class="message-body">
+            <div class="message-text">{{ selectedMessage!.content }}</div>
+          </div>
+
+          <!-- Pièces jointes -->
+          <div class="message-attachments" *ngIf="selectedMessage!.attachments && selectedMessage!.attachments.length > 0">
+            <h4>Pièces jointes</h4>
+            <div class="attachments-list">
+              <div 
+                class="attachment-item"
+                *ngFor="let attachment of (selectedMessage?.attachments || [])">
+                <i class="fas fa-paperclip"></i>
+                <span>{{ attachment.original_filename }}</span>
+                <span class="attachment-size">({{ formatFileSize(attachment.file_size) }})</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de composition -->
+  <div class="compose-modal" *ngIf="showCompose">
+    <div class="compose-modal-content">
+      <div class="compose-header">
+        <h2>Nouveau message</h2>
+        <button class="close-btn" (click)="closeCompose()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form (ngSubmit)="sendMessage()" class="compose-form">
+        <div class="form-group">
+          <label for="recipient">Destinataire</label>
+          <select id="recipient" [(ngModel)]="newMessage.recipient_id" name="recipient_id" required>
+            <option value="">Sélectionner un destinataire</option>
+            <option *ngFor="let user of users" [value]="user.id">
+              {{ getFullName(user.firstName, user.lastName) }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Sujet</label>
+          <input 
+            type="text" 
+            id="subject" 
+            [(ngModel)]="newMessage.subject" 
+            name="subject" 
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="content">Message</label>
+          <textarea 
+            id="content" 
+            [(ngModel)]="newMessage.content" 
+            name="content" 
+            rows="10" 
+            required></textarea>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="newMessage.is_important" 
+              name="is_important">
+            <span class="checkmark"></span>
+            Marquer comme important
+          </label>
+        </div>
+
+        <div class="compose-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCompose()">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Envoyer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

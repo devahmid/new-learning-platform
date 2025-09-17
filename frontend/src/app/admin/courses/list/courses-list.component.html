@@ -1,0 +1,200 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">📚 Liste des Cours</h1>
+                    <p class="text-gray-600 mt-2">Gérez tous vos cours et leur contenu</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button (click)="router.navigate(['/admin/courses/ajout'])"
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                        <span class="text-xl">➕</span>
+                        Nouveau Cours
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtres et recherche -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Recherche -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Rechercher</label>
+                        <input type="text" [(ngModel)]="searchTerm" (input)="filterCourses()"
+                            placeholder="Rechercher par titre ou description..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <!-- Catégorie -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">🏷️ Catégorie</label>
+                        <select [(ngModel)]="selectedCategory" (change)="filterCourses()"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Toutes</option>
+                            <option *ngFor="let cat of categories" [value]="cat.name">{{ cat.label }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Niveau -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">📊 Niveau</label>
+                        <select [(ngModel)]="selectedLevel" (change)="filterCourses()"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Tous</option>
+                            <option *ngFor="let level of levels" [value]="level.name">{{ level.label }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Statut -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">📈 Statut</label>
+                        <select [(ngModel)]="selectedStatus" (change)="filterCourses()"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option *ngFor="let status of statuses" [value]="status.value">{{ status.label }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <app-form-loader *ngIf="isLoading" text="Chargement des cours..."></app-form-loader>
+
+        <!-- Liste des cours -->
+        <div *ngIf="!isLoading" class="space-y-6">
+
+            <!-- Résultats -->
+            <div class="flex items-center justify-between">
+                <p class="text-gray-600">
+                    {{ filteredCourses.length }} cours trouvé{{ filteredCourses.length > 1 ? 's' : '' }}
+                </p>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-600">Par page:</span>
+                    <select [(ngModel)]="itemsPerPage" (change)="filterCourses()"
+                        class="px-3 py-1 border border-gray-300 rounded-md text-sm">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grille des cours -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div *ngFor="let course of paginatedCourses"
+                    class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200 overflow-hidden">
+
+                    <!-- Header de la carte -->
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{{ course.title }}
+                                </h3>
+                                <p class="text-sm text-gray-600 line-clamp-3">{{ course.description }}</p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end space-y-2">
+                                <span
+                                    [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusBadge(course.status)">
+                                    {{ course.status === 'active' ? 'Actif' : course.status === 'draft' ? 'Brouillon' :
+                                    'Archivé' }}
+                                </span>
+                                <span
+                                    [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getLevelBadge(course.level.name)">
+                                    {{ course.level.name }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Métadonnées -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                <p class="text-2xl font-bold text-blue-600">{{ course.studentsCount }}</p>
+                                <p class="text-xs text-gray-600">Élèves</p>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                <p class="text-2xl font-bold text-yellow-600">{{ course.rating }}</p>
+                                <p class="text-xs text-gray-600">Note</p>
+                            </div>
+                        </div>
+
+                        <!-- Informations -->
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <div class="flex items-center">
+                                <span class="w-4 h-4 mr-2">👨‍🏫</span>
+                                {{ course.instructor.pseudo }}
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-4 h-4 mr-2">🏷️</span>
+                                {{ course.category?.name || 'Non catégorisé' }}
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-4 h-4 mr-2">📅</span>
+                                {{ course.createdAt | date:'dd/MM/yyyy' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <button (click)="viewCourse(course.id)"
+                                    class="px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
+                                    👁️ Voir
+                                </button>
+                                <button (click)="editCourse(course.id)"
+                                    class="px-3 py-2 text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors">
+                                    ✏️ Modifier
+                                </button>
+                            </div>
+                            <button (click)="deleteCourse(course.id)"
+                                class="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
+                                🗑️ Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div *ngIf="totalPages > 1" class="flex items-center justify-center space-x-2">
+                <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+                    class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    ← Précédent
+                </button>
+
+                <div class="flex space-x-1">
+                    <button *ngFor="let page of Array.from({length: totalPages}, (_, i) => i + 1)"
+                        (click)="changePage(page)"
+                        [class]="'px-3 py-2 text-sm font-medium rounded-lg ' + (page === currentPage ? 'bg-blue-600 text-white' : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50')">
+                        {{ page }}
+                    </button>
+                </div>
+
+                <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages"
+                    class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Suivant →
+                </button>
+            </div>
+
+            <!-- Message si aucun cours -->
+            <div *ngIf="filteredCourses.length === 0" class="text-center py-12">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-4xl">🔍</span>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun cours trouvé</h3>
+                <p class="text-gray-600 mb-6">Essayez de modifier vos critères de recherche</p>
+                <button
+                    (click)="searchTerm = ''; selectedCategory = ''; selectedLevel = ''; selectedStatus = 'all'; filterCourses()"
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                    Réinitialiser les filtres
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>

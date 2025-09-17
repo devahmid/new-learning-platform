@@ -1,0 +1,175 @@
+<div
+  id="register-component"
+  class="w-full min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+>
+  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+    <div class="text-center">
+      <h2 class="mt-6 text-3xl font-bold text-gray-900">
+        Créer un compte / إنشاء حساب جديد
+      </h2>
+      <p class="mt-2 text-sm text-gray-600">
+        Rejoignez-nous pour apprendre l’arabe / انضم إلينا لتعلم اللغة العربية
+      </p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="register()" class="space-y-6">
+      <div class="space-y-4">
+        <div class="flex flex-col">
+          <label for="firstName" class="mb-1 text-sm text-gray-700 font-medium">
+            Prénom / الاسم الأول
+          </label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            class="appearance-none rounded-lg block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            placeholder="John / أحمد"
+          />
+          <small class="text-red-600" *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched">
+  Prénom invalide.
+</small>
+        </div>
+
+        <div class="flex flex-col">
+          <label for="lastName" class="mb-1 text-sm text-gray-700 font-medium">
+            Nom de famille / الاسم العائلي
+          </label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            class="appearance-none rounded-lg block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            placeholder="Doe / محمدي"
+          />
+          <small class="text-red-600" *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched">
+  Nom de famille  invalide.
+</small>
+
+        </div>
+
+        <div class="flex flex-col">
+          <label for="email" class="mb-1 text-sm text-gray-700 font-medium">
+            Email / البريد الإلكتروني
+          </label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="appearance-none rounded-lg block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            placeholder="example@email.com"
+          />
+          <small
+            class="text-red-600"
+            *ngIf="
+              registerForm.get('email')?.invalid &&
+              registerForm.get('email')?.touched
+            "
+          >
+            Adresse e-mail invalide.
+          </small>
+        </div>
+        <!-- Téléphone -->
+        <div class="flex flex-col">
+          <label
+            for="phoneNumber"
+            class="mb-1 text-sm text-gray-700 font-medium"
+            >Téléphone</label
+          >
+          <input
+            id="phoneNumber"
+            type="tel"
+            formControlName="phoneNumber"
+            class="appearance-none rounded-lg block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            placeholder="+33612345678"
+          />
+          <small
+            class="text-red-600"
+            *ngIf="
+              registerForm.get('phoneNumber')?.invalid &&
+              registerForm.get('phoneNumber')?.touched
+            "
+          >
+            Numéro invalide.
+          </small>
+        </div>
+
+        <div class="flex flex-col">
+          <label for="password" class="mb-1 text-sm text-gray-700 font-medium">
+            Mot de passe / كلمة المرور
+          </label>
+          <p-password
+            id="password"
+            formControlName="password"
+            [feedback]="true"
+            [inputStyle]="{ width: '100%', padding: '0.5rem 0.75rem' }"
+            styleClass="appearance-none border border-gray-300 placeholder-gray-400 text-gray-900 
+                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg w-full"
+          ></p-password>
+        </div>
+        <!-- Confirmation mot de passe -->
+        <div class="flex flex-col">
+          <label
+            for="confirmPassword"
+            class="mb-1 text-sm text-gray-700 font-medium"
+            >Confirmer le mot de passe</label
+          >
+          <input
+            id="confirmPassword"
+            type="password"
+            formControlName="confirmPassword"
+            class="appearance-none rounded-lg block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            placeholder="••••••••"
+          />
+          <small
+            class="text-red-600"
+            *ngIf="
+              registerForm.errors?.['passwordMismatch']
+ &&
+              registerForm.get('confirmPassword')?.touched
+            "
+          >
+            Les mots de passe ne correspondent pas.
+          </small>
+        </div>
+      </div>
+
+      <!-- Conseils de sécurité pour le mot de passe -->
+      <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div class="flex items-start">
+          <i class="fas fa-shield-alt text-blue-500 mt-1 mr-3"></i>
+          <div>
+            <h4 class="text-blue-800 font-semibold text-sm mb-2">Conseils pour un mot de passe sécurisé</h4>
+            <ul class="text-blue-700 text-xs space-y-1">
+              <li>• Utilisez au moins 8 caractères</li>
+              <li>• Mélangez lettres majuscules et minuscules</li>
+              <li>• Ajoutez des chiffres et symboles</li>
+              <li>• Évitez les informations personnelles</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <p-button
+          type="submit"
+          label="Créer un compte / إنشاء حساب"
+          icon="pi pi-user-plus"
+          [disabled]="registerForm.invalid"
+          styleClass="w-full justify-center bg-green-600 hover:bg-green-700 border-none text-white font-medium text-sm 
+              rounded-md py-2 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        >
+        </p-button>
+      </div>
+    </form>
+
+    <!-- Lien vers la connexion -->
+    <div class="pt-4 text-center">
+      <p class="text-sm text-gray-600">
+        Déjà un compte ? 
+        <a [routerLink]="['/login']" class="text-green-600 hover:text-green-700 font-medium">
+          Se connecter / تسجيل الدخول
+        </a>
+      </p>
+    </div>
+  </div>
+</div>

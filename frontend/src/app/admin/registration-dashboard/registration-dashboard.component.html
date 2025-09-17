@@ -1,0 +1,93 @@
+<!-- <p-table [value]="registrations" [paginator]="true" [rows]="10" [responsiveLayout]="'scroll'">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Parent</th>
+      <th>Email</th>
+      <th>Téléphone</th>
+      <th>Enfants</th>
+      <th>Conditions</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-reg>
+    <tr>
+      <td>{{ reg.fullName }}</td>
+      <td>{{ reg.email }}</td>
+      <td>{{ reg.phone }}</td>
+      <td>
+        <ul class="list-disc pl-4 text-sm">
+          <li *ngFor="let child of reg.children">
+            {{ child.firstName }} {{ child.lastName }} ({{ arabicLevelsMap[child.arabicLevel] }})
+          </li>
+        </ul>
+      </td>
+      <td>
+        <i class="pi" [ngClass]="reg.acceptedConditions ? 'pi-check-circle text-green-600' : 'pi-times-circle text-red-500'"></i>
+      </td>
+    </tr>
+  </ng-template>
+</p-table> -->
+<!-- <p-table  #dt  [value]="registrations" [paginator]="true" [rows]="10" [responsiveLayout]="'scroll'" [resizableColumns]="true"
+    [globalFilterFields]="['fullName', 'email', 'phone']" sortMode="multiple">
+    <ng-template pTemplate="caption">
+        <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-[#2F8CCF]">Liste des inscriptions</h3>
+            <div class="flex gap-2">
+                <button pButton type="button" icon="pi pi-file-excel" label="Exporter CSV"  (click)="exportCSV()"
+                    class="p-button-sm p-button-success"></button>
+                <button pButton type="button" icon="pi pi-print" label="Exporter PDF"
+                    class="p-button-sm p-button-warning" (click)="exportPDF()"></button>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+        <tr>
+            <th pSortableColumn="fullName">Parent <p-sortIcon field="fullName" /></th>
+            <th pSortableColumn="email">Email <p-sortIcon field="email" /></th>
+            <th pSortableColumn="phone">Téléphone <p-sortIcon field="phone" /></th>
+            <th>Enfants</th>
+            <th>Conditions</th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-reg>
+        <tr>
+            <td>{{ reg.fullName }}</td>
+            <td>{{ reg.email }}</td>
+            <td>{{ reg.phone }}</td>
+            <td>
+                <ul class="list-disc pl-4 text-sm">
+                    <li *ngFor="let child of reg.children">
+                        {{ child.firstName }} {{ child.lastName }} ({{ arabicLevelsMap[child.arabicLevel] }})
+                    </li>
+                </ul>
+            </td>
+            <td>
+                <i class="pi"
+                    [ngClass]="reg.acceptedConditions ? 'pi-check-circle text-green-600' : 'pi-times-circle text-red-500'"></i>
+            </td>
+        </tr>
+    </ng-template>
+</p-table> -->
+
+<table class="min-w-full mt-6 border border-gray-300 rounded overflow-hidden">
+  <thead class="bg-gray-100 text-left">
+    <tr>
+      <th class="px-4 py-2">Niveau</th>
+      <th class="px-4 py-2">Description</th>
+      <th class="px-4 py-2">Nombre d'enfants</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let stat of getChildrenStatsByLevel()">
+      <td class="px-4 py-2 font-semibold text-[#2F8CCF]">Niveau {{ stat.level }}</td>
+      <td class="px-4 py-2">{{ stat.label }}</td>
+      <td class="px-4 py-2">{{ stat.count }}</td>
+    </tr>
+    <tr class="bg-gray-50 font-semibold">
+      <td class="px-4 py-2 text-[#2F8CCF]" colspan="2">Total</td>
+      <td class="px-4 py-2">{{ getChildrenTotalCount() }}</td>
+    </tr>
+  </tbody>
+</table>
+

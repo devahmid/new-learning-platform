@@ -1,0 +1,618 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Header -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            ✨ Créer un Nouveau Cours
+          </h1>
+          <p class="mt-2 text-gray-600 dark:text-gray-400">
+            Créez un cours complet avec leçons, quiz et exercices
+          </p>
+        </div>
+
+        <!-- Bouton retour -->
+        <button (click)="router.navigate(['/admin/courses'])"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+          <i class="fa-solid fa-arrow-left mr-2"></i>
+          Retour
+        </button>
+      </div>
+
+      <!-- Indicateur d'étapes -->
+      <div class="mt-8">
+        <div class="flex items-center justify-between">
+          <div *ngFor="let step of [1, 2, 3, 4]" class="flex items-center">
+            <div
+              [class]="'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ' + getStepClass(step)">
+              <i [class]="getStepIcon(step)"></i>
+            </div>
+            <div *ngIf="step < 4" class="w-16 h-1 mx-2 bg-gray-200 dark:bg-gray-700"></div>
+          </div>
+        </div>
+
+        <div class="flex justify-between mt-2">
+          <span class="text-sm text-gray-600 dark:text-gray-400">Informations de base</span>
+          <span class="text-sm text-gray-600 dark:text-gray-400">Leçons</span>
+          <span class="text-sm text-gray-600 dark:text-gray-400">Quiz & Exercices</span>
+          <span class="text-sm text-gray-600 dark:text-gray-400">Révision</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <form [formGroup]="courseForm" (ngSubmit)="saveCourse()" class="space-y-8">
+
+      <!-- Étape 1: Informations de base -->
+      <div *ngIf="currentStep === 1"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+          📝 Informations de base du cours
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Titre -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Titre du cours *
+            </label>
+            <input type="text" formControlName="title"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ex: Arabe pour Débutants">
+            <div *ngIf="courseForm.get('title')?.invalid && courseForm.get('title')?.touched"
+              class="mt-1 text-sm text-red-600">
+              Le titre est requis et doit contenir entre 3 et 100 caractères
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Description *
+            </label>
+            <textarea formControlName="description" rows="4"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Décrivez le contenu et les objectifs de votre cours..."></textarea>
+            <div *ngIf="courseForm.get('description')?.invalid && courseForm.get('description')?.touched"
+              class="mt-1 text-sm text-red-600">
+              La description est requise et doit contenir entre 10 et 500 caractères
+            </div>
+          </div>
+
+          <!-- Catégorie -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Catégorie *
+            </label>
+            <select formControlName="categoryId" (change)="courseForm.patchValue({subcategoryId: null})"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="">Sélectionner une catégorie</option>
+              <option *ngFor="let category of categories" [value]="category.id">
+                {{ category.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Sous-catégorie -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Sous-catégorie *
+            </label>
+            <select formControlName="subcategoryId" [disabled]="!courseForm.get('categoryId')?.value"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50">
+              <option value="">Sélectionner une sous-catégorie</option>
+              <option *ngFor="let subcategory of filteredSubcategories" [value]="subcategory.id">
+                {{ subcategory.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Niveau -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Niveau *
+            </label>
+            <select formControlName="levelId"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="">Sélectionner un niveau</option>
+              <option *ngFor="let level of levels" [value]="level.id">
+                {{ level.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Instructeur -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Instructeur
+            </label>
+            <select formControlName="instructorId"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="">Sélectionner un instructeur</option>
+              <option *ngFor="let instructor of instructors" [value]="instructor.id">
+                {{ instructor.name }} ({{ instructor.specialty }})
+              </option>
+            </select>
+          </div>
+
+          <!-- URLs -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Vidéo de présentation
+            </label>
+            <div class="flex gap-2">
+              <input type="url" formControlName="videoUrl"
+                class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="https://www.youtube.com/watch?v=...">
+              <label class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 cursor-pointer transition-colors duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-upload"></i>
+                <span class="text-sm">Upload</span>
+                <input type="file" accept="video/*" (change)="onFileSelected($event, 'videoUrl')" class="hidden">
+              </label>
+            </div>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              PDF de présentation
+            </label>
+            <div class="flex gap-2">
+              <input type="url" formControlName="pdfUrl"
+                class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="https://example.com/presentation.pdf">
+              <label class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800 cursor-pointer transition-colors duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span class="text-sm">PDF</span>
+                <input type="file" accept=".pdf" (change)="onFileSelected($event, 'pdfUrl')" class="hidden">
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Étape 2: Leçons -->
+      <div *ngIf="currentStep === 2"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            📚 Leçons du cours
+          </h2>
+          <button type="button" (click)="addLesson()"
+            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+            <i class="fa-solid fa-plus mr-2"></i>
+            Ajouter une leçon
+          </button>
+        </div>
+
+        <div formArrayName="lessons" class="space-y-6">
+          <div *ngFor="let lesson of lessonsArray.controls; let i = index" [formGroup]="$any(lesson)"
+            class="border border-gray-200 dark:border-gray-600 rounded-xl p-6 bg-gray-50 dark:bg-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white">Leçon {{ i + 1 }}</h3>
+              <button type="button" (click)="removeLesson(i)"
+                class="text-red-600 hover:text-red-800 transition-colors duration-300">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Titre *</label>
+                <input type="text" formControlName="title"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Titre de la leçon">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Durée (minutes) *</label>
+                <input type="number" formControlName="duration"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  min="5" max="180">
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description *</label>
+                <textarea formControlName="description" rows="2"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Description de la leçon"></textarea>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contenu *</label>
+                <textarea formControlName="content" rows="4"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Contenu détaillé de la leçon..."></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Vidéo</label>
+                <div class="flex gap-2">
+                  <input type="url" formControlName="videoUrl"
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="URL de la vidéo">
+                  <label class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 cursor-pointer transition-colors duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-video"></i>
+                    <span class="text-sm">Vidéo</span>
+                    <input type="file" accept="video/*" (change)="onLessonFileSelected($event, i, 'videoUrl')" class="hidden">
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fichier joint</label>
+                <div class="flex gap-2">
+                  <input type="url" formControlName="fileUrl"
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="URL du fichier">
+                  <label class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-800 cursor-pointer transition-colors duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-file"></i>
+                    <span class="text-sm">Fichier</span>
+                    <input type="file" accept=".pdf,.doc,.docx" (change)="onLessonFileSelected($event, i, 'fileUrl')" class="hidden">
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="lessonsArray.length === 0" class="text-center py-8">
+          <i class="fa-solid fa-book-open text-4xl text-gray-400 mb-4"></i>
+          <p class="text-gray-500 dark:text-gray-400">Aucune leçon ajoutée pour le moment</p>
+          <p class="text-sm text-gray-400 dark:text-gray-500">Cliquez sur "Ajouter une leçon" pour commencer</p>
+        </div>
+      </div>
+
+      <!-- Étape 3: Quiz et Exercices -->
+      <div *ngIf="currentStep === 3" class="space-y-6">
+        <!-- Quiz -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+              🎯 Quiz du cours
+            </h2>
+            <button type="button" (click)="addQuiz()"
+              class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-plus mr-2"></i>
+              Ajouter un quiz
+            </button>
+          </div>
+
+          <div formArrayName="quizzes" class="space-y-6">
+            <div *ngFor="let quiz of quizzesArray.controls; let quizIndex = index"
+              class="border border-gray-200 dark:border-gray-600 rounded-xl p-6 bg-gray-50 dark:bg-gray-700">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Quiz {{ quizIndex + 1 }}</h3>
+                <button type="button" (click)="removeQuiz(quizIndex)"
+                  class="text-red-600 hover:text-red-800 transition-colors duration-300">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Titre *</label>
+                  <input type="text" [formControlName]="'quizzes.' + quizIndex + '.title'"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Titre du quiz">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Limite de temps (min)
+                    *</label>
+                  <input type="number" [formControlName]="'quizzes.' + quizIndex + '.timeLimit'"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    min="5" max="120">
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description *</label>
+                  <textarea [formControlName]="'quizzes.' + quizIndex + '.description'" rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Description du quiz"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Score de passage (%)
+                    *</label>
+                  <input type="number" [formControlName]="'quizzes.' + quizIndex + '.passingScore'"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    min="0" max="100">
+                </div>
+              </div>
+
+              <!-- Questions -->
+              <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h4 class="text-md font-medium text-gray-900 dark:text-white">Questions</h4>
+                  <button type="button" (click)="addQuestion(quizIndex)"
+                    class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                    <i class="fa-solid fa-plus mr-1"></i>
+                    Ajouter une question
+                  </button>
+                </div>
+
+                <div [formArrayName]="'quizzes.' + quizIndex + '.questions'" class="space-y-4">
+                  <div *ngFor="let question of getQuestionsArray(quizIndex).controls; let questionIndex = index"
+                    class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800">
+                    <div class="flex items-center justify-between mb-3">
+                      <h5 class="text-sm font-medium text-gray-900 dark:text-white">Question {{ questionIndex + 1 }}
+                      </h5>
+                      <button type="button" (click)="removeQuestion(quizIndex, questionIndex)"
+                        class="text-red-600 hover:text-red-800 transition-colors duration-300">
+                        <i class="fa-solid fa-trash text-sm"></i>
+                      </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Question
+                          *</label>
+                        <input type="text"
+                          [formControlName]="'quizzes.' + quizIndex + '.questions.' + questionIndex + '.text'"
+                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Texte de la question">
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type *</label>
+                        <select [formControlName]="'quizzes.' + quizIndex + '.questions.' + questionIndex + '.type'"
+                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                          <option value="multiple_choice">Choix multiple</option>
+                          <option value="true_false">Vrai/Faux</option>
+                          <option value="short_answer">Réponse courte</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Points *</label>
+                        <input type="number"
+                          [formControlName]="'quizzes.' + quizIndex + '.questions.' + questionIndex + '.points'"
+                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          min="1" max="10">
+                      </div>
+
+                      <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Réponse correcte
+                          *</label>
+                        <input type="text"
+                          [formControlName]="'quizzes.' + quizIndex + '.questions.' + questionIndex + '.correctAnswer'"
+                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Réponse correcte">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div *ngIf="getQuestionsArray(quizIndex).length === 0" class="text-center py-4">
+                  <p class="text-gray-500 dark:text-gray-400">Aucune question ajoutée pour ce quiz</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="quizzesArray.length === 0" class="text-center py-8">
+            <i class="fa-solid fa-question-circle text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-500 dark:text-gray-400">Aucun quiz ajouté pour le moment</p>
+            <p class="text-sm text-gray-400 dark:text-gray-500">Les quiz sont optionnels mais recommandés</p>
+          </div>
+        </div>
+
+        <!-- Exercices -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+              🏃 Exercices du cours
+            </h2>
+            <button type="button" (click)="addExercise()"
+              class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-plus mr-2"></i>
+              Ajouter un exercice
+            </button>
+          </div>
+
+          <div formArrayName="exercises" class="space-y-6">
+            <div *ngFor="let exercise of exercisesArray.controls; let i = index"
+              class="border border-gray-200 dark:border-gray-600 rounded-xl p-6 bg-gray-50 dark:bg-gray-700">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Exercice {{ i + 1 }}</h3>
+                <button type="button" (click)="removeExercise(i)"
+                  class="text-red-600 hover:text-red-800 transition-colors duration-300">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Titre *</label>
+                  <input type="text" [formControlName]="'exercises.' + i + '.title'"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Titre de l'exercice">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type *</label>
+                  <select [formControlName]="'exercises.' + i + '.type'"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="practice">Pratique</option>
+                    <option value="assignment">Devoir</option>
+                    <option value="project">Projet</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Temps estimé (min)
+                    *</label>
+                  <input type="number" [formControlName]="'exercises.' + i + '.estimatedTime'"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    min="15" max="480">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Difficulté *</label>
+                  <select [formControlName]="'exercises.' + i + '.difficulty'"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="beginner">Débutant</option>
+                    <option value="intermediate">Intermédiaire</option>
+                    <option value="advanced">Avancé</option>
+                  </select>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description *</label>
+                  <textarea [formControlName]="'exercises.' + i + '.description'" rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Description de l'exercice"></textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Instructions *</label>
+                  <textarea [formControlName]="'exercises.' + i + '.instructions'" rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Instructions détaillées pour l'exercice..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="exercisesArray.length === 0" class="text-center py-8">
+            <i class="fa-solid fa-dumbbell text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-500 dark:text-gray-400">Aucun exercice ajouté pour le moment</p>
+            <p class="text-sm text-gray-400 dark:text-gray-500">Les exercices sont optionnels mais recommandés</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Étape 4: Révision -->
+      <div *ngIf="currentStep === 4"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+          📋 Révision et finalisation
+        </h2>
+
+        <div class="space-y-6">
+          <!-- Résumé du cours -->
+          <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+            <h3 class="text-lg font-medium text-blue-900 dark:text-blue-100 mb-3">Résumé du cours</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <span class="font-medium text-blue-800 dark:text-blue-200">Titre:</span>
+                <p class="text-blue-700 dark:text-blue-300">{{ courseForm.get('title')?.value || 'Non défini' }}</p>
+              </div>
+              <div>
+                <span class="font-medium text-blue-800 dark:text-blue-200">Catégorie:</span>
+                <p class="text-blue-700 dark:text-blue-300">{{ getCategoryName(courseForm.get('categoryId')?.value) }}
+                </p>
+              </div>
+              <div>
+                <span class="font-medium text-blue-800 dark:text-blue-200">Niveau:</span>
+                <p class="text-blue-700 dark:text-blue-300">{{ getLevelName(courseForm.get('levelId')?.value) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistiques -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ lessonsArray.length }}</div>
+              <div class="text-sm text-green-700 dark:text-green-300">Leçons</div>
+            </div>
+            <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ quizzesArray.length }}</div>
+              <div class="text-sm text-purple-700 dark:text-purple-300">Quiz</div>
+            </div>
+            <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ exercisesArray.length }}</div>
+              <div class="text-sm text-orange-700 dark:text-orange-300">Exercices</div>
+            </div>
+          </div>
+
+          <!-- Statut de publication -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Statut de publication
+            </label>
+            <select formControlName="status"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="draft">Brouillon (sauvegarde privée)</option>
+              <option value="published">Publié (visible par tous)</option>
+            </select>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Vous pourrez modifier le statut plus tard depuis la liste des cours
+            </p>
+          </div>
+
+          <!-- Validation finale -->
+          <div *ngIf="!courseForm.valid"
+            class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div class="flex">
+              <i class="fa-solid fa-exclamation-triangle text-red-400 mt-0.5"></i>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                  Formulaire incomplet
+                </h3>
+                <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                  <p>Veuillez compléter tous les champs obligatoires avant de sauvegarder.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation entre étapes -->
+      <div class="flex items-center justify-between pt-6">
+        <button type="button" (click)="previousStep()" [disabled]="currentStep === 1"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fa-solid fa-arrow-left mr-2"></i>
+          Précédent
+        </button>
+
+        <div class="flex items-center gap-3">
+          <button type="button" (click)="togglePreview()"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+            <i class="fa-solid fa-eye mr-2"></i>
+            {{ showPreview ? 'Masquer' : 'Prévisualiser' }}
+          </button>
+
+          <button *ngIf="currentStep < totalSteps" type="button" (click)="nextStep()"
+            [disabled]="!isStepValid(currentStep)"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            Suivant
+            <i class="fa-solid fa-arrow-right ml-2"></i>
+          </button>
+
+          <button *ngIf="currentStep === totalSteps" type="submit" [disabled]="!courseForm.valid || isSubmitting"
+            class="inline-flex items-center px-6 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span *ngIf="!isSubmitting">
+              <i class="fa-solid fa-save mr-2"></i>
+              Sauvegarder le cours
+            </span>
+            <span *ngIf="isSubmitting">
+              <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+              Sauvegarde en cours...
+            </span>
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="hasError"
+      class="mt-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      <div class="flex">
+        <i class="fa-solid fa-exclamation-triangle text-red-400 mt-0.5"></i>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+            Erreur
+          </h3>
+          <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+            <p>{{ errorMessage }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

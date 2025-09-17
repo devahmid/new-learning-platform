@@ -1,0 +1,318 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                        📊 Cours Populaires
+                    </h1>
+                    <p class="mt-2 text-gray-600 dark:text-gray-400">
+                        Analysez les performances et la popularité de vos cours
+                    </p>
+                </div>
+
+                <!-- Bouton retour -->
+                <button (click)="router.navigate(['/admin/courses'])"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>
+                    Retour
+                </button>
+            </div>
+
+            <!-- Statistiques rapides -->
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fa-solid fa-users text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-blue-100">Total Élèves</p>
+                            <p class="text-2xl font-bold">{{ stats.totalStudents }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fa-solid fa-chart-line text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-green-100">Croissance</p>
+                            <p class="text-2xl font-bold">+{{ stats.growthRate }}%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fa-solid fa-star text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-purple-100">Satisfaction</p>
+                            <p class="text-2xl font-bold">{{ stats.studentSatisfaction }}/5</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fa-solid fa-trophy text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-orange-100">Top Catégorie</p>
+                            <p class="text-2xl font-bold">{{ stats.topPerformingCategory }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Barre d'outils -->
+        <div
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <!-- Filtres -->
+                <div class="flex flex-wrap gap-3">
+                    <select [(ngModel)]="selectedCategory" (change)="applyFiltersAndSort()"
+                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option *ngFor="let option of categoryOptions" [value]="option.value">
+                            {{ option.label }}
+                        </option>
+                    </select>
+
+                    <select [(ngModel)]="selectedLevel" (change)="applyFiltersAndSort()"
+                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option *ngFor="let option of levelOptions" [value]="option.value">
+                            {{ option.label }}
+                        </option>
+                    </select>
+
+                    <select [(ngModel)]="selectedSort" (change)="applyFiltersAndSort()"
+                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option *ngFor="let option of sortOptions" [value]="option.value">
+                            {{ option.label }}
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3">
+                    <button (click)="exportData()"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                        <i class="fa-solid fa-download mr-2"></i>
+                        Exporter
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau des cours populaires -->
+        <div
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <!-- Loading -->
+            <div *ngIf="isLoading" class="flex items-center justify-center py-12">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span class="ml-3 text-gray-600 dark:text-gray-400">Chargement des données...</span>
+            </div>
+
+            <!-- Error -->
+            <div *ngIf="hasError" class="flex items-center justify-center py-12">
+                <div class="text-center">
+                    <i class="fa-solid fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
+                    <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+                    <button (click)="loadPopularCourses()"
+                        class="mt-3 inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                        <i class="fa-solid fa-redo mr-2"></i>
+                        Réessayer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenu -->
+            <div *ngIf="!isLoading && !hasError" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Cours
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Catégorie
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Élèves
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Note
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Completion
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Revenus
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Statut
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr *ngFor="let course of paginatedCourses"
+                            class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <div
+                                            class="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                            <i class="fa-solid fa-book text-blue-600 dark:text-blue-400"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ course.title }}
+                                            <span *ngIf="course.trending"
+                                                class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">
+                                                <i class="fa-solid fa-fire mr-1"></i>Trending
+                                            </span>
+                                            <span *ngIf="course.featured"
+                                                class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                                                <i class="fa-solid fa-star mr-1"></i>Featured
+                                            </span>
+                                        </div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            {{ course.description | slice:0:60 }}{{ course.description.length > 60 ?
+                                            '...' : '' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 dark:text-white">{{ course.category }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ course.subcategory }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                {{ course.totalStudents }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white mr-2">
+                                        {{ course.averageRating.toFixed(1) }}
+                                    </span>
+                                    <div class="flex items-center">
+                                        <i *ngFor="let star of [1,2,3,4,5]"
+                                            [class]="star <= course.averageRating ? 'fa-solid fa-star text-yellow-400' : 'fa-regular fa-star text-gray-300'"
+                                            class="text-sm">
+                                        </i>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2">
+                                        <div class="bg-green-600 h-2 rounded-full"
+                                            [style.width.%]="course.completionRate"></div>
+                                    </div>
+                                    <span class="text-sm text-gray-900 dark:text-white">{{ course.completionRate
+                                        }}%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                {{ formatCurrency(course.totalRevenue) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                    Actif
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-2">
+                                    <button (click)="viewCourse(course.id)"
+                                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                                        title="Voir le cours">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button (click)="editCourse(course.id)"
+                                        class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors duration-200"
+                                        title="Modifier le cours">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </button>
+                                    <button (click)="toggleFeatured(course.id)"
+                                        [class]="course.featured ? 'text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300'"
+                                        class="transition-colors duration-200"
+                                        [title]="course.featured ? 'Retirer des favoris' : 'Ajouter aux favoris'">
+                                        <i class="fa-solid fa-star"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div *ngIf="!isLoading && !hasError && totalPages > 1"
+                class="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Précédent
+                    </button>
+                    <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages"
+                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Suivant
+                    </button>
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                            Affichage de <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> à
+                            <span class="font-medium">{{ getEndItem() }}</span> sur <span class="font-medium">{{
+                                totalItems }}</span> résultats
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+
+                            <ng-container *ngFor="let page of [].constructor(totalPages); let i = index">
+                                <button (click)="changePage(i + 1)"
+                                    [class]="(i + 1 === currentPage) ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'"
+                                    class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                    {{ i + 1 }}
+                                </button>
+                            </ng-container>
+
+                            <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages"
+                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

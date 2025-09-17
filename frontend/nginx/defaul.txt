@@ -1,0 +1,405 @@
+server {
+    listen 80;
+    server_name arrisala.fr www.arrisala.fr api.arrisala.fr grafana.arrisala.fr portainer.arrisala.fr;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+
+server {
+  listen 443 ssl;
+  server_name arrisala.fr www.arrisala.fr;
+
+  ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+  root /usr/share/nginx/html;
+  index index.html;
+
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+}
+
+server {
+  listen 443 ssl;
+  server_name grafana.arrisala.fr;
+
+  ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+  location / {
+    proxy_pass http://grafana:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+server {
+  listen 443 ssl;
+  server_name portainer.arrisala.fr;
+
+  ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+  location / {
+    proxy_pass http://portainer:9000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Optionnel : limite le cache navigateur
+    add_header Cache-Control "no-store" always;
+  }
+}
+
+
+
+server {
+  listen 443 ssl;
+  server_name api.arrisala.fr;
+
+  ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+
+  # ✅ Spécifique au webhook Stripe
+  # location = /webhook/stripe {
+  #   proxy_pass http://nest:3000;
+  #   proxy_http_version 1.1;
+
+  #   proxy_set_header Host $host;
+  #   proxy_set_header X-Real-IP $remote_addr;
+  #   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  #   proxy_set_header X-Forwarded-Proto $scheme;
+
+  #   proxy_set_header Content-Length $content_length;
+  #   proxy_pass_request_body on;
+  # }
+  
+  location / {
+    proxy_pass http://nest-backend:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+
+    # Sécurité API
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header Content-Security-Policy "default-src 'self' https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com; script-src 'self' 'unsafe-inline' https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com; connect-src 'self' https://www.paypal.com https://*.paypal.com; frame-ancestors 'self' https://www.paypal.com https://*.paypal.com;" always;
+  }
+}
+
+
+# server {
+#     listen 80;
+#     server_name arrisala.fr www.arrisala.fr api.arrisala.fr;
+
+#     location /.well-known/acme-challenge/ {
+#         root /var/www/certbot;
+#     }
+
+#     location / {
+#         return 301 https://$host$request_uri;
+#     }
+# }
+
+# # server {
+# #     listen 443 ssl;
+# #     server_name arrisala.fr www.arrisala.fr;
+
+# #     ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+# #     ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+# #     root /usr/share/nginx/html;
+# #     index index.html;
+
+# #     location / {
+# #         try_files $uri $uri/ /index.html;
+# #         add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
+# #     }
+# # }
+
+# server {
+#     listen 443 ssl;
+#     server_name arrisala.fr www.arrisala.fr;
+
+#     ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+#     root /usr/share/nginx/html;
+#     index index.html;
+
+#     location / {
+#         try_files $uri $uri/ /index.html;
+
+#         # Headers de sécurité
+#         add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;
+#         add_header X-Frame-Options "DENY" always;
+#         add_header X-Content-Type-Options "nosniff" always;
+#         add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+#         add_header Content-Security-Policy "default-src * 'unsafe-inline' 'unsafe-eval' data:;" always;
+
+#         # CSP mobile-friendly avec Google Fonts
+#         # add_header Content-Security-Policy "
+#         # default-src 'self';
+#         # script-src 'self';
+#         # style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+#         # font-src 'self' https://fonts.gstatic.com data:;
+#         # img-src 'self' data: https://storage.googleapis.com;
+#         # connect-src 'self';
+#         # base-uri 'self';
+#         # object-src 'none';
+#         # frame-ancestors 'none';
+#         # " always;
+
+#     }
+# }
+
+
+# server {
+#     listen 443 ssl;
+#     server_name api.arrisala.fr;
+
+#     ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+#     location / {
+#         #proxy_pass http://nest:3000;
+#         proxy_http_version 1.1;
+#         proxy_set_header Upgrade $http_upgrade;
+#         proxy_set_header Connection 'upgrade';
+#         proxy_set_header Host $host;
+#         proxy_cache_bypass $http_upgrade;
+
+#         add_header X-Frame-Options "DENY" always;
+#         add_header X-Content-Type-Options "nosniff" always;
+#         add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+#         add_header Content-Security-Policy "default-src 'self';" always;
+#     }
+# # Grafana
+# server {
+#     listen 443 ssl;
+#     server_name grafana.arrisala.fr;
+
+#     ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+    
+#     location / {
+#         proxy_pass http://grafana:3000;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#     }
+# }
+
+# # Portainer
+# server {
+#     listen 443 ssl;
+#     server_name portainer.arrisala.fr;
+
+#     ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+    
+#     location / {
+#         #proxy_pass http://portainer:9000;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#     }
+# }
+#     # location / {
+#     #     proxy_pass http://nest:3000;
+#     #     proxy_http_version 1.1;
+#     #     proxy_set_header Upgrade $http_upgrade;
+#     #     proxy_set_header Connection 'upgrade';
+#     #     proxy_set_header Host $host;
+#     #     proxy_cache_bypass $http_upgrade;
+#     # }
+# }
+
+
+# # # Challenge HTTP pour Let's Encrypt
+# # server {
+# #     listen 80;
+# #     server_name arrisala.fr www.arrisala.fr api.arrisala.fr;
+
+# #     location /.well-known/acme-challenge/ {
+# #         root /var/www/certbot;
+# #     }
+
+# #     location / {
+# #         return 301 https://$host$request_uri;
+# #     }
+# # }
+
+# # # Frontend HTTPS
+# # server {
+# #     listen 443 ssl;
+# #     server_name arrisala.fr www.arrisala.fr;
+
+# #     ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+# #     ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+# #     root /usr/share/nginx/html;
+# #     index index.html;
+
+# #     location / {
+# #         try_files $uri $uri/ /index.html;
+# #     }
+# # }
+
+# # # Backend HTTPS
+# # server {
+# #     listen 443 ssl;
+# #     server_name api.arrisala.fr;
+
+# #     ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+# #     ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+# #     location / {
+# #         proxy_pass http://nest-app:3000;
+# #         proxy_http_version 1.1;
+# #         proxy_set_header Upgrade $http_upgrade;
+# #         proxy_set_header Connection 'upgrade';
+# #         proxy_set_header Host $host;
+# #         proxy_cache_bypass $http_upgrade;
+# #     }
+# # }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # server {
+# #     listen 80;
+# #     server_name arrisala.fr www.arrisala.fr;
+
+# #     root /usr/share/nginx/html;
+# #     index index.html;
+
+# #     location / {
+# #         try_files $uri $uri/ /index.html;
+# #     }
+# # }
+
+# # server {
+# #     listen 80;
+# #     server_name api.arrisala.fr;
+
+# #     location / {
+# #         proxy_pass http://nest-app:3000;
+# #         proxy_http_version 1.1;
+# #         proxy_set_header Upgrade $http_upgrade;
+# #         proxy_set_header Connection 'upgrade';
+# #         proxy_set_header Host $host;
+# #         proxy_cache_bypass $http_upgrade;
+# #     }
+# # }
+# # #REDIRECT HTTP -> HTTPS
+# # # server {
+# # #     listen 80;
+# # #     server_name arrisala.fr www.arrisala.fr api.arrisala.fr;
+
+# # #     location /.well-known/acme-challenge/ {
+# # #         root /var/www/certbot;
+# # #     }
+
+# # #     location / {
+# # #         return 301 https://$host$request_uri;
+# # #     }
+# # # }
+# # ######################################
+# # # # FRONT - HTTPS
+# # # server {
+# # #     listen 443 ssl;
+# # #     server_name arrisala.fr www.arrisala.fr;
+
+# # #     ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+# # #     ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+# # #     root /usr/share/nginx/html;
+# # #     index index.html;
+
+# # #     location / {
+# # #         try_files $uri $uri/ /index.html;
+# # #     }
+# # # }
+
+# # # # BACK - HTTPS
+# # # server {
+# # #     listen 443 ssl;
+# # #     server_name api.arrisala.fr;
+
+# # #     ssl_certificate /etc/letsencrypt/live/arrisala.fr/fullchain.pem;
+# # #     ssl_certificate_key /etc/letsencrypt/live/arrisala.fr/privkey.pem;
+
+# # #     location / {
+# # #         proxy_pass http://nest-app:3000;
+# # #         proxy_http_version 1.1;
+# # #         proxy_set_header Upgrade $http_upgrade;
+# # #         proxy_set_header Connection 'upgrade';
+# # #         proxy_set_header Host $host;
+# # #         proxy_cache_bypass $http_upgrade;
+# # #     }
+# # # }
+
+# # ##############################################
+# # # server {
+# # #     listen 80;
+# # #     server_name arrisala.fr www.arrisala.fr;
+
+# # #     location / {
+# # #         proxy_pass http://angular-app:80;
+# # #     }
+# # # }
+
+# # # server {
+# # #     listen 80;
+# # #     server_name api.arrisala.fr;
+
+# # #     location / {
+# # #         proxy_pass http://nest-app:3000;
+# # #         proxy_http_version 1.1;
+# # #         proxy_set_header Upgrade $http_upgrade;
+# # #         proxy_set_header Connection 'upgrade';
+# # #         proxy_set_header Host $host;
+# # #         proxy_cache_bypass $http_upgrade;
+# # #     }
+# # # }

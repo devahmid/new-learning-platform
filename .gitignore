@@ -1,0 +1,98 @@
+# =====================================================
+# GITIGNORE GLOBAL - Plateforme d'apprentissage de l'arabe
+# =====================================================
+
+# ===== NODE.JS =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# ===== ANGULAR =====
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+frontend/.nyc_output/
+
+# ===== NESTJS =====
+nestjs-api/dist/
+nestjs-api/coverage/
+nestjs-api/.nyc_output/
+nestjs-api/uploads/
+
+# ===== PHP =====
+php-api/vendor/
+php-api/composer.lock
+*.log
+
+# ===== BASES DE DONNÉES =====
+*.sqlite
+*.db
+*.sql.backup
+
+# ===== DOCKER =====
+.docker/
+docker-compose.override.yml
+
+# ===== ENVIRONNEMENTS =====
+.env
+.env.local
+.env.production
+.env.*.local
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== OS =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== LOGS =====
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ===== CACHE =====
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+
+# ===== CERTIFICATS =====
+*.pem
+*.key
+*.crt
+*.csr
+
+# ===== UPLOADS =====
+uploads/
+temp/
+tmp/
+
+# ===== BACKUP =====
+*.backup
+*.bak
+*.tmp
+
+# ===== COVERAGE =====
+coverage/
+.nyc_output/
+
+# ===== BUILD =====
+build/
+dist/
+out/

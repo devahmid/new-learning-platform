@@ -1,0 +1,269 @@
+
+<div class="py-12 bg-gray-50 min-h-screen">
+  <div class="container mx-auto py-16 px-4">
+    <!-- Breadcrumb Navigation -->
+    <div class="max-w-3xl mx-auto mb-6">
+      <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-4">
+        <span class="text-green-600 font-medium">
+          <i class="fa-solid fa-book mr-1"></i>Matières
+        </span>
+      </nav>
+    </div>
+    
+<!-- Indicateur de l'enfant sélectionné -->
+<div class="container mx-auto px-4 pt-8">
+  <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4 mb-8">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
+          {{ getChildInitials() }}
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800">{{ getSelectedChildName() }}</h3>
+          <p class="text-sm text-gray-600">Niveau {{ getLevelName() }} • Prêt à apprendre !</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+        <span class="text-sm text-green-600 font-medium">Actif</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="subjects-overview" class="container mx-auto py-8 px-4">
+    <h2 class="text-4xl font-bold text-center mb-12">Page d’accueil</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 justify-items-center">
+        <!-- Card Replay spéciale -->
+        <div class="w-full max-w-sm relative group flex flex-col cursor-pointer" (click)="onReplayClick($event)">    
+            <!-- Carte Replay avec style distinctif -->
+            <div class="relative z-10 flex-1 flex flex-col justify-between px-2 pt-10 pb-4 rounded-2xl shadow-lg 
+            transition-transform duration-300 hover:scale-105 bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600">
+                <i class="fa-solid fa-video absolute -top-10 left-1/2 -translate-x-1/2 text-3xl bg-white p-4 rounded-full shadow-lg z-10 text-purple-600"></i>
+
+                <!-- Bloc contenu avec bordure blanche -->
+                <div class="rounded-xl bg-white p-1">
+                    <div class="rounded-lg px-6 py-5 flex justify-between items-center text-white bg-gradient-to-r from-purple-600 to-indigo-600">
+                        <span class="text-lg font-semibold">Replay</span>
+                        <span class="text-xl">🎬</span>
+                    </div>
+                </div>
+
+                <!-- Description Replay -->
+                <div class="text-white text-sm italic text-center mt-2 transition-all duration-300
+                   group-hover:opacity-100 group-hover:translate-y-1">
+                    Cours enregistrés
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards des matières normales -->
+        <div *ngFor="let subject of subjects" class="w-full max-w-sm relative group flex flex-col cursor-not-allowed opacity-60">    
+            
+            <!-- Carte principale -->
+            <div class="relative z-10 flex-1 flex flex-col justify-between px-2 pt-10 pb-4 rounded-2xl shadow-lg 
+            transition-transform duration-300" [ngClass]="subject.color">
+            <i *ngIf="subject.icon"
+                class="fa-solid absolute -top-10 left-1/2 -translate-x-1/2 text-3xl bg-white p-4 rounded-full shadow-lg z-10"
+                [ngClass]="subject.iconColor + ' ' + subject.icon">
+            </i>
+
+                <!-- Bloc contenu avec bordure blanche -->
+                <div class="rounded-xl bg-white p-1">
+                    <div class="rounded-lg px-6 py-5 flex justify-between items-center text-white"
+                        [ngClass]="subject.innerColor">
+                        <span class="text-lg font-semibold">{{ subject.name }}</span>
+                        <span class="text-xl">{{ subject.ar }}</span>
+                    </div>
+                </div>
+
+                <!-- Description FR si différente -->
+                <div class="text-white text-sm italic text-center mt-2 transition-all duration-300
+                   group-hover:opacity-100 group-hover:translate-y-1" [class.opacity-0]="subject.fr ">
+                    {{ subject.fr || '' }}
+                </div>
+
+                <!-- Message "Bientôt disponible" -->
+                <div class="text-white text-xs text-center mt-2 bg-black bg-opacity-30 rounded-lg px-2 py-1">
+                    <i class="fa-solid fa-clock mr-1"></i>
+                    Bientôt disponible
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popup simple -->
+<div 
+  *ngIf="showPopup" 
+  class="fixed top-4 right-4 z-50 max-w-sm bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg shadow-lg animate-slide-in">
+  <div class="flex items-center">
+    <div class="flex-shrink-0">
+      <i class="fa-solid fa-info-circle text-blue-500 text-lg"></i>
+    </div>
+    <div class="ml-3">
+      <p class="text-sm font-medium">{{ popupMessage }}</p>
+    </div>
+    <div class="ml-auto pl-3">
+      <button 
+        (click)="showPopup = false"
+        class="text-gray-400 hover:text-gray-600 focus:outline-none">
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- <div class="container mx-auto py-20 px-4">
+    <h2 class="text-4xl font-extrabold text-center text-gray-800 mb-12 animate-fade-in">
+        Page d’accueil
+    </h2> -->
+
+    <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 justify-items-center">
+        <div *ngFor="let subject of subjects" class="w-full max-w-sm relative group m-4 flex flex-col cursor-pointer"> -->
+
+            <!-- Illustration (inchangée) -->
+
+            <!-- <div
+                class="absolute -top-8 left-1/2 -translate-x-1/2 z-0 pointer-events-none group-hover:animate-bounce transition-transform duration-500">
+                <img src="assets/crayons.svg"
+                    class="w-12 h-12 inline-block transform rotate-[-10deg] translate-x-2 drop-shadow" />
+                <img src="assets/book.svg"
+                    class="w-12 h-12 inline-block transform -rotate-[-20deg] -translate-x-2 drop-shadow" />
+            </div> -->
+
+
+            <!-- Carte extérieure : on lui donne flex-grow pour qu’elle remplisse tout -->
+            <!-- <div class="relative z-10 flex-1 flex flex-col justify-between px-2 pt-10 pb-4 rounded-2xl shadow-lg
+                 transition-transform duration-300 hover:scale-105" [ngClass]="subject.color"> -->
+                <!-- Haut de carte -->
+                <!-- <div class="rounded-xl bg-white p-1">
+                    <div class="rounded-lg px-6 py-5 flex flex-col items-center text-white"
+                        [ngClass]="subject.innerColor">
+                        <div class="text-2xl font-bold tracking-wide">{{ subject.name }}</div>
+                        <div class="text-lg mt-1">{{ subject.ar }}</div>
+                    </div>
+                </div> -->
+
+                <!-- Bas de carte : toujours présent, mais on masque s’il n’y a rien -->
+                <!-- <div class="text-white text-sm italic text-center mt-2 transition-all duration-300
+                   group-hover:opacity-100 group-hover:translate-y-1" [class.opacity-0]="subject.fr ">
+                    {{ subject.fr || '' }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- <div class="container mx-auto py-20 px-4"> -->
+    <!-- Reprise exacte de votre carte en bandeau -->
+    <!-- <div class="relative w-full max-w-2xl mx-auto mb-12">
+        <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 z-0 pointer-events-none">
+            <div class="inline-block bounce-y">
+                <img src="assets/crayons.svg"
+                    class="w-12 h-12 inline-block transform -rotate-[10deg] translate-x-2 drop-shadow" />
+                <img src="assets/book.svg"
+                    class="w-12 h-12 inline-block transform -rotate-[20deg] -translate-x-2 drop-shadow" />
+            </div>
+        </div>
+
+        <div class="relative z-10 w-full px-4 pt-10 pb-6 rounded-2xl shadow-lg" [ngClass]="subjects[0].color">
+            <div class="rounded-xl bg-white p-2">
+                <div class="rounded-lg px-8 py-6 flex justify-between items-center text-white"
+                    [ngClass]="subjects[0].innerColor">
+                    <span class="text-3xl font-bold">{{ subjects[0].fr }}</span>
+                    <span class="text-3xl font-bold">{{ subjects[0].ar }}</span>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Boutons “Niveau 1/2/3” -->
+    <!-- <div class="space-y-8 max-w-md mx-auto">
+        <button *ngFor="let lvl of levels" (click)="goToLevel(lvl)" class="w-full py-4 text-2xl font-bold rounded-full
+               bg-gradient-to-r from-teal-300 via-teal-400 to-teal-500
+               border-2 border-teal-200 hover:from-teal-400 hover:to-teal-600
+               cursor-pointer">
+            Niveau {{ lvl }}
+        </button>
+    </div>
+</div> -->
+
+
+<!-- <div class="container mx-auto py-12 px-4"> -->
+
+    <!-- ─── Bandeau “Niveau X” ─── -->
+    <!-- <div class="relative w-full max-w-2xl mx-auto mb-12"> -->
+        <!-- crayons+livre -->
+        <!-- <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 z-0 pointer-events-none">
+            <div class="inline-block animate-bounce-y">
+                <img src="assets/crayons.svg"
+                    class="w-12 h-12 inline-block transform -rotate-[10deg] translate-x-2 drop-shadow" />
+                <img src="assets/book.svg"
+                    class="w-12 h-12 inline-block transform -rotate-[20deg] -translate-x-2 drop-shadow" />
+            </div>
+        </div> -->
+
+        <!-- fond dégradé + texte -->
+        <!-- <div class="relative z-10 w-full px-6 py-4 rounded-2xl shadow-lg
+               bg-gradient-to-r from-green-200 via-green-400 to-green-500">
+            <h1 class="text-center text-3xl font-bold text-white">
+                Niveau {{ level }}animate-
+            </h1>
+        </div>
+    </div> -->
+
+    <!-- ─── Progress Circle ─── -->
+    <!-- <div class="flex justify-center mb-12"> -->
+        <!-- si vous utilisez DaisyUI : -->
+        <!-- <div class="radial-progress" [ngStyle]="{'--value': completion}">{{ completion }}%</div> -->
+
+        <!-- Sinon, vous pouvez remplacer par un SVG comme ci‑dessous :
+      <svg class="w-16 h-16" viewBox="0 0 36 36">
+        <path stroke="#ddd" stroke-width="3.8" fill="none"
+              d="M18 2.0845
+                 a 15.9155 15.9155 0 0 1 0 31.831
+                 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        <path stroke="#22c55e" stroke-width="3.8" fill="none"
+              stroke-dasharray="{{completion}},100"
+              d="M18 2.0845
+                 a 15.9155 15.9155 0 0 1 0 31.831
+                 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        <text x="18" y="20" text-anchor="middle" font-size="8" fill="#000">
+          {{completion}}%
+        </text>
+      </svg>
+      -->
+    <!-- </div> -->
+
+    <!-- ─── Boutons de sections ─── -->
+    <!-- <div class="grid grid-cols-2 gap-8 max-w-2xl mx-auto mb-8">
+        <button (click)="go('vocabulaire')" class="py-4 text-2xl font-bold rounded-full
+               bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-500
+               border-2 border-yellow-300 hover:from-yellow-300 hover:to-yellow-600
+               cursor-pointer">
+            Vocabulaire
+        </button>
+        <button (click)="go('grammaire')" class="py-4 text-2xl font-bold rounded-full
+               bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-500
+               border-2 border-yellow-300 hover:from-yellow-300 hover:to-yellow-600
+               cursor-pointer">
+            Grammaire
+        </button>
+    </div> -->
+
+    <!-- bouton centré -->
+    <!-- <div class="flex justify-center">
+        <button (click)="go('exercices')" class="w-1/2 py-4 text-2xl font-bold rounded-full
+               bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-500
+               border-2 border-yellow-300 hover:from-yellow-300 hover:to-yellow-600
+               cursor-pointer">
+            Exercices
+        </button>
+    </div>
+</div> -->
+  </div>
+</div>

@@ -1,0 +1,264 @@
+/* Styles pour le Course Builder */
+
+/* Animations d'entrée */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Animation des sections */
+.bg-white {
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+/* Animation des éléments de formulaire */
+input, select, textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus, select:focus, textarea:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+/* Animation des boutons */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Animation des cartes de leçon/quiz/exercice */
+.border.border-gray-200.rounded-xl {
+  transition: all 0.2s ease-in-out;
+}
+
+.border.border-gray-200.rounded-xl:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation des boutons d'ajout */
+.bg-blue-600, .bg-purple-600, .bg-orange-600 {
+  transition: all 0.2s ease-in-out;
+}
+
+.bg-blue-600:hover, .bg-purple-600:hover, .bg-orange-600:hover {
+  transform: scale(1.05);
+}
+
+/* Animation des boutons de suppression */
+.text-red-600 {
+  transition: all 0.2s ease-in-out;
+}
+
+.text-red-600:hover {
+  transform: scale(1.1);
+}
+
+/* Animation des sections vides */
+.border-2.border-dashed {
+  transition: all 0.3s ease-in-out;
+}
+
+.border-2.border-dashed:hover {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
+}
+
+/* Animation des icônes */
+.fa-solid {
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover .fa-solid {
+  transform: scale(1.1);
+}
+
+/* Animation des labels */
+label {
+  transition: color 0.2s ease-in-out;
+}
+
+/* Animation des erreurs de validation */
+.text-red-600 {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .flex.items-center.justify-between {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .space-x-3 > * + * {
+    margin-left: 0;
+    margin-top: 0.75rem;
+  }
+}
+
+/* Animation des transitions de formulaire */
+.form-array-item {
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+/* Animation des boutons d'action */
+.action-buttons {
+  transition: all 0.3s ease-in-out;
+}
+
+.action-buttons:hover {
+  transform: translateY(-2px);
+}
+
+/* Animation des sections de contenu */
+.content-section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Animation des messages d'état */
+.status-message {
+  animation: slideInFromTop 0.4s ease-out;
+}
+
+/* Animation des indicateurs de chargement */
+.loading-indicator {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation des validations en temps réel */
+.validation-feedback {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Animation des sections collapsibles */
+.collapsible-section {
+  transition: all 0.3s ease-in-out;
+}
+
+.collapsible-section.collapsed {
+  max-height: 0;
+  overflow: hidden;
+}
+
+/* Animation des tooltips */
+.tooltip {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Animation des modales */
+.modal {
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+/* Animation des notifications */
+.notification {
+  animation: slideInFromTop 0.4s ease-out;
+}
+
+/* Animation des barres de progression */
+.progress-bar {
+  transition: width 0.5s ease-in-out;
+}
+
+/* Animation des indicateurs de statut */
+.status-indicator {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Animation des transitions de page */
+.page-transition {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Animation des éléments de navigation */
+.nav-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-item:hover {
+  transform: translateX(4px);
+}
+
+/* Animation des cartes d'aperçu */
+.preview-card {
+  transition: all 0.3s ease-in-out;
+}
+
+.preview-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Animation des indicateurs de validation */
+.validation-indicator {
+  transition: all 0.2s ease-in-out;
+}
+
+.validation-indicator.valid {
+  animation: pulse 1s ease-out;
+}
+
+.validation-indicator.invalid {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}

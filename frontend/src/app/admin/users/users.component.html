@@ -1,0 +1,126 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Header Section -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-users-cog text-white text-xl"></i>
+            </div>
+            Gestion des Utilisateurs
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-2">Gérez tous les utilisateurs, rôles et permissions de la plateforme</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">1,247</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Utilisateurs actifs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Utilisateurs</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">1,247</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-users text-white text-lg"></i>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm">
+          <span class="text-green-600 dark:text-green-400 font-medium">+12%</span>
+          <span class="text-gray-500 dark:text-gray-400 ml-2">ce mois</span>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Parents</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">892</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-user-friends text-white text-lg"></i>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm">
+          <span class="text-green-600 dark:text-green-400 font-medium">+8%</span>
+          <span class="text-gray-500 dark:text-gray-400 ml-2">ce mois</span>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Enfants</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">355</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-child text-white text-lg"></i>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm">
+          <span class="text-green-600 dark:text-green-400 font-medium">+15%</span>
+          <span class="text-gray-500 dark:text-gray-400 ml-2">ce mois</span>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Administrateurs</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">12</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-user-shield text-white text-lg"></i>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm">
+          <span class="text-gray-500 dark:text-gray-400 font-medium">Stable</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Grid -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+      <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Actions de Gestion</h2>
+        <p class="text-gray-600 dark:text-gray-400">Sélectionnez une action pour gérer les utilisateurs</p>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          *ngFor="let action of userActions"
+          class="group bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-500 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105"
+          (click)="goTo(action.path)"
+        >
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center group-hover:from-emerald-600 group-hover:to-emerald-700 transition-all duration-300 shadow-lg">
+              <i class="{{ action.icon }} text-white text-lg"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
+                {{ action.label }}
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ action.desc }}</p>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center text-emerald-600 dark:text-emerald-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span>Accéder</span>
+            <i class="fa-solid fa-arrow-right ml-2"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  
