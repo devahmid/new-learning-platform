@@ -43,8 +43,8 @@ class AdminCoursesController {
             $data = json_decode(file_get_contents('php://input'), true);
             
             // Validation basique
-            if (empty($data['title']) || empty($data['description']) || empty($data['levelId']) || empty($data['categoryId'])) {
-                Response::error('Données manquantes: title, description, levelId, categoryId requis', 400);
+            if (empty($data['title']) || empty($data['description']) || empty($data['classeId']) || empty($data['categoryId'])) {
+                Response::error('Données manquantes: title, description, classeId, categoryId requis', 400);
                 return;
             }
             
@@ -52,7 +52,7 @@ class AdminCoursesController {
             $course = new Course([
                 'title' => $data['title'],
                 'description' => $data['description'],
-                'levelId' => $data['levelId'],
+                'classeId' => $data['classeId'],
                 'categoryId' => $data['categoryId'],
                 'subcategoryId' => $data['subcategoryId'] ?? null,
                 'instructorId' => $data['instructorId'] ?? 1,

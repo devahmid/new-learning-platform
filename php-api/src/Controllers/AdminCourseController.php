@@ -71,7 +71,7 @@ class AdminCourseController {
             $validator = new \App\Utils\Validator($data, [
                 'title' => 'required|min:2',
                 'description' => 'required|min:10',
-                'levelId' => 'required|integer',
+                'classeId' => 'required|integer',
                 'categoryId' => 'required|integer'
             ]);
             
@@ -97,7 +97,7 @@ class AdminCourseController {
             $course = new Course([
                 'title' => $data['title'],
                 'description' => $data['description'],
-                'levelId' => $data['levelId'],
+                'classeId' => $data['classeId'],
                 'categoryId' => $data['categoryId'],
                 'subcategoryId' => $subcategoryId,
                 'instructorId' => $data['instructorId'] ?? 1, // ID par défaut pour l'admin
@@ -163,7 +163,7 @@ class AdminCourseController {
             
             // Mettre à jour les champs
             $fillableFields = [
-                'title', 'description', 'levelId', 'categoryId', 'subcategoryId', 
+                'title', 'description', 'classeId', 'categoryId', 'subcategoryId', 
                 'instructorId', 'price', 'discountPrice', 'tags', 'order', 
                 'isActive', 'videoUrl', 'pdfUrl', 'imageUrl', 'duration', 'difficulty'
             ];

@@ -38,10 +38,10 @@ class CourseController {
     }
     
     /**
-     * Récupère les cours par niveau
+     * Récupère les cours par classe
      */
-    public function findByLevel($levelId) {
-        $courses = Course::where(['levelId' => $levelId]);
+    public function findByClasse($classeId) {
+        $courses = Course::findByClasse($classeId);
         $coursesArray = array_map(function($course) {
             return $course->toArray();
         }, $courses);
@@ -51,19 +51,26 @@ class CourseController {
     }
     
     /**
-     * Récupère les cours par catégorie et niveau
+     * Récupère les cours par classe et catégorie
      */
-    public function findByCategoryAndLevel($categoryId, $levelId) {
-        $courses = Course::where([
-            'categoryId' => $categoryId,
-            'levelId' => $levelId
-        ]);
+    public function findByClasseAndCategory($classeId, $categoryId) {
+        $courses = Course::findByClasseAndCategory($classeId, $categoryId);
         $coursesArray = array_map(function($course) {
             return $course->toArray();
         }, $courses);
         
         // Format compatible NestJS
         Response::json($coursesArray, 200);
+    }
+    
+    /**
+     * Récupère les catégories disponibles pour une classe
+     */
+    public function getCategoriesForClasse($classeId) {
+        $categories = Course::getCategoriesForClasse($classeId);
+        
+        // Format compatible NestJS
+        Response::json($categories, 200);
     }
     
     /**
@@ -76,7 +83,7 @@ class CourseController {
         $validator = new \App\Utils\Validator($data, [
             'title' => 'required|min:2',
             'description' => 'required|min:10',
-            'levelId' => 'required|integer',
+            'classeId' => 'required|integer',
             'categoryId' => 'required|integer'
         ]);
         
@@ -88,7 +95,7 @@ class CourseController {
         $course = new Course([
             'title' => $data['title'],
             'description' => $data['description'],
-            'levelId' => $data['levelId'],
+            'classeId' => $data['classeId'],
             'categoryId' => $data['categoryId'],
             'subcategoryId' => $data['subcategoryId'] ?? null,
             'instructorId' => $data['instructorId'] ?? null,
@@ -118,7 +125,7 @@ class CourseController {
         $data = json_decode(file_get_contents('php://input'), true);
         
         // Mettre à jour les champs
-        $fillableFields = ['title', 'description', 'levelId', 'categoryId', 'subcategoryId', 'instructorId', 'price', 'discountPrice', 'tags', 'order', 'isActive'];
+        $fillableFields = ['title', 'description', 'classeId', 'categoryId', 'subcategoryId', 'instructorId', 'price', 'discountPrice', 'tags', 'order', 'isActive'];
         
         foreach ($fillableFields as $field) {
             if (isset($data[$field])) {

@@ -19,7 +19,7 @@ class Course extends BaseModel {
         'isActive',
         'categoryId',
         'subcategoryId',
-        'levelId',
+        'classeId',
         'instructorId',
         'price',
         'discountPrice',
@@ -48,11 +48,11 @@ class Course extends BaseModel {
     }
     
     /**
-     * Récupère le niveau du cours
+     * Récupère la classe du cours
      */
-    public function level() {
-        if ($this->levelId) {
-            return Level::find($this->levelId);
+    public function classe() {
+        if ($this->classeId) {
+            return Classe::find($this->classeId);
         }
         return null;
     }
@@ -103,8 +103,8 @@ class Course extends BaseModel {
             $array['subcategory'] = $this->subcategory()?->toArrayWithoutRelations();
         }
         
-        if ($this->levelId) {
-            $array['level'] = $this->level()?->toArrayWithoutRelations();
+        if ($this->classeId) {
+            $array['classe'] = $this->classe()?->toArrayWithoutRelations();
         }
         
         if ($this->instructorId) {
@@ -185,17 +185,17 @@ class Course extends BaseModel {
     }
     
     /**
-     * Récupère les cours par niveau
+     * Récupère les cours par classe
      */
-    public static function getCoursesByLevel() {
+    public static function getCoursesByClasse() {
         $db = \DatabaseConfig::getInstance()->getConnection();
         $stmt = $db->query("
             SELECT 
-                l.name as level_name,
+                cl.name as classe_name,
                 COUNT(c.id) as count
             FROM " . self::$table . " c
-            LEFT JOIN levels l ON c.levelId = l.id
-            GROUP BY c.levelId, l.name
+            LEFT JOIN classes cl ON c.classeId = cl.id
+            GROUP BY c.classeId, cl.name
             ORDER BY count DESC
         ");
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -239,6 +239,39 @@ class Course extends BaseModel {
             LEFT JOIN exercises e ON c.id = e.courseId
             WHERE e.id IS NULL
         ");
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Récupère les cours par classe
+     */
+    public static function findByClasse($classeId) {
+        return self::where(['classeId' => $classeId]);
+    }
+    
+    /**
+     * Récupère les cours par classe et catégorie
+     */
+    public static function findByClasseAndCategory($classeId, $categoryId) {
+        return self::where([
+            'classeId' => $classeId,
+            'categoryId' => $categoryId
+        ]);
+    }
+    
+    /**
+     * Récupère les catégories disponibles pour une classe
+     */
+    public static function getCategoriesForClasse($classeId) {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT DISTINCT cat.*
+            FROM " . self::$table . " c
+            JOIN categories cat ON c.categoryId = cat.id
+            WHERE c.classeId = ? AND c.isActive = 1 AND cat.isActive = 1
+            ORDER BY cat.order
+        ");
+        $stmt->execute([$classeId]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

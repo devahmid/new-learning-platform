@@ -70,6 +70,16 @@ class User extends BaseModel {
     }
     
     /**
+     * Récupère la classe de l'utilisateur
+     */
+    public function classe() {
+        if ($this->classeId) {
+            return Classe::find($this->classeId);
+        }
+        return null;
+    }
+    
+    /**
      * Récupère les inscriptions de l'utilisateur
      */
     public function enrollments() {
@@ -122,6 +132,11 @@ class User extends BaseModel {
         // Ajouter les relations si nécessaire
         if ($this->levelId) {
             $array['level'] = $this->level()?->toArray();
+        }
+        
+        // ✅ Ajouter la classe si présente
+        if ($this->classeId) {
+            $array['classe'] = $this->classe()?->toArray();
         }
         
         return $array;

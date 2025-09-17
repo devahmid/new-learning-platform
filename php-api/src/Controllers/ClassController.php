@@ -103,4 +103,103 @@ class ClassController {
             Response::json(['error' => 'Erreur lors de la suppression de la classe'], 500);
         }
     }
+    
+    /**
+     * Récupère les catégories d'une classe
+     */
+    public function getCategories($classeId) {
+        $classe = Classe::find($classeId);
+        
+        if (!$classe) {
+            Response::json(['error' => 'Classe non trouvée'], 404);
+            return;
+        }
+        
+        $categories = Classe::getCategoriesForClasse($classeId);
+        Response::json($categories, 200);
+    }
+    
+    /**
+     * Récupère les cours d'une classe
+     */
+    public function getCourses($classeId) {
+        $classe = Classe::find($classeId);
+        
+        if (!$classe) {
+            Response::json(['error' => 'Classe non trouvée'], 404);
+            return;
+        }
+        
+        $courses = Classe::getCoursesForClasse($classeId);
+        $coursesArray = array_map(function($course) {
+            return $course->toArray();
+        }, $courses);
+        
+        Response::json($coursesArray, 200);
+    }
+    
+    /**
+     * Récupère les cours d'une classe par catégorie
+     */
+    public function getCoursesByCategory($classeId, $categoryId) {
+        $classe = Classe::find($classeId);
+        
+        if (!$classe) {
+            Response::json(['error' => 'Classe non trouvée'], 404);
+            return;
+        }
+        
+        $courses = Classe::getCoursesForClasseByCategory($classeId, $categoryId);
+        $coursesArray = array_map(function($course) {
+            return $course->toArray();
+        }, $courses);
+        
+        Response::json($coursesArray, 200);
+    }
+    
+    /**
+     * Ajoute une catégorie à une classe
+     */
+    public function addCategory($classeId) {
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        if (!$data || !isset($data['categoryId'])) {
+            Response::json(['error' => 'categoryId requis'], 400);
+            return;
+        }
+        
+        $classe = Classe::find($classeId);
+        if (!$classe) {
+            Response::json(['error' => 'Classe non trouvée'], 404);
+            return;
+        }
+        
+        $order = $data['order'] ?? 0;
+        $result = Classe::addCategoryToClasse($classeId, $data['categoryId'], $order);
+        
+        if ($result) {
+            Response::json(['message' => 'Catégorie ajoutée à la classe avec succès'], 200);
+        } else {
+            Response::json(['error' => 'Erreur lors de l\'ajout de la catégorie'], 500);
+        }
+    }
+    
+    /**
+     * Supprime une catégorie d'une classe
+     */
+    public function removeCategory($classeId, $categoryId) {
+        $classe = Classe::find($classeId);
+        if (!$classe) {
+            Response::json(['error' => 'Classe non trouvée'], 404);
+            return;
+        }
+        
+        $result = Classe::removeCategoryFromClasse($classeId, $categoryId);
+        
+        if ($result) {
+            Response::json(['message' => 'Catégorie supprimée de la classe avec succès'], 200);
+        } else {
+            Response::json(['error' => 'Erreur lors de la suppression de la catégorie'], 500);
+        }
+    }
 }

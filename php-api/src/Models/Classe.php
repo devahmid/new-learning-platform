@@ -11,33 +11,22 @@ class Classe extends BaseModel {
     protected static $fillable = [
         'name',
         'description',
-        'levelId',
-        'instructorId',
-        'maxStudents',
-        'isActive',
-        'startDate',
-        'endDate',
-        'schedule'
+        'capacity',
+        'isActive'
     ];
     
     /**
-     * Récupère le niveau de la classe
+     * Récupère les catégories de la classe
      */
-    public function level() {
-        if ($this->levelId) {
-            return Level::find($this->levelId);
-        }
-        return null;
+    public function categories() {
+        return ClasseCategory::where(['classeId' => $this->id, 'isActive' => 1]);
     }
     
     /**
-     * Récupère l'instructeur de la classe
+     * Récupère les cours de la classe
      */
-    public function instructor() {
-        if ($this->instructorId) {
-            return User::find($this->instructorId);
-        }
-        return null;
+    public function courses() {
+        return Course::where(['classeId' => $this->id]);
     }
     
     /**
@@ -60,14 +49,15 @@ class Classe extends BaseModel {
     public function toArray() {
         $array = parent::toArray();
         
-        // Relations simples (sans récursion pour éviter les boucles infinies)
-        if ($this->levelId) {
-            $array['level'] = $this->level()?->toArrayWithoutRelations();
-        }
+        // Relations avec les catégories
+        $array['categories'] = array_map(function($cc) {
+            return $cc->category()?->toArrayWithoutRelations();
+        }, $this->categories());
         
-        if ($this->instructorId) {
-            $array['instructor'] = $this->instructor()?->toArrayWithoutRelations();
-        }
+        // Relations avec les cours
+        $array['courses'] = array_map(function($course) {
+            return $course->toArrayWithoutRelations();
+        }, $this->courses());
         
         // Relations avec les étudiants
         $array['students'] = array_map(function($student) {
@@ -80,5 +70,40 @@ class Classe extends BaseModel {
         }, $this->schedules());
         
         return $array;
+    }
+    
+    /**
+     * Récupère les catégories disponibles pour une classe
+     */
+    public static function getCategoriesForClasse($classeId) {
+        return ClasseCategory::getCategoriesForClasse($classeId);
+    }
+    
+    /**
+     * Récupère les cours d'une classe
+     */
+    public static function getCoursesForClasse($classeId) {
+        return Course::findByClasse($classeId);
+    }
+    
+    /**
+     * Récupère les cours d'une classe par catégorie
+     */
+    public static function getCoursesForClasseByCategory($classeId, $categoryId) {
+        return Course::findByClasseAndCategory($classeId, $categoryId);
+    }
+    
+    /**
+     * Ajoute une catégorie à une classe
+     */
+    public static function addCategoryToClasse($classeId, $categoryId, $order = 0) {
+        return ClasseCategory::createAssociation($classeId, $categoryId, $order);
+    }
+    
+    /**
+     * Supprime une catégorie d'une classe
+     */
+    public static function removeCategoryFromClasse($classeId, $categoryId) {
+        return ClasseCategory::removeAssociation($classeId, $categoryId);
     }
 }
