@@ -244,8 +244,9 @@ export class HeaderComponent implements OnInit {
       : 'Aucun enfant sélectionné';
   }
 
-  getLevelName(levelId?: number): string {
-    switch (levelId) {
+  getLevelName(levelId?: any): string {
+    console.log('[HEADER] Classe:', levelId);
+    switch (levelId.id) {
       case 1:
         return 'Débutant';
       case 2:

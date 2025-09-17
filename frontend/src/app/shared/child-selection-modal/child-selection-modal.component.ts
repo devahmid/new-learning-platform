@@ -88,7 +88,6 @@ export class ChildSelectionModalComponent implements OnInit, OnDestroy {
       const children = await this.parentService
         .getChildrenOfLoggedInParent()
         .toPromise();
-      console.log('[CHILD-MODAL] Enfants chargés:', children);
       this.children.set(children || []);
       
       // Charger les progressions pour chaque enfant
@@ -205,24 +204,48 @@ export class ChildSelectionModalComponent implements OnInit, OnDestroy {
       return 'bg-gray-100 text-gray-800 border-gray-200';
     }
     
-    // Utiliser l'ID de la classe pour déterminer la couleur
-    const classeId = classe.id;
-    switch (classeId) {
-      case 1:
-      case 2:
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 3:
-      case 4:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 5:
-      case 6:
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 7:
-      case 8:
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+    // Utiliser la couleur définie dans l'objet classe si elle existe
+    if (classe.color) {
+      // Convertir la couleur hex en classes Tailwind appropriées
+      return this.convertColorToTailwindClasses(classe.color);
     }
+    
+    // Fallback : utiliser l'ID de la classe pour déterminer la couleur
+    const classeId = classe.id;
+    
+    // Logique de couleurs basée sur l'ID de classe
+    if (classeId >= 1 && classeId <= 2) {
+      return 'bg-green-100 text-green-800 border-green-200';
+    } else if (classeId >= 3 && classeId <= 4) {
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    } else if (classeId >= 5 && classeId <= 6) {
+      return 'bg-red-100 text-red-800 border-red-200';
+    } else if (classeId >= 7 && classeId <= 8) {
+      return 'bg-purple-100 text-purple-800 border-purple-200';
+    } else if (classeId >= 9 && classeId <= 10) {
+      return 'bg-blue-100 text-blue-800 border-blue-200';
+    } else if (classeId >= 11 && classeId <= 12) {
+      return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+    } else if (classeId >= 13 && classeId <= 14) {
+      return 'bg-pink-100 text-pink-800 border-pink-200';
+    } else {
+      // Pour les IDs très élevés, utiliser une couleur basée sur le modulo
+      const colorIndex = classeId % 6;
+      const colors = [
+        'bg-green-100 text-green-800 border-green-200',
+        'bg-yellow-100 text-yellow-800 border-yellow-200',
+        'bg-red-100 text-red-800 border-red-200',
+        'bg-purple-100 text-purple-800 border-purple-200',
+        'bg-blue-100 text-blue-800 border-blue-200',
+        'bg-indigo-100 text-indigo-800 border-indigo-200'
+      ];
+      return colors[colorIndex];
+    }
+  }
+
+  private convertColorToTailwindClasses(hexColor: string): string {
+    // Utiliser des classes Tailwind de base avec la couleur personnalisée en style inline
+    return `text-white border-2 font-medium px-2 py-1 rounded-full text-xs`;
   }
 
   getClasseName(classe?: any): string {

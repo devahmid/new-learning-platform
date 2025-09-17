@@ -94,8 +94,8 @@
           <!-- Info enfant -->
           <div class="text-left">
             <div class="text-sm font-medium text-gray-800">{{ getSelectedChildName() }}</div>
-            <div *ngIf="selectedChild()" class="text-xs text-emerald-600">
-              Niveau {{ getLevelName(selectedChild()?.level?.id) }}
+            <div *ngIf="selectedChild()" class="text-xs text-white px-2 py-1 rounded-full flex items-center gap-1" [style.background-color]="selectedChild()?.classe?.color || '#6366F1'">
+              {{ selectedChild()?.classe?.name }}
             </div>
           </div>
           

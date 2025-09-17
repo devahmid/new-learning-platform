@@ -133,7 +133,9 @@
                             </h3>
                             <div class="flex items-center space-x-2 mt-1">
                                 <span
-                                    [class]="'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ' + getClasseBadgeClass(child.classe)">
+                                    [class]="'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ' + getClasseBadgeClass(child.classe)"
+                                    [style.background-color]="child.classe?.color || '#6366F1'"
+                                    [style.border-color]="child.classe?.color || '#6366F1'">
                                     <i class="fa-solid fa-graduation-cap mr-1"></i>
                                     {{ getClasseName(child.classe) }}
                                 </span>

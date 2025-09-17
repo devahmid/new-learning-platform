@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './niveau-user.component.scss',
 })
 export class NiveauUserComponent implements OnInit, OnDestroy {
-  classe = 1;
+  classe = '';
   progress = 0; // Progression réelle depuis l'API
   subjectData: any = null;
   vocabularyLessons: Lesson[] = [];
@@ -42,8 +42,11 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     // Écouter les changements de paramètres de route
     this.routeSubscription = this.route.paramMap.subscribe(params => {
       const subjectName = params.get('subjectName');
-      const classeParam = params.get('classe');
-      this.classe = classeParam ? +classeParam : 1;
+      const classeParam = params.get('level'); // Le paramètre s'appelle 'level' dans la route
+      const selectedChild = this.childContext.selectedChild();
+    
+      // Utiliser le paramètre de la route pour la classe
+      this.classe = classeParam ? `Classe ${classeParam}` : (selectedChild?.classe?.name || '');
 
       // Gestion spéciale pour "replay"
       if (subjectName === 'replay') {
@@ -137,14 +140,15 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Vérifier si l'enfant a une classe (classeId ou classe.id)
-    const classeId = selectedChild.classeId || selectedChild.classe?.id;
+    // Récupérer l'ID de la classe depuis les paramètres de route
+    const classeId = this.route.snapshot.paramMap.get('level');
     if (!classeId) {
-      console.error('Classe manquante pour l\'enfant:', selectedChild);
-      this.error = 'Classe non définie pour cet enfant';
+      console.error('ID de classe manquant dans l\'URL');
+      this.error = 'Classe non spécifiée';
       this.isLoading = false;
       return;
     }
+    console.log('Utilisation de la classe ID', classeId, 'pour récupérer les cours');
 
     // Gestion spéciale pour les replays
     if (this.subjectData && this.subjectData.name === 'Replay') {
@@ -152,10 +156,11 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Récupérer les cours pour cette matière et cette classe
+    // Récupérer les cours pour cette matière et la classe spécifiée
     if (this.subjectData && this.subjectData.id) {
+      console.log('Chargement des cours pour la matière', this.subjectData.name, 'classe ID', classeId);
       this.courseService
-        .getCoursesByCategoryAndClasse(this.subjectData.id, classeId)
+        .getCoursesByCategoryAndClasse(this.subjectData.id, +classeId) // Utiliser l'ID de la classe de l'URL
         .subscribe({
           next: (courses) => {
             console.log(
@@ -189,22 +194,23 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadReplayCourses(classeId: number) {
+  private loadReplayCourses(classeId: string) {
     // Pour les replays, on récupère tous les cours de la catégorie "Replay" (ID 14)
-    // et on filtre par classe
+    // pour la classe spécifiée dans l'URL
+    console.log('Chargement des cours Replay pour la classe ID', classeId);
     this.courseService
-      .getCoursesByCategoryAndClasse(14, classeId) // ID 14 = catégorie Replay
+      .getCoursesByCategoryAndClasse(14, +classeId) // ID 14 = catégorie Replay, classeId = classe de l'URL
       .subscribe({
         next: (courses) => {
           console.log(
-            "Cours Replay récupérés depuis l'API pour classe",
+            "Cours Replay récupérés depuis l'API pour la classe ID",
             classeId,
-            ':',
+            ":",
             courses
           );
           
-          // Ajouter des exemples de cours bloqués pour tester
-          this.courses = this.addBlockingExamples(courses);
+          // Utiliser les vraies données de l'API
+          this.courses = courses;
 
           // Traiter les leçons
           this.processLessons();
@@ -214,7 +220,6 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
         error: (err) => {
           console.error('Erreur lors du chargement des cours Replay:', err);
           this.error = 'Erreur lors du chargement des replays';
-          // Pas de données disponibles - afficher 0
           this.courses = [];
           this.progress = 0;
           this.isLoading = false;
@@ -373,5 +378,13 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     // Ici tu peux ajouter une popup ou un toast si tu en as un
     console.log(message);
     alert(message);
+  }
+
+  // Méthode pour obtenir le nom de la classe
+  getClasseName(): string {
+    const selectedChild = this.childContext.selectedChild();
+    
+    this.classe = selectedChild?.classe?.name || '';
+    return this.classe;
   }
 }

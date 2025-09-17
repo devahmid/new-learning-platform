@@ -7,7 +7,6 @@ use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Exercise;
 use App\Models\Quiz;
-use App\Models\Level;
 use App\Models\ClassModel;
 use App\Utils\Response;
 use App\Utils\JWT;
@@ -25,33 +24,30 @@ class AdminDashboardController {
         JWT::requireRole(['admin']);
         
         try {
-            $userModel = new User();
-            $courseModel = new Course();
-            $lessonModel = new Lesson();
-            $exerciseModel = new Exercise();
-            $quizModel = new Quiz();
-            $levelModel = new Level();
-            $classModel = new ClassModel();
-            
             // Statistiques des utilisateurs
-            $totalUsers = $userModel->count();
-            $totalParents = $userModel->countByType('parent');
-            $totalChildren = $userModel->countByType('child');
-            $totalAdmins = $userModel->countByRole('admin');
+            $totalUsers = User::count();
+            $totalParents = User::countByType('parent');
+            $totalChildren = User::countByType('child');
+            $totalAdmins = User::countByRole('admin');
             
             // Statistiques du contenu
-            $totalCourses = $courseModel->count();
-            $totalLessons = $lessonModel->count();
-            $totalExercises = $exerciseModel->count();
-            $totalQuizzes = $quizModel->count();
-            $totalLevels = $levelModel->count();
-            $totalClasses = $classModel->count();
+            $totalCourses = Course::count();
+            $totalLessons = Lesson::count();
+            $totalExercises = Exercise::count();
+            $totalQuizzes = Quiz::count();
+            $totalClasses = ClassModel::count();
             
             // Utilisateurs actifs (créés dans les 30 derniers jours)
-            $activeUsers = $userModel->countActiveUsers(30);
+            $activeUsers = User::countActiveUsers(30);
             
-            // Cours populaires (avec le plus d'exercices)
-            $popularCourses = $courseModel->getPopularCourses(5);
+            // Cours populaires (avec le plus d'exercices) - avec gestion d'erreur
+            $popularCourses = [];
+            try {
+                $popularCourses = Course::getPopularCourses(5);
+            } catch (Exception $e) {
+                // En cas d'erreur, on continue avec un tableau vide
+                $popularCourses = [];
+            }
             
             $stats = [
                 'users' => [
@@ -66,7 +62,6 @@ class AdminDashboardController {
                     'lessons' => $totalLessons,
                     'exercises' => $totalExercises,
                     'quizzes' => $totalQuizzes,
-                    'levels' => $totalLevels,
                     'classes' => $totalClasses
                 ],
                 'popularCourses' => $popularCourses
@@ -132,17 +127,17 @@ class AdminDashboardController {
             $exerciseModel = new Exercise();
             
             // Statistiques des cours
-            $totalCourses = $courseModel->count();
-            $activeCourses = $courseModel->countActive();
-            $coursesByLevel = $courseModel->getCoursesByLevel();
-            $coursesByCategory = $courseModel->getCoursesByCategory();
-            $popularCourses = $courseModel->getPopularCourses(10);
-            $recentCourses = $courseModel->getRecentCourses(7);
+            $totalCourses = Course::count();
+            $activeCourses = Course::countActive();
+            $coursesByClasse = Course::getCoursesByClasse();
+            $coursesByCategory = Course::getCoursesByCategory();
+            $popularCourses = Course::getPopularCourses(10);
+            $recentCourses = Course::getRecentCourses(7);
             
             $stats = [
                 'total' => $totalCourses,
                 'active' => $activeCourses,
-                'byLevel' => $coursesByLevel,
+                'byClasse' => $coursesByClasse,
                 'byCategory' => $coursesByCategory,
                 'popular' => $popularCourses,
                 'recent' => $recentCourses
@@ -258,8 +253,7 @@ class AdminDashboardController {
             $alerts = [];
             
             // Vérifier les utilisateurs inactifs (pas de connexion depuis 30 jours)
-            $userModel = new User();
-            $inactiveUsers = $userModel->getInactiveUsers(30);
+            $inactiveUsers = User::getInactiveUsers(30);
             if (count($inactiveUsers) > 0) {
                 $alerts[] = [
                     'type' => 'warning',
@@ -270,8 +264,7 @@ class AdminDashboardController {
             }
             
             // Vérifier les cours sans exercices
-            $courseModel = new Course();
-            $coursesWithoutExercises = $courseModel->getCoursesWithoutExercises();
+            $coursesWithoutExercises = Course::getCoursesWithoutExercises();
             if (count($coursesWithoutExercises) > 0) {
                 $alerts[] = [
                     'type' => 'info',
@@ -281,15 +274,25 @@ class AdminDashboardController {
                 ];
             }
             
-            // Vérifier les niveaux sans cours
-            $levelModel = new Level();
-            $levelsWithoutCourses = $levelModel->getLevelsWithoutCourses();
-            if (count($levelsWithoutCourses) > 0) {
+            // Vérifier les classes sans cours
+            $classesWithoutCourses = ClassModel::getClassesWithoutCourses();
+            if (count($classesWithoutCourses) > 0) {
                 $alerts[] = [
                     'type' => 'info',
-                    'title' => 'Niveaux vides',
-                    'message' => count($levelsWithoutCourses) . ' niveau(x) sans cours',
-                    'count' => count($levelsWithoutCourses)
+                    'title' => 'Classes vides',
+                    'message' => count($classesWithoutCourses) . ' classe(s) sans cours',
+                    'count' => count($classesWithoutCourses)
+                ];
+            }
+            
+            // Vérifier les utilisateurs en attente de validation
+            $pendingUsers = User::where(['status' => 'pending']);
+            if (count($pendingUsers) > 0) {
+                $alerts[] = [
+                    'type' => 'warning',
+                    'title' => 'Utilisateurs en attente',
+                    'message' => count($pendingUsers) . ' utilisateur(s) en attente de validation',
+                    'count' => count($pendingUsers)
                 ];
             }
             

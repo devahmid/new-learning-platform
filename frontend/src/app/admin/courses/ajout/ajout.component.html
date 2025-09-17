@@ -110,16 +110,16 @@
             </select>
           </div>
 
-          <!-- Niveau -->
+          <!-- Classe -->
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Niveau *
+              Classe *
             </label>
-            <select formControlName="levelId"
+            <select formControlName="classeId"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">Sélectionner un niveau</option>
-              <option *ngFor="let level of levels" [value]="level.id">
-                {{ level.name }}
+              <option value="">Sélectionner une classe</option>
+              <option *ngFor="let classe of classes" [value]="classe.id">
+                {{ classe.name }}
               </option>
             </select>
           </div>
@@ -507,8 +507,8 @@
                 </p>
               </div>
               <div>
-                <span class="font-medium text-blue-800 dark:text-blue-200">Niveau:</span>
-                <p class="text-blue-700 dark:text-blue-300">{{ getLevelName(courseForm.get('levelId')?.value) }}</p>
+                <span class="font-medium text-blue-800 dark:text-blue-200">Classe:</span>
+                <p class="text-blue-700 dark:text-blue-300">{{ getClasseName(courseForm.get('classeId')?.value) }}</p>
               </div>
             </div>
           </div>

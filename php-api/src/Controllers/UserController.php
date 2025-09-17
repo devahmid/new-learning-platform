@@ -145,7 +145,7 @@ class UserController {
             }
             
             // Mettre à jour les champs autorisés
-            $allowedFields = ['firstName', 'lastName', 'dateOfBirth', 'levelId', 'classeId'];
+            $allowedFields = ['firstName', 'lastName', 'dateOfBirth', 'classeId'];
             foreach ($data as $key => $value) {
                 if (in_array($key, $allowedFields)) {
                     $child->$key = $value;
@@ -199,7 +199,7 @@ class UserController {
             'role' => $data['role'] ?? 'user',
             'phoneNumber' => $data['phoneNumber'] ?? null,
             'dateOfBirth' => $data['dateOfBirth'] ?? null,
-            'levelId' => $data['levelId'] ?? null,
+            'classeId' => $data['classeId'] ?? null,
             'parentId' => $data['parentId'] ?? null
         ]);
         
@@ -253,7 +253,7 @@ class UserController {
         }
         
         // Mettre à jour les champs
-        $fillableFields = ['email', 'firstName', 'lastName', 'phoneNumber', 'dateOfBirth', 'type', 'levelId', 'parentId'];
+        $fillableFields = ['email', 'firstName', 'lastName', 'phoneNumber', 'dateOfBirth', 'type', 'classeId', 'parentId'];
         
         foreach ($fillableFields as $field) {
             if (isset($data[$field])) {
@@ -426,7 +426,7 @@ class UserController {
         $child->type = 'child';
         $child->role = 'user';
         $child->parentId = $currentUser['id'];
-        $child->levelId = $data['levelId'] ?? null;
+        $child->classeId = $data['classeId'] ?? null;
         
         // Générer un email temporaire si non fourni
         if (empty($data['email'])) {
@@ -445,5 +445,160 @@ class UserController {
         unset($childData['password']);
         
         Response::json($childData, 201);
+    }
+    
+    /**
+     * Récupère les statistiques d'un enfant
+     */
+    public function getChildStats($childId) {
+        $currentUser = JWT::requireAuth();
+        
+        // Vérifier que l'enfant appartient au parent ou que l'utilisateur est admin
+        $child = User::find($childId);
+        if (!$child) {
+            Response::notFound('Enfant non trouvé');
+        }
+        
+        // Vérifier que l'enfant appartient au parent ou que l'utilisateur est admin
+        if ($currentUser['type'] !== 'admin' && $child->parentId !== $currentUser['id']) {
+            Response::forbidden('Accès non autorisé à cet enfant');
+        }
+        
+        // Calculer les statistiques de l'enfant
+        $stats = $this->calculateChildStats($childId);
+        
+        Response::json($stats, 200);
+    }
+    
+    /**
+     * Calcule les statistiques d'un enfant
+     */
+    private function calculateChildStats($childId) {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        
+        // Récupérer les cours de l'enfant (basé sur sa classe)
+        $child = User::find($childId);
+        $classeId = $child->classeId; // Utiliser uniquement classeId
+        
+        if (!$classeId) {
+            // Retourner des statistiques vides si pas de classe
+            return [
+                'id' => $childId,
+                'progress' => 0,
+                'points' => 0,
+                'badges' => 0,
+                'subjects' => 0,
+                'completedLessons' => 0,
+                'totalLessons' => 0,
+                'completedExercises' => 0,
+                'totalExercises' => 0,
+                'completedQuizzes' => 0,
+                'totalQuizzes' => 0
+            ];
+        }
+        
+        // Compter les leçons
+        $stmt = $db->prepare("
+            SELECT COUNT(*) as total
+            FROM lessons l
+            JOIN courses c ON l.courseId = c.id
+            WHERE c.classeId = ? AND c.isActive = 1
+        ");
+        $stmt->execute([$classeId]);
+        $totalLessons = $stmt->fetch()['total'] ?? 0;
+        
+        // Compter les leçons complétées (simulation - à adapter selon votre logique)
+        $completedLessons = 0; // TODO: Implémenter la logique de progression réelle
+        
+        // Compter les exercices
+        $stmt = $db->prepare("
+            SELECT COUNT(*) as total
+            FROM exercises e
+            JOIN courses c ON e.courseId = c.id
+            WHERE c.classeId = ? AND c.isActive = 1
+        ");
+        $stmt->execute([$classeId]);
+        $totalExercises = $stmt->fetch()['total'] ?? 0;
+        
+        // Compter les exercices complétés (simulation)
+        $completedExercises = 0; // TODO: Implémenter la logique de progression réelle
+        
+        // Compter les quiz
+        $stmt = $db->prepare("
+            SELECT COUNT(*) as total
+            FROM quizzes q
+            JOIN courses c ON q.courseId = c.id
+            WHERE c.classeId = ? AND c.isActive = 1
+        ");
+        $stmt->execute([$classeId]);
+        $totalQuizzes = $stmt->fetch()['total'] ?? 0;
+        
+        // Compter les quiz complétés (simulation)
+        $completedQuizzes = 0; // TODO: Implémenter la logique de progression réelle
+        
+        // Compter les matières
+        $stmt = $db->prepare("
+            SELECT COUNT(DISTINCT c.categoryId) as total
+            FROM courses c
+            WHERE c.classeId = ? AND c.isActive = 1
+        ");
+        $stmt->execute([$classeId]);
+        $subjects = $stmt->fetch()['total'] ?? 0;
+        
+        // Calculer la progression globale
+        $totalItems = $totalLessons + $totalExercises + $totalQuizzes;
+        $completedItems = $completedLessons + $completedExercises + $completedQuizzes;
+        $progress = $totalItems > 0 ? round(($completedItems / $totalItems) * 100) : 0;
+        
+        // Calculer les points (simulation)
+        $points = ($completedLessons * 10) + ($completedExercises * 5) + ($completedQuizzes * 15);
+        
+        // Calculer les badges (simulation)
+        $badges = 0;
+        if ($completedLessons >= 10) $badges++;
+        if ($completedLessons >= 50) $badges++;
+        if ($completedExercises >= 20) $badges++;
+        if ($completedQuizzes >= 5) $badges++;
+        if ($progress >= 25) $badges++;
+        if ($progress >= 50) $badges++;
+        if ($progress >= 75) $badges++;
+        if ($progress >= 100) $badges++;
+        
+        return [
+            'id' => $childId,
+            'progress' => $progress,
+            'points' => $points,
+            'badges' => $badges,
+            'subjects' => $subjects,
+            'completedLessons' => $completedLessons,
+            'totalLessons' => $totalLessons,
+            'completedExercises' => $completedExercises,
+            'totalExercises' => $totalExercises,
+            'completedQuizzes' => $completedQuizzes,
+            'totalQuizzes' => $totalQuizzes
+        ];
+    }
+    
+    /**
+     * Récupère les statistiques de tous les enfants du parent connecté
+     */
+    public function getMyChildrenStats() {
+        $currentUser = JWT::requireAuth();
+        
+        // Vérifier que l'utilisateur est un parent
+        if ($currentUser['type'] !== 'parent') {
+            Response::forbidden('Seuls les parents peuvent accéder aux statistiques de leurs enfants');
+        }
+        
+        // Récupérer tous les enfants du parent
+        $children = User::where(['parentId' => $currentUser['id'], 'type' => 'child']);
+        
+        $childrenStats = [];
+        foreach ($children as $child) {
+            $stats = $this->calculateChildStats($child->id);
+            $childrenStats[] = $stats;
+        }
+        
+        Response::json($childrenStats, 200);
     }
 }

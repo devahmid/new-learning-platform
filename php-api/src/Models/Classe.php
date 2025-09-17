@@ -11,6 +11,7 @@ class Classe extends BaseModel {
     protected static $fillable = [
         'name',
         'description',
+        'color',
         'capacity',
         'isActive'
     ];

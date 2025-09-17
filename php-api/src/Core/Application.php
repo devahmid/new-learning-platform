@@ -37,6 +37,8 @@ class Application {
         $this->routes['GET']['/api/users'] = ['App\Controllers\UserController', 'findAll'];
         $this->routes['GET']['/api/users/me'] = ['App\Controllers\UserController', 'getMe'];
         $this->routes['GET']['/api/users/me/children'] = ['App\Controllers\UserController', 'getMyChildren'];
+        $this->routes['GET']['/api/users/children/{id}/stats'] = ['App\Controllers\UserController', 'getChildStats'];
+        $this->routes['GET']['/api/users/me/children/stats'] = ['App\Controllers\UserController', 'getMyChildrenStats'];
         
         // Routes de réinitialisation de mot de passe (compatibilité frontend) - AVANT les routes dynamiques
         $this->routes['POST']['/api/users/request-password-reset'] = ['App\Controllers\AuthController', 'requestPasswordReset'];
@@ -78,8 +80,16 @@ class Application {
         // Routes cours
         $this->routes['GET']['/api/courses'] = ['App\Controllers\CourseController', 'findAll'];
         $this->routes['GET']['/api/courses/{id}'] = ['App\Controllers\CourseController', 'findById'];
+        
+        // Anciennes routes (compatibilité)
         $this->routes['GET']['/api/courses/level/{levelId}'] = ['App\Controllers\CourseController', 'findByLevel'];
         $this->routes['GET']['/api/courses/category/{categoryId}/level/{levelId}'] = ['App\Controllers\CourseController', 'findByCategoryAndLevel'];
+        
+        // Nouvelles routes basées sur les classes
+        $this->routes['GET']['/api/courses/classe/{classeId}'] = ['App\Controllers\CourseController', 'findByClasse'];
+        $this->routes['GET']['/api/courses/classe/{classeId}/category/{categoryId}'] = ['App\Controllers\CourseController', 'findByClasseAndCategory'];
+        $this->routes['GET']['/api/courses/classe/{classeId}/categories'] = ['App\Controllers\CourseController', 'getCategoriesForClasse'];
+        
         $this->routes['POST']['/api/courses'] = ['App\Controllers\CourseController', 'create'];
         $this->routes['PUT']['/api/courses/{id}'] = ['App\Controllers\CourseController', 'update'];
         $this->routes['DELETE']['/api/courses/{id}'] = ['App\Controllers\CourseController', 'delete'];

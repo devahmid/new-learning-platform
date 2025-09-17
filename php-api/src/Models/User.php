@@ -21,7 +21,6 @@ class User extends BaseModel {
         'approved_at',
         'approved_by',
         'rejection_reason',
-        'levelId',
         'parentId',
         'classeId',
         'resetToken',
@@ -60,11 +59,11 @@ class User extends BaseModel {
     }
     
     /**
-     * Récupère le niveau de l'utilisateur
+     * Récupère le niveau de l'utilisateur (déprécié - utiliser classe())
      */
     public function level() {
-        if ($this->levelId) {
-            return Level::find($this->levelId);
+        if ($this->classeId) {
+            return Classe::find($this->classeId);
         }
         return null;
     }
@@ -129,8 +128,8 @@ class User extends BaseModel {
         unset($array['resetToken']);
         unset($array['resetTokenExpiration']);
         
-        // Ajouter les relations si nécessaire
-        if ($this->levelId) {
+        // Ajouter les relations si nécessaire (déprécié - utiliser classe)
+        if ($this->classeId) {
             $array['level'] = $this->level()?->toArray();
         }
         
@@ -320,12 +319,13 @@ class User extends BaseModel {
     /**
      * Récupère les utilisateurs inactifs depuis X jours
      */
-    public function getInactiveUsers($days = 30) {
+    public static function getInactiveUsers($days = 30) {
         $db = \DatabaseConfig::getInstance()->getConnection();
         $stmt = $db->prepare("
             SELECT id, firstName, lastName, email, createdAt 
             FROM " . self::$table . " 
             WHERE createdAt < DATE_SUB(NOW(), INTERVAL ? DAY)
+            AND status = 'active'
         ");
         $stmt->execute([$days]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);

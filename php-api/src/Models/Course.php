@@ -231,7 +231,7 @@ class Course extends BaseModel {
     /**
      * Récupère les cours sans exercices
      */
-    public function getCoursesWithoutExercises() {
+    public static function getCoursesWithoutExercises() {
         $db = \DatabaseConfig::getInstance()->getConnection();
         $stmt = $db->query("
             SELECT c.* 

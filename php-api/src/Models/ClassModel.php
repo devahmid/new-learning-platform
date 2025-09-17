@@ -88,4 +88,19 @@ class ClassModel extends BaseModel {
         ");
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+    
+    /**
+     * Récupère les classes sans cours
+     */
+    public static function getClassesWithoutCourses() {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT c.*
+            FROM " . self::$table . " c
+            LEFT JOIN courses co ON c.id = co.classeId
+            WHERE co.id IS NULL AND c.isActive = 1
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

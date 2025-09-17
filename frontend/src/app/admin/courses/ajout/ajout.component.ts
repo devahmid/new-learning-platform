@@ -10,13 +10,14 @@ import {
 } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AdminService } from '../../admin.service';
+import { ClasseService } from '../../../services/classe.service';
 
 interface CourseForm {
   title: string;
   description: string;
   categoryId: number;
   subcategoryId: number;
-  levelId: number;
+  classeId: number;
   videoUrl?: string;
   pdfUrl?: string;
   instructorId?: number;
@@ -83,7 +84,7 @@ export class AjoutComponent implements OnInit {
   // Données de référence
   categories: any[] = [];
   subcategories: any[] = [];
-  levels: any[] = [];
+  classes: any[] = [];
   instructors: any[] = [];
 
   // Étapes du formulaire
@@ -96,6 +97,7 @@ export class AjoutComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private adminService: AdminService,
+    private classeService: ClasseService,
     public router: Router,
     private route: ActivatedRoute
   ) {
@@ -136,7 +138,7 @@ export class AjoutComponent implements OnInit {
       ],
       categoryId: [null, Validators.required],
       subcategoryId: [null, Validators.required],
-      levelId: [null, Validators.required],
+      classeId: [null, Validators.required],
       videoUrl: [''],
       pdfUrl: [''],
       instructorId: [null],
@@ -152,16 +154,16 @@ export class AjoutComponent implements OnInit {
     try {
       this.isLoading = true;
 
-      // Charger les catégories, sous-catégories et niveaux depuis l'API
-      const [categories, subcategories, levels] = await Promise.all([
+      // Charger les catégories, sous-catégories et classes depuis l'API
+      const [categories, subcategories, classes] = await Promise.all([
         this.adminService.getCategories().toPromise(),
         this.adminService.getSubcategories().toPromise(),
-        this.adminService.getLevels().toPromise(),
+        this.classeService.getAllClasses().toPromise(),
       ]);
 
       this.categories = categories || [];
       this.subcategories = subcategories || [];
-      this.levels = levels || [];
+      this.classes = classes || [];
 
       // Instructeurs simulés pour l'instant
       this.instructors = [
@@ -190,10 +192,10 @@ export class AjoutComponent implements OnInit {
         { id: 7, name: 'Géométrie', categoryId: 3 },
       ];
 
-      this.levels = [
-        { id: 1, name: 'Débutant' },
-        { id: 2, name: 'Intermédiaire' },
-        { id: 3, name: 'Avancé' },
+      this.classes = [
+        { id: 1, name: 'Classe 1' },
+        { id: 2, name: 'Classe 2' },
+        { id: 3, name: 'Classe 3' },
       ];
 
       this.instructors = [
@@ -250,7 +252,7 @@ export class AjoutComponent implements OnInit {
         description: course.description,
         categoryId: course.category?.id || course.categoryId,
         subcategoryId: course.subcategory?.id || course.subcategoryId,
-        levelId: course.level?.id || course.levelId,
+        classeId: course.classe?.id || course.classeId,
         videoUrl: course.videoUrl || course.video_url || course.video || '',
         pdfUrl: course.pdfUrl || course.fileUrl || course.pdf_url || course.file_url || course.file || '',
         instructorId: course.instructor?.id || course.instructorId,
@@ -335,7 +337,7 @@ export class AjoutComponent implements OnInit {
           this.courseForm.get('description')?.valid &&
           this.courseForm.get('categoryId')?.valid &&
           this.courseForm.get('subcategoryId')?.valid &&
-          this.courseForm.get('levelId')?.valid
+          this.courseForm.get('classeId')?.valid
         );
 
       case 2: // Leçons
@@ -473,7 +475,7 @@ export class AjoutComponent implements OnInit {
           description: courseData.description,
           categoryId: courseData.categoryId,
           subcategoryId: courseData.subcategoryId,
-          levelId: courseData.levelId,
+          classeId: courseData.classeId,
           instructorId: courseData.instructorId,
           videoUrl: courseData.videoUrl || null,
           pdfUrl: courseData.pdfUrl || null,
@@ -602,9 +604,9 @@ export class AjoutComponent implements OnInit {
     return subcategory?.name || 'Non définie';
   }
 
-  getLevelName(levelId: number | null): string {
-    if (!levelId) return 'Non défini';
-    const level = this.levels.find((l) => l.id === levelId);
-    return level?.name || 'Non défini';
+  getClasseName(classeId: number | null): string {
+    if (!classeId) return 'Non définie';
+    const classe = this.classes.find((c) => c.id === classeId);
+    return classe?.name || 'Non définie';
   }
 }
