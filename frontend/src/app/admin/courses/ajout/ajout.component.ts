@@ -39,6 +39,7 @@ interface LessonForm {
   videoUrl?: string;
   fileUrl?: string;
   order: number;
+  subcategoryId?: number;
 }
 
 interface QuizForm {
@@ -372,7 +373,8 @@ export class AjoutComponent implements OnInit {
             duration: lesson.duration || 0,
             videoUrl: lesson.videoUrl || lesson.video_url || lesson.video || '',
             fileUrl: lesson.fileUrl || lesson.file_url || lesson.file || '',
-            order: lesson.order || lastIndex + 1
+            order: lesson.order || lastIndex + 1,
+            subcategoryId: lesson.subcategoryId || lesson.subcategory?.id || null
           });
         });
         console.log('Leçons chargées dans le formulaire:', this.lessonsArray.value);
@@ -467,6 +469,7 @@ export class AjoutComponent implements OnInit {
       videoUrl: [''],
       fileUrl: [''],
       order: [this.lessonsArray.length + 1],
+      subcategoryId: [null],
     });
 
     this.lessonsArray.push(lesson);
@@ -584,7 +587,8 @@ export class AjoutComponent implements OnInit {
             duration: lesson.duration || 0,
             videoUrl: lesson.videoUrl || null,
             fileUrl: lesson.fileUrl || null,
-            order: lesson.order || 0
+            order: lesson.order || 0,
+            subcategoryId: lesson.subcategoryId || null
           })) || [],
           // Convertir les quiz au format attendu par l'API
           quizzes: courseData.quizzes?.map((quiz: any) => ({
@@ -676,6 +680,13 @@ export class AjoutComponent implements OnInit {
     return this.subcategories.filter((sub) => sub.categoryId === categoryId);
   }
 
+  // 🔄 Filtrage des sous-catégories pour une leçon spécifique
+  getFilteredSubcategoriesForLesson(lessonIndex: number): any[] {
+    const categoryId = this.courseForm.get('categoryId')?.value;
+    if (!categoryId) return [];
+    return this.subcategories.filter((sub) => sub.categoryId === categoryId);
+  }
+
   // 📝 Validation des URLs
   isValidUrl(url: string): boolean {
     if (!url) return true;
@@ -704,5 +715,11 @@ export class AjoutComponent implements OnInit {
     if (!classeId) return 'Non définie';
     const classe = this.classes.find((c) => c.id === classeId);
     return classe?.name || 'Non définie';
+  }
+
+  getSubcategoryNameForLesson(subcategoryId: number | null): string {
+    if (!subcategoryId) return 'Aucune sous-catégorie';
+    const subcategory = this.subcategories.find((s) => s.id === subcategoryId);
+    return subcategory?.name || 'Sous-catégorie inconnue';
   }
 }
