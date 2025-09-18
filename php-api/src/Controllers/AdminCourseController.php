@@ -61,8 +61,8 @@ class AdminCourseController {
      * Crée un nouveau cours (version admin)
      */
     public function createCourse() {
-        // Vérifier l'authentification admin
-        JWT::requireRole(['admin']);
+        // Vérifier l'authentification admin et récupérer l'utilisateur connecté
+        $user = JWT::requireRole(['admin']);
         
         try {
             $data = json_decode(file_get_contents('php://input'), true);
@@ -80,6 +80,24 @@ class AdminCourseController {
                 return;
             }
             
+            // Vérifier que categoryId existe si fourni
+            $categoryId = null;
+            if (isset($data['categoryId']) && !empty($data['categoryId'])) {
+                // Vérifier que la catégorie existe
+                $db = \DatabaseConfig::getInstance()->getConnection();
+                $stmt = $db->prepare("SELECT id FROM categories WHERE id = ?");
+                $stmt->execute([$data['categoryId']]);
+                if ($stmt->fetch()) {
+                    $categoryId = $data['categoryId'];
+                } else {
+                    Response::error('La catégorie spécifiée n\'existe pas', 400);
+                    return;
+                }
+            } else {
+                Response::error('categoryId est requis', 400);
+                return;
+            }
+            
             // Vérifier que subcategoryId existe si fourni
             $subcategoryId = null;
             if (isset($data['subcategoryId']) && !empty($data['subcategoryId'])) {
@@ -93,14 +111,35 @@ class AdminCourseController {
                 // Si la sous-catégorie n'existe pas, on laisse subcategoryId à null
             }
             
+            // Vérifier que l'instructorId existe si fourni, sinon utiliser l'utilisateur connecté
+            $instructorId = $user['id']; // Utiliser l'ID de l'utilisateur connecté par défaut
+            
+            if (isset($data['instructorId']) && !empty($data['instructorId'])) {
+                $db = \DatabaseConfig::getInstance()->getConnection();
+                $stmt = $db->prepare("SELECT id FROM users WHERE id = ?");
+                $stmt->execute([$data['instructorId']]);
+                if ($stmt->fetch()) {
+                    $instructorId = $data['instructorId'];
+                } else {
+                    Response::error('L\'instructeur spécifié n\'existe pas', 400);
+                    return;
+                }
+            }
+            
+            // Debug: Log des données reçues
+            error_log("DEBUG createCourse - Données reçues: " . json_encode($data));
+            error_log("DEBUG createCourse - categoryId vérifié: $categoryId");
+            error_log("DEBUG createCourse - subcategoryId vérifié: " . ($subcategoryId ?? 'null'));
+            error_log("DEBUG createCourse - classeId: " . $data['classeId']);
+            
             // Créer le cours
             $course = new Course([
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'classeId' => $data['classeId'],
-                'categoryId' => $data['categoryId'],
+                'categoryId' => $categoryId, // Utiliser la variable vérifiée
                 'subcategoryId' => $subcategoryId,
-                'instructorId' => $data['instructorId'] ?? 1, // ID par défaut pour l'admin
+                'instructorId' => $instructorId, // Utiliser l'ID vérifié
                 'price' => $data['price'] ?? '0.00',
                 'discountPrice' => $data['discountPrice'] ?? null,
                 'tags' => $data['tags'] ?? null,
@@ -113,6 +152,10 @@ class AdminCourseController {
             ]);
             
             $course->save();
+            
+            // Debug: Log du cours sauvegardé
+            error_log("DEBUG createCourse - Cours sauvegardé avec ID: " . $course->id);
+            error_log("DEBUG createCourse - Cours sauvegardé: " . json_encode($course->toArray()));
             
             // Créer les leçons si elles existent
             if (isset($data['lessons']) && is_array($data['lessons'])) {
@@ -246,6 +289,18 @@ class AdminCourseController {
      */
     private function createLessons($courseId, $lessonsData) {
         foreach ($lessonsData as $lessonData) {
+            // Vérifier que subcategoryId existe si fourni
+            $lessonSubcategoryId = null;
+            if (isset($lessonData['subcategoryId']) && !empty($lessonData['subcategoryId'])) {
+                $db = \DatabaseConfig::getInstance()->getConnection();
+                $stmt = $db->prepare("SELECT id FROM subcategories WHERE id = ?");
+                $stmt->execute([$lessonData['subcategoryId']]);
+                if ($stmt->fetch()) {
+                    $lessonSubcategoryId = $lessonData['subcategoryId'];
+                }
+                // Si la sous-catégorie n'existe pas, on laisse subcategoryId à null
+            }
+            
             $lesson = new Lesson([
                 'title' => $lessonData['title'],
                 'description' => $lessonData['description'] ?? '',
@@ -255,6 +310,7 @@ class AdminCourseController {
                 'duration' => $lessonData['duration'] ?? null,
                 'order' => $lessonData['order'] ?? 0,
                 'courseId' => $courseId,
+                'subcategoryId' => $lessonSubcategoryId,
                 'isActive' => $lessonData['isActive'] ?? true
             ]);
             $lesson->save();

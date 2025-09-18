@@ -54,10 +54,25 @@ class CourseController {
      * Récupère les cours par classe et catégorie
      */
     public function findByClasseAndCategory($classeId, $categoryId) {
+        // Debug: Log des paramètres reçus
+        error_log("DEBUG findByClasseAndCategory - classeId: $classeId, categoryId: $categoryId");
+        
+        // Vérifier que les paramètres sont valides
+        if (!is_numeric($classeId) || !is_numeric($categoryId)) {
+            error_log("DEBUG - Paramètres invalides: classeId=$classeId, categoryId=$categoryId");
+            Response::json([], 200);
+            return;
+        }
+        
         $courses = Course::findByClasseAndCategory($classeId, $categoryId);
+        error_log("DEBUG - Nombre de cours trouvés: " . count($courses));
+        
         $coursesArray = array_map(function($course) {
             return $course->toArray();
         }, $courses);
+        
+        // Debug: Log des cours trouvés
+        error_log("DEBUG - Cours trouvés: " . json_encode($coursesArray));
         
         // Format compatible NestJS
         Response::json($coursesArray, 200);

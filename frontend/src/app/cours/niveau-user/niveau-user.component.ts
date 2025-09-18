@@ -157,41 +157,73 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     }
 
     // Récupérer les cours pour cette matière et la classe spécifiée
-    if (this.subjectData && this.subjectData.id) {
+    if (this.subjectData && this.subjectData.name) {
       console.log('Chargement des cours pour la matière', this.subjectData.name, 'classe ID', classeId);
-      this.courseService
-        .getCoursesByCategoryAndClasse(this.subjectData.id, +classeId) // Utiliser l'ID de la classe de l'URL
-        .subscribe({
-          next: (courses) => {
-            console.log(
-              "Cours récupérés depuis l'API pour",
-              this.subjectData.name,
-              'classe',
-              classeId,
-              ':',
-              courses
-            );
-            this.courses = courses;
-
-            // Toujours traiter les leçons, même si certaines sont vides
-            this.processLessons();
-            this.calculateProgress();
+      
+      // Récupérer d'abord l'ID réel de la catégorie depuis la base de données
+      this.courseService.getCategoriesByClasse(+classeId).subscribe({
+        next: (categories) => {
+          console.log('Catégories disponibles pour la classe', classeId, ':', categories);
+          
+          // Trouver la catégorie correspondant à la matière
+          const category = categories.find(cat => 
+            cat.name?.toLowerCase() === this.subjectData.name.toLowerCase() ||
+            cat.name?.toLowerCase().includes(this.subjectData.name.toLowerCase())
+          );
+          
+          if (category && category.id) {
+            console.log('Catégorie trouvée:', category, 'ID réel:', category.id);
+            this.loadCoursesForCategory(category.id, +classeId);
+          } else {
+            console.error('Catégorie non trouvée pour la matière:', this.subjectData.name);
+            this.error = `Aucune catégorie trouvée pour ${this.subjectData.name}`;
             this.isLoading = false;
-          },
-          error: (err) => {
-            console.error('Erreur lors du chargement des cours:', err);
-            this.error = 'Erreur lors du chargement des cours';
-            // Pas de données disponibles - afficher 0
-            this.courses = [];
-            this.progress = 0;
-            this.isLoading = false;
-          },
-        });
+          }
+        },
+        error: (err) => {
+          console.error('Erreur lors du chargement des catégories:', err);
+          this.error = 'Erreur lors du chargement des catégories';
+          this.isLoading = false;
+        }
+      });
     } else {
-      console.error('SubjectData ou ID manquant:', this.subjectData);
+      console.error('SubjectData ou nom manquant:', this.subjectData);
       this.error = 'Matière non trouvée';
       this.isLoading = false;
     }
+  }
+
+  private loadCoursesForCategory(categoryId: number, classeId: number) {
+    this.courseService
+      .getCoursesByCategoryAndClasse(categoryId, classeId)
+      .subscribe({
+        next: (courses) => {
+          console.log(
+            "Cours récupérés depuis l'API pour",
+            this.subjectData.name,
+            'classe',
+            classeId,
+            'catégorie',
+            categoryId,
+            ':',
+            courses
+          );
+          this.courses = courses;
+
+          // Toujours traiter les leçons, même si certaines sont vides
+          this.processLessons();
+          this.calculateProgress();
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Erreur lors du chargement des cours:', err);
+          this.error = 'Erreur lors du chargement des cours';
+          // Pas de données disponibles - afficher 0
+          this.courses = [];
+          this.progress = 0;
+          this.isLoading = false;
+        },
+      });
   }
 
   private loadReplayCourses(classeId: string) {

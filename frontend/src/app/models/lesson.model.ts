@@ -7,7 +7,13 @@ export interface Lesson {
     order?: number;
     createdAt?: string;
     updatedAt?: string;
-    completed?:boolean;
-    expanded?: boolean
+    completed?: boolean;
+    expanded?: boolean;
+    subcategoryId?: number;
+    subcategory?: {
+      id: number;
+      name: string;
+      description?: string;
+    };
   }
   

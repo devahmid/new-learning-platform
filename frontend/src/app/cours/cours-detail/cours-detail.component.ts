@@ -127,11 +127,9 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
   resultMessage: string | null = null;
   showConfetti = false;
 
-  // Organisation des leçons par sous-catégories
-  vocabularyLessons: any[] = [];
-  grammarLessons: any[] = [];
-  readingLessons: any[] = [];
-  otherLessons: any[] = [];
+  // Organisation des leçons par sous-catégories (dynamique)
+  lessonsBySubcategory: { [key: string]: any[] } = {};
+  subcategoryNames: string[] = [];
 
   // Navigation de retour
   
@@ -156,14 +154,21 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     this.initializeChildTracking();
 
     this.courseService.getCourseById(id).subscribe((data: any) => {
+      console.log('DEBUG - Données reçues de l\'API:', data);
+      console.log('DEBUG - Leçons reçues:', data.lessons);
+      
       this.cours = {
         ...data,
         lessons:
-          data.lessons?.map((lesson: any) => ({
-            ...lesson,
-            expanded: false,
-            completed: false,
-          })) || [],
+          data.lessons?.map((lesson: any) => {
+            console.log('DEBUG - Leçon individuelle:', lesson);
+            console.log('DEBUG - Sous-catégorie de la leçon:', lesson.subcategory);
+            return {
+              ...lesson,
+              expanded: false,
+              completed: false,
+            };
+          }) || [],
         enrollments: [],
         createdAt: (data as any).createdAt || '',
         updatedAt: (data as any).updatedAt || '',
@@ -192,10 +197,8 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
 
   private organizeLessonsBySubcategory() {
     // Réinitialiser les tableaux
-    this.vocabularyLessons = [];
-    this.grammarLessons = [];
-    this.readingLessons = [];
-    this.otherLessons = [];
+    this.lessonsBySubcategory = {};
+    this.subcategoryNames = [];
 
     // Utiliser seulement les leçons du cours actuel
     if (!this.cours || !this.cours.lessons) {
@@ -203,64 +206,44 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const currentSubcategoryName = (this.cours as any).subcategory?.name?.toLowerCase() || '';
-    console.log(`Cours actuel "${this.cours.title}" - Sous-catégorie: "${currentSubcategoryName}"`);
+    console.log(`Cours actuel "${this.cours.title}" - Catégorie: "${this.cours.category?.name}"`);
 
     // Trier les leçons par ordre
     const sortedLessons = [...this.cours.lessons].sort((a, b) => (a.order || 0) - (b.order || 0));
     
-    // Organiser les leçons selon la sous-catégorie du cours
-    if (currentSubcategoryName.includes('vocabulaire')) {
-      this.vocabularyLessons = sortedLessons;
-    } else if (currentSubcategoryName.includes('grammaire')) {
-      this.grammarLessons = sortedLessons;
-    } else if (currentSubcategoryName.includes('lecture')) {
-      this.readingLessons = sortedLessons;
-    } else if (currentSubcategoryName.includes('replay')) {
-      // Pour les cours Replay, créer une section spéciale
-      this.otherLessons = sortedLessons;
-    } else {
-      // Pour les autres sous-catégories, les mettre dans "autres"
-      this.otherLessons = sortedLessons;
-    }
+    // Organiser chaque leçon selon SA propre sous-catégorie
+    sortedLessons.forEach(lesson => {
+      const lessonSubcategoryName = lesson.subcategory?.name;
+      
+      if (lessonSubcategoryName) {
+        // Leçon avec sous-catégorie
+        if (!this.lessonsBySubcategory[lessonSubcategoryName]) {
+          this.lessonsBySubcategory[lessonSubcategoryName] = [];
+        }
+        this.lessonsBySubcategory[lessonSubcategoryName].push(lesson);
+      } else {
+        // Leçon sans sous-catégorie - les mettre dans une section spéciale
+        if (!this.lessonsBySubcategory['Leçons générales']) {
+          this.lessonsBySubcategory['Leçons générales'] = [];
+        }
+        this.lessonsBySubcategory['Leçons générales'].push(lesson);
+      }
+    });
+
+    // Créer la liste des noms de sous-catégories pour l'affichage
+    // Mettre "Leçons générales" à la fin
+    const allSubcategories = Object.keys(this.lessonsBySubcategory);
+    this.subcategoryNames = allSubcategories
+      .filter(name => name !== 'Leçons générales')
+      .sort()
+      .concat(allSubcategories.includes('Leçons générales') ? ['Leçons générales'] : []);
 
     console.log('Leçons organisées par sous-catégorie:', {
-      vocabulary: this.vocabularyLessons.length,
-      grammar: this.grammarLessons.length,
-      reading: this.readingLessons.length,
-      other: this.otherLessons.length
+      subcategories: this.subcategoryNames,
+      lessonsBySubcategory: this.lessonsBySubcategory
     });
   }
 
-  private fallbackToCurrentCourseLessons() {
-    // Fallback : utiliser seulement les leçons du cours actuel
-    const sortedLessons = [...this.cours.lessons].sort((a, b) => (a.order || 0) - (b.order || 0));
-    const subcategoryName = (this.cours as any).subcategory?.name?.toLowerCase() || '';
-
-    // Réinitialiser tous les tableaux
-    this.vocabularyLessons = [];
-    this.grammarLessons = [];
-    this.readingLessons = [];
-    this.otherLessons = [];
-
-    if (subcategoryName.includes('vocabulaire')) {
-      this.vocabularyLessons = sortedLessons;
-    } else if (subcategoryName.includes('grammaire')) {
-      this.grammarLessons = sortedLessons;
-    } else if (subcategoryName.includes('lecture')) {
-      this.readingLessons = sortedLessons;
-    } else {
-      this.otherLessons = sortedLessons;
-    }
-
-    console.log('Fallback - Leçons du cours actuel:', {
-      vocabulary: this.vocabularyLessons.length,
-      grammar: this.grammarLessons.length,
-      reading: this.readingLessons.length,
-      other: this.otherLessons.length,
-      subcategory: subcategoryName
-    });
-  }
   loadPdf(pdfUrl: string) {
     fetch(pdfUrl)
       .then((res) => res.blob())
@@ -302,6 +285,7 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       // Mapper les noms de catégories vers les noms de matières
       const categoryToSubjectMap: { [key: string]: string } = {
         'Langue Arabe': 'Arabe',
+        'Langue Arabe ': 'Arabe', // Avec espace à la fin
         'Langue Arabe Admin': 'Arabe', // Ajout pour gérer le cas avec "Admin"
         Croyance: 'Croyance',
         'At-Tafsir': 'At-Tafsir',
@@ -311,21 +295,31 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       };
 
       console.log('Catégorie du cours:', this.cours.category.name);
+      console.log('Catégorie du cours (avec quotes):', `"${this.cours.category.name}"`);
       
+      // Nettoyer le nom de catégorie avant le mapping
+      const cleanCategoryName = this.cours.category.name.trim();
       const subjectName =
+        categoryToSubjectMap[cleanCategoryName] ||
         categoryToSubjectMap[this.cours.category.name] ||
         this.cours.category.name;
       const classe = this.cours.classe.id;
 
+      // Normaliser le nom de la matière pour l'URL
+      const normalizedSubjectName = this.normalizeForUrl(subjectName);
+      const classeName = this.normalizeForUrl(this.cours.classe.name) || `classe-${classe}`;
+
       console.log('Navigation vers:', {
         categoryName: this.cours.category.name,
         subjectName,
+        normalizedSubjectName,
         classe,
+        classeName,
         lessonId: lesson.id,
       });
 
-      // Naviguer vers LessonDetailComponent avec les bons paramètres
-      this.router.navigate(['/cours', subjectName, classe, 'lesson', lesson.id]);
+      console.log('URL finale:', `/cours/${normalizedSubjectName}/${classeName}/lesson/${lesson.id}`);
+      this.router.navigate(['/cours', normalizedSubjectName, classeName, 'lesson', lesson.id]);
     } else {
       console.error(
         'Données du cours manquantes pour la navigation:',
@@ -367,9 +361,11 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
 
   retourListe() {
     // Retourner vers la page des classes pour cette matière
-    const subjectName = this.getSubjectName().toLowerCase();
-    const classe = this.getClasse();
-    this.router.navigate(['/cours', subjectName, classe]);
+    const subjectName = this.getSubjectName();
+    const normalizedSubjectName = this.normalizeForUrl(subjectName);
+    const classeId = this.cours.classe.id; // Utiliser l'ID de la classe, pas le nom
+    console.log('Retour vers:', `/cours/${normalizedSubjectName}/${classeId}`);
+    this.router.navigate(['/cours', normalizedSubjectName, classeId]);
   }
 
 
@@ -379,6 +375,7 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       // Mapper les noms de catégories vers les noms de matières
       const categoryToSubjectMap: { [key: string]: string } = {
         'Langue Arabe': 'Arabe',
+        'Langue Arabe ': 'Arabe', // Avec espace à la fin
         'Langue Arabe Admin': 'Arabe',
         Croyance: 'Croyance',
         'At-Tafsir': 'At-Tafsir',
@@ -386,7 +383,11 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
         Hadith: 'Hadith',
       };
       
-      return categoryToSubjectMap[this.cours.category.name] || this.cours.category.name;
+      // Nettoyer le nom de catégorie avant le mapping
+      const cleanCategoryName = this.cours.category.name.trim();
+      return categoryToSubjectMap[cleanCategoryName] || 
+             categoryToSubjectMap[this.cours.category.name] || 
+             this.cours.category.name;
     }
     
     // Fallback vers les paramètres de route si disponibles
@@ -513,5 +514,136 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       this.organizeLessonsBySubcategory();
       this.mettreAJourProgression();
     });
+  }
+
+  // Méthodes helper pour les styles dynamiques des sous-catégories
+  getSubcategoryIcon(subcategoryName: string): string {
+    const iconMap: { [key: string]: string } = {
+      // Arabe
+      'Vocabulaire': 'fa-solid fa-book text-green-600',
+      'Grammaire': 'fa-solid fa-pencil text-blue-600',
+      'Lecture': 'fa-solid fa-book-open text-orange-600',
+      'Écriture': 'fa-solid fa-pen-fancy text-purple-600',
+      
+      // Fiqh
+      'Prière': 'fa-solid fa-mosque text-blue-600',
+      'Jeûne': 'fa-solid fa-sun text-yellow-600',
+      'Zakat': 'fa-solid fa-coins text-green-600',
+      'Hajj': 'fa-solid fa-kaaba text-orange-600',
+      
+      // Croyance
+      'Tawhid': 'fa-solid fa-star text-yellow-600',
+      'Prophètes': 'fa-solid fa-user-tie text-blue-600',
+      'Anges': 'fa-solid fa-dove text-white-600',
+      'Destin': 'fa-solid fa-scroll text-purple-600',
+      
+      // Général
+      'Replay': 'fa-solid fa-video text-indigo-600',
+      'Leçons générales': 'fa-solid fa-graduation-cap text-gray-600'
+    };
+
+    // Recherche par correspondance partielle
+    for (const [key, value] of Object.entries(iconMap)) {
+      if (subcategoryName.toLowerCase().includes(key.toLowerCase())) {
+        return value;
+      }
+    }
+
+    // Icône par défaut pour toute sous-catégorie non mappée
+    return 'fa-solid fa-graduation-cap text-gray-600';
+  }
+
+  getSubcategoryIconClass(subcategoryName: string, index: number): string {
+    const colorClasses = [
+      'bg-blue-100', 'bg-green-100', 'bg-orange-100', 'bg-purple-100', 
+      'bg-indigo-100', 'bg-pink-100', 'bg-yellow-100', 'bg-red-100'
+    ];
+    
+    return colorClasses[index % colorClasses.length];
+  }
+
+  getLessonButtonClass(subcategoryName: string, lessonIndex: number): string {
+    const baseClasses = 'hover:bg-opacity-80';
+    const colorMap: { [key: string]: string } = {
+      // Arabe
+      'Vocabulaire': 'bg-green-50 hover:bg-green-100',
+      'Grammaire': 'bg-blue-50 hover:bg-blue-100',
+      'Lecture': 'bg-orange-50 hover:bg-orange-100',
+      'Écriture': 'bg-purple-50 hover:bg-purple-100',
+      
+      // Fiqh
+      'Prière': 'bg-blue-50 hover:bg-blue-100',
+      'Jeûne': 'bg-yellow-50 hover:bg-yellow-100',
+      'Zakat': 'bg-green-50 hover:bg-green-100',
+      'Hajj': 'bg-orange-50 hover:bg-orange-100',
+      
+      // Croyance
+      'Tawhid': 'bg-yellow-50 hover:bg-yellow-100',
+      'Prophètes': 'bg-blue-50 hover:bg-blue-100',
+      'Anges': 'bg-indigo-50 hover:bg-indigo-100',
+      'Destin': 'bg-purple-50 hover:bg-purple-100',
+      
+      // Général
+      'Replay': 'bg-indigo-50 hover:bg-indigo-100',
+      'Leçons générales': 'bg-gray-50 hover:bg-gray-100'
+    };
+
+    for (const [key, value] of Object.entries(colorMap)) {
+      if (subcategoryName.toLowerCase().includes(key.toLowerCase())) {
+        return `${value} ${baseClasses}`;
+      }
+    }
+
+    // Couleur par défaut pour toute sous-catégorie non mappée
+    return 'bg-gray-50 hover:bg-gray-100';
+  }
+
+  getLessonIconClass(subcategoryName: string): string {
+    const colorMap: { [key: string]: string } = {
+      // Arabe
+      'Vocabulaire': 'text-green-600',
+      'Grammaire': 'text-blue-600',
+      'Lecture': 'text-orange-600',
+      'Écriture': 'text-purple-600',
+      
+      // Fiqh
+      'Prière': 'text-blue-600',
+      'Jeûne': 'text-yellow-600',
+      'Zakat': 'text-green-600',
+      'Hajj': 'text-orange-600',
+      
+      // Croyance
+      'Tawhid': 'text-yellow-600',
+      'Prophètes': 'text-blue-600',
+      'Anges': 'text-indigo-600',
+      'Destin': 'text-purple-600',
+      
+      // Général
+      'Replay': 'text-indigo-600',
+      'Leçons générales': 'text-gray-600'
+    };
+
+    for (const [key, value] of Object.entries(colorMap)) {
+      if (subcategoryName.toLowerCase().includes(key.toLowerCase())) {
+        return value;
+      }
+    }
+
+    // Couleur par défaut pour toute sous-catégorie non mappée
+    return 'text-gray-600';
+  }
+
+  // Méthode pour normaliser les noms pour les URLs
+  private normalizeForUrl(name: string): string {
+    if (!name) return '';
+    const normalized = name
+      .toLowerCase()
+      .replace(/\s+/g, '-')  // Remplacer les espaces par des tirets
+      .replace(/[^a-z0-9-]/g, '')  // Enlever les caractères spéciaux
+      .replace(/-+/g, '-')  // Remplacer les tirets multiples par un seul
+      .replace(/^-|-$/g, '');  // Enlever les tirets en début/fin
+    
+    console.log(`normalizeForUrl("${name}") = "${normalized}"`);
+    return normalized;
   }
 }

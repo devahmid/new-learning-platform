@@ -59,11 +59,15 @@
         </div>
 
         <!-- Cards des matières normales -->
-        <div *ngFor="let subject of subjects" class="w-full max-w-sm relative group flex flex-col cursor-not-allowed opacity-60">    
+        <div *ngFor="let subject of subjects" 
+             class="w-full max-w-sm relative group flex flex-col"
+             [ngClass]="isSubjectUnlocked(subject) ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
+             (click)="onSubjectClick(subject, $event)">    
             
             <!-- Carte principale -->
             <div class="relative z-10 flex-1 flex flex-col justify-between px-2 pt-10 pb-4 rounded-2xl shadow-lg 
-            transition-transform duration-300" [ngClass]="subject.color">
+            transition-transform duration-300"
+            [ngClass]="subject.color + (isSubjectUnlocked(subject) ? ' hover:scale-105' : '')">
             <i *ngIf="subject.icon"
                 class="fa-solid absolute -top-10 left-1/2 -translate-x-1/2 text-3xl bg-white p-4 rounded-full shadow-lg z-10"
                 [ngClass]="subject.iconColor + ' ' + subject.icon">
@@ -84,10 +88,16 @@
                     {{ subject.fr || '' }}
                 </div>
 
-                <!-- Message "Bientôt disponible" -->
-                <div class="text-white text-xs text-center mt-2 bg-black bg-opacity-30 rounded-lg px-2 py-1">
+                <!-- Message "Bientôt disponible" - affiché seulement si la matière n'est pas débloquée -->
+                <div *ngIf="!isSubjectUnlocked(subject)" class="text-white text-xs text-center mt-2 bg-black bg-opacity-30 rounded-lg px-2 py-1">
                     <i class="fa-solid fa-clock mr-1"></i>
                     Bientôt disponible
+                </div>
+
+                <!-- Message "Disponible" - affiché seulement si la matière est débloquée -->
+                <div *ngIf="isSubjectUnlocked(subject)" class="text-white text-xs text-center mt-2 bg-green-600 bg-opacity-80 rounded-lg px-2 py-1">
+                    <i class="fa-solid fa-check mr-1"></i>
+                    Disponible
                 </div>
 
             </div>

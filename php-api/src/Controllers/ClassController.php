@@ -115,7 +115,18 @@ class ClassController {
             return;
         }
         
+        // Debug: Vérifier les associations classe-catégorie
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("SELECT * FROM classe_categories WHERE classeId = ?");
+        $stmt->execute([$classeId]);
+        $associations = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        error_log("DEBUG getCategories - Classe ID: $classeId");
+        error_log("DEBUG getCategories - Associations trouvées: " . json_encode($associations));
+        
         $categories = Classe::getCategoriesForClasse($classeId);
+        error_log("DEBUG getCategories - Catégories retournées: " . json_encode($categories));
+        
         Response::json($categories, 200);
     }
     

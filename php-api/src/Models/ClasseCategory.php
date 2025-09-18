@@ -58,9 +58,14 @@ class ClasseCategory extends BaseModel {
      */
     public static function getCategoriesForClasse($classeId) {
         $classeCategories = self::where(['classeId' => $classeId, 'isActive' => 1]);
-        return array_map(function($cc) {
+        $categories = array_map(function($cc) {
             return $cc->category();
         }, $classeCategories);
+        
+        // Filtrer les valeurs nulles et retourner les tableaux
+        return array_map(function($category) {
+            return $category ? $category->toArray() : null;
+        }, array_filter($categories));
     }
     
     /**

@@ -17,7 +17,8 @@ class Lesson extends BaseModel {
         'duration',
         'order',
         'isActive',
-        'courseId'
+        'courseId',
+        'subcategoryId'
     ];
     
     /**
@@ -26,6 +27,16 @@ class Lesson extends BaseModel {
     public function course() {
         if ($this->courseId) {
             return Course::find($this->courseId);
+        }
+        return null;
+    }
+    
+    /**
+     * Récupère la sous-catégorie de cette leçon
+     */
+    public function subcategory() {
+        if ($this->subcategoryId) {
+            return Subcategory::find($this->subcategoryId);
         }
         return null;
     }
@@ -53,6 +64,10 @@ class Lesson extends BaseModel {
         // Relations simples (sans récursion pour éviter les boucles infinies)
         if ($this->courseId) {
             $array['course'] = $this->course()?->toArrayWithoutRelations();
+        }
+        
+        if ($this->subcategoryId) {
+            $array['subcategory'] = $this->subcategory()?->toArrayWithoutRelations();
         }
         
         // Relations avec les exercices et quiz (sans références circulaires)

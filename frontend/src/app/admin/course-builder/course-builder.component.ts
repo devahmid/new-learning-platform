@@ -44,6 +44,7 @@ interface LessonForm {
   fileUrl?: string;
   order: number;
   duration: number; // en minutes
+  subcategoryId?: number; // sous-catégorie de la leçon
 }
 
 interface QuizForm {
@@ -277,6 +278,7 @@ export class CourseBuilderComponent implements OnInit {
       fileUrl: [''],
       order: [this.lessonsArray.length + 1],
       duration: [30, [Validators.required, Validators.min(1)]],
+      subcategoryId: [null], // sous-catégorie de la leçon
     });
     this.lessonsArray.push(lesson);
   }

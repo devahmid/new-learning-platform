@@ -47,114 +47,64 @@
         </div>
       </div>
 
-      <!-- Sections d'apprentissage - 3 sous-catégories arabes -->
-      <div id="learning-sections" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Sections d'apprentissage - Sous-catégories dynamiques -->
+      <div id="learning-sections" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        <!-- Section Grammaire -->
-        <div id="grammar-section" class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow" *ngIf="grammarLessons.length > 0">
+        <!-- Sections dynamiques pour chaque sous-catégorie (sauf "Leçons générales") -->
+        <ng-container *ngFor="let subcategoryName of subcategoryNames; let i = index">
+          <div *ngIf="subcategoryName !== 'Leçons générales'"
+               class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
           <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-              <i class="fa-solid fa-pencil text-blue-600 text-xl"></i>
+            <div class="w-12 h-12 rounded-full flex items-center justify-center"
+                 [ngClass]="getSubcategoryIconClass(subcategoryName, i)">
+              <i [class]="getSubcategoryIcon(subcategoryName)" class="text-xl"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800">Grammaire</h3>
+            <h3 class="text-xl font-bold text-gray-800">{{ subcategoryName }}</h3>
           </div>
           <div class="space-y-4">
             <button 
-              *ngFor="let lesson of grammarLessons; let i = index"
-              class="w-full py-3 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors flex items-center justify-between"
+              *ngFor="let lesson of lessonsBySubcategory[subcategoryName]; let lessonIndex = index"
+              class="w-full py-3 px-4 rounded-xl transition-colors flex items-center justify-between"
+              [ngClass]="getLessonButtonClass(subcategoryName, lessonIndex)"
               (click)="toggleLesson(lesson)">
               <span class="text-gray-700">{{ lesson.title }}</span>
-              <i class="fa-solid fa-check text-blue-600" *ngIf="lesson.completed"></i>
-              <i class="fa-regular fa-circle-play text-blue-600" *ngIf="!lesson.completed && i === 0"></i>
-              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed && i > 0"></i>
+              <i class="fa-solid fa-check" 
+                 [ngClass]="getLessonIconClass(subcategoryName)" 
+                 *ngIf="lesson.completed"></i>
+              <i class="fa-regular fa-circle-play" 
+                 [ngClass]="getLessonIconClass(subcategoryName)" 
+                 *ngIf="!lesson.completed && lessonIndex === 0"></i>
+              <i class="fa-solid fa-lock text-gray-400" 
+                 *ngIf="!lesson.completed && lessonIndex > 0"></i>
             </button>
           </div>
-        </div>
-
-        <!-- Section Vocabulaire -->
-        <div id="vocabulary-section" class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow" *ngIf="vocabularyLessons.length > 0">
-          <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-              <i class="fa-solid fa-book text-green-600 text-xl"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800">Vocabulaire</h3>
           </div>
-          <div class="space-y-4">
-            <button 
-              *ngFor="let lesson of vocabularyLessons; let i = index"
-              class="w-full py-3 px-4 rounded-xl bg-green-50 hover:bg-green-100 transition-colors flex items-center justify-between"
-              (click)="toggleLesson(lesson)">
-              <span class="text-gray-700">{{ lesson.title }}</span>
-              <i class="fa-solid fa-check text-green-600" *ngIf="lesson.completed"></i>
-              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Section Lecture -->
-        <div id="reading-section" class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow" *ngIf="readingLessons.length > 0">
-          <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-              <i class="fa-solid fa-book-open text-orange-600 text-xl"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800">Lecture</h3>
-          </div>
-          <div class="space-y-4">
-            <button 
-              *ngFor="let lesson of readingLessons; let i = index"
-              class="w-full py-3 px-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors flex items-center justify-between"
-              (click)="toggleLesson(lesson)">
-              <span class="text-gray-700">{{ lesson.title }}</span>
-              <i class="fa-solid fa-check text-orange-600" *ngIf="lesson.completed"></i>
-              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed"></i>
-            </button>
-          </div>
-        </div>
+        </ng-container>
       </div>
 
-      <!-- Section Replay - Pleine largeur en bas -->
-      <div id="replay-section" class="mt-8" *ngIf="isReplayCourse() && otherLessons.length > 0">
+      <!-- Section "Leçons générales" - Pleine largeur en bas -->
+      <div id="general-lessons-section" class="mt-8" *ngIf="lessonsBySubcategory['Leçons générales'] && lessonsBySubcategory['Leçons générales'].length > 0">
         <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
           <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center">
-              <i class="fa-solid fa-video text-white text-xl"></i>
+            <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+              <i class="fa-solid fa-graduation-cap text-gray-600 text-xl"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800">Leçons Replay</h3>
+            <h3 class="text-xl font-bold text-gray-800">Leçons générales</h3>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <button 
-              *ngFor="let lesson of otherLessons; let i = index"
-              class="py-3 px-4 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 transition-colors flex items-center justify-between border border-purple-200"
+              *ngFor="let lesson of lessonsBySubcategory['Leçons générales']; let lessonIndex = index"
+              class="py-3 px-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between"
               (click)="toggleLesson(lesson)">
               <span class="text-gray-700">{{ lesson.title }}</span>
-              <i class="fa-solid fa-play text-purple-600" *ngIf="!lesson.completed"></i>
-              <i class="fa-solid fa-check text-green-600" *ngIf="lesson.completed"></i>
+              <i class="fa-solid fa-check text-gray-600" *ngIf="lesson.completed"></i>
+              <i class="fa-regular fa-circle-play text-gray-600" *ngIf="!lesson.completed && lessonIndex === 0"></i>
+              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed && lessonIndex > 0"></i>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Section Autres leçons - Pleine largeur en bas -->
-      <div id="other-section" class="mt-8" *ngIf="!isReplayCourse() && otherLessons.length > 0">
-        <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-              <i class="fa-solid fa-graduation-cap text-purple-600 text-xl"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800">Autres leçons</h3>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <button 
-              *ngFor="let lesson of otherLessons; let i = index"
-              class="py-3 px-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors flex items-center justify-between"
-              (click)="toggleLesson(lesson)">
-              <span class="text-gray-700">{{ lesson.title }}</span>
-              <i class="fa-solid fa-check text-purple-600" *ngIf="lesson.completed"></i>
-              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed"></i>
-            </button>
-          </div>
-        </div>
-      </div>
 
       <div id="practice-section" class="mt-8">
         <button 

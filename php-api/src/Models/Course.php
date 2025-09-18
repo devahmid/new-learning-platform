@@ -113,7 +113,26 @@ class Course extends BaseModel {
         
         // Relations avec les leçons et quiz (sans références circulaires)
         $array['lessons'] = array_map(function($lesson) {
-            return $lesson->toArrayWithoutRelations();
+            $lessonArray = $lesson->toArrayWithoutRelations();
+            // Ajouter la sous-catégorie de la leçon
+            if ($lesson->subcategoryId) {
+                error_log("DEBUG Course->toArray() - Leçon {$lesson->id} a subcategoryId: {$lesson->subcategoryId}");
+                $subcategory = $lesson->subcategory();
+                if ($subcategory) {
+                    error_log("DEBUG Course->toArray() - Sous-catégorie trouvée: {$subcategory->name}");
+                    $lessonArray['subcategory'] = [
+                        'id' => $subcategory->id,
+                        'name' => $subcategory->name,
+                        'description' => $subcategory->description,
+                        'categoryId' => $subcategory->categoryId
+                    ];
+                } else {
+                    error_log("DEBUG Course->toArray() - Sous-catégorie non trouvée pour ID: {$lesson->subcategoryId}");
+                }
+            } else {
+                error_log("DEBUG Course->toArray() - Leçon {$lesson->id} n'a pas de subcategoryId");
+            }
+            return $lessonArray;
         }, $this->lessons());
         
         $array['quizzes'] = array_map(function($quiz) {

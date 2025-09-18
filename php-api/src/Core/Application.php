@@ -74,6 +74,7 @@ class Application {
         // Routes classes
         $this->routes['GET']['/api/classes'] = ['App\Controllers\ClassController', 'findAll'];
         $this->routes['GET']['/api/classes/{id}'] = ['App\Controllers\ClassController', 'findById'];
+        $this->routes['GET']['/api/classes/{id}/categories'] = ['App\Controllers\ClassController', 'getCategories'];
         $this->routes['POST']['/api/classes'] = ['App\Controllers\ClassController', 'create'];
         $this->routes['PUT']['/api/classes/{id}'] = ['App\Controllers\ClassController', 'update'];
         $this->routes['DELETE']['/api/classes/{id}'] = ['App\Controllers\ClassController', 'delete'];

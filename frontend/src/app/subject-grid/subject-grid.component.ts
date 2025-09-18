@@ -67,14 +67,27 @@ export class SubjectGridComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     
-    // Désactiver le clic sur toutes les matières sauf Replay
-    this.popupMessage = 'Cette matière sera bientôt disponible !';
-    this.showPopup = true;
-    
-    // Auto-masquer après 3 secondes
-    setTimeout(() => {
-      this.showPopup = false;
-    }, 3000);
+    // Vérifier si la matière est débloquée
+    if (this.isSubjectUnlocked(subject)) {
+      // Navigation vers la page des niveaux pour cette matière
+      this.router.navigate(['/matières', subject.name.toLowerCase()]);
+    } else {
+      // Désactiver le clic sur les matières non débloquées
+      this.popupMessage = 'Cette matière sera bientôt disponible !';
+      this.showPopup = true;
+      
+      // Auto-masquer après 3 secondes
+      setTimeout(() => {
+        this.showPopup = false;
+      }, 3000);
+    }
+  }
+
+  // Méthode pour vérifier si une matière est débloquée
+  isSubjectUnlocked(subject: any): boolean {
+    // Débloquer "Arabe" et "Croyance"
+    const unlockedSubjects = ['Arabe', 'Croyance', 'Fiqh'];
+    return unlockedSubjects.includes(subject.name);
   }
 
   onReplayClick(event: Event) {
