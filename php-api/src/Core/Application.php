@@ -241,6 +241,10 @@ class Application {
         $this->routes['GET']['/api/exercise/progress/type/{type}'] = ['App\Controllers\ExerciseProgressController', 'getProgressByType'];
         
         // Route de test
+        // Routes de contact
+        $this->routes['POST']['/api/contact/send'] = ['App\Controllers\ContactControllerSimple', 'sendMessage'];
+        $this->routes['GET']['/api/contact/info'] = ['App\Controllers\ContactControllerSimple', 'getContactInfo'];
+        
         $this->routes['GET']['/api/health'] = ['App\Controllers\HealthController', 'check'];
         
         // Routes progression des élèves
