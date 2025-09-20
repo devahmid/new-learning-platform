@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AdminStatsService, AdminStats } from '../../services/admin-stats.service';
 
 @Component({
   selector: 'app-users',
@@ -9,14 +10,12 @@ import { Router } from '@angular/router';
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss'
 })
-export class UsersComponent {
-
-  // userActions = [
-  //   { icon: 'pi pi-users', label: 'Tous les utilisateurs', desc: 'Liste complète des utilisateurs', path: 'list' },
-  //   { icon: 'pi pi-user-plus', label: 'Ajouter un utilisateur', desc: 'Créer un nouvel utilisateur', path: 'ajout' },
-  //   { icon: 'pi pi-id-card', label: 'Rôles', desc: 'Gérer les rôles', path: 'settings/roles' },
-  //   { icon: 'pi pi-building', label: 'Classes', desc: 'Gérer les classes d\'élèves', path: 'classes' },
-  // ];
+export class UsersComponent implements OnInit {
+  
+  // Statistiques des utilisateurs
+  stats: AdminStats | null = null;
+  isLoading = true;
+  error: string | null = null;
 
   userActions = [
     {
@@ -57,7 +56,32 @@ export class UsersComponent {
     },
   ];
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private adminStatsService: AdminStatsService
+  ) { }
+
+  ngOnInit() {
+    this.loadStats();
+  }
+
+  loadStats() {
+    this.isLoading = true;
+    this.error = null;
+    
+    this.adminStatsService.getAdminStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+        this.isLoading = false;
+        console.log('Statistiques chargées:', stats);
+      },
+      error: (err) => {
+        this.error = 'Erreur lors du chargement des statistiques';
+        this.isLoading = false;
+        console.error('Erreur lors du chargement des statistiques:', err);
+      }
+    });
+  }
 
   goTo(path: string) {
     const basePath = path.startsWith('settings') || path.startsWith('courses') || path.startsWith('stats')
@@ -67,5 +91,15 @@ export class UsersComponent {
     this.router.navigate(basePath);
   }
 
+  // Helper methods pour le template
+  getGrowthColor(percentage: number): string {
+    if (percentage > 0) return 'text-green-600 dark:text-green-400';
+    if (percentage < 0) return 'text-red-600 dark:text-red-400';
+    return 'text-gray-500 dark:text-gray-400';
+  }
 
+  formatGrowthText(percentage: number): string {
+    if (percentage === 0) return 'Stable';
+    return `${percentage > 0 ? '+' : ''}${percentage}%`;
+  }
 }

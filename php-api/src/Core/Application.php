@@ -142,6 +142,7 @@ class Application {
         // Routes admin dashboard
         $this->routes['GET']['/api/admin/dashboard/stats'] = ['App\Controllers\AdminDashboardController', 'getStats'];
         $this->routes['GET']['/api/admin/users/stats'] = ['App\Controllers\AdminDashboardController', 'getUserStats'];
+        $this->routes['GET']['/api/admin/users/stats/growth'] = ['App\Controllers\AdminDashboardController', 'getUserStatsWithGrowth'];
         $this->routes['GET']['/api/admin/courses/stats'] = ['App\Controllers\AdminDashboardController', 'getCourseStats'];
         $this->routes['GET']['/api/admin/activities/recent'] = ['App\Controllers\AdminDashboardController', 'getRecentActivities'];
         $this->routes['GET']['/api/admin/alerts'] = ['App\Controllers\AdminDashboardController', 'getAlerts'];

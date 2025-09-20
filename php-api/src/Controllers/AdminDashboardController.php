@@ -109,6 +109,65 @@ class AdminDashboardController {
             Response::error('Erreur lors de la récupération des statistiques utilisateurs: ' . $e->getMessage(), 500);
         }
     }
+
+    /**
+     * Récupère les statistiques avec pourcentages de croissance pour le composant Users
+     */
+    public function getUserStatsWithGrowth() {
+        // Vérifier l'authentification admin
+        JWT::requireRole(['admin']);
+        
+        try {
+            // Statistiques actuelles
+            $totalUsers = User::count();
+            $totalParents = User::countByType('parent');
+            $totalChildren = User::countByType('child');
+            $totalAdmins = User::countByRole('admin');
+            
+            // Statistiques du mois précédent pour calculer la croissance
+            $lastMonthUsers = User::countLastMonth();
+            $lastMonthParents = User::countByTypeLastMonth('parent');
+            $lastMonthChildren = User::countByTypeLastMonth('child');
+            $lastMonthAdmins = User::countByRoleLastMonth('admin');
+            
+            // Calcul des pourcentages de croissance
+            $usersGrowth = $this->calculateGrowthPercentage($totalUsers, $lastMonthUsers);
+            $parentsGrowth = $this->calculateGrowthPercentage($totalParents, $lastMonthParents);
+            $childrenGrowth = $this->calculateGrowthPercentage($totalChildren, $lastMonthChildren);
+            $adminsGrowth = $this->calculateGrowthPercentage($totalAdmins, $lastMonthAdmins);
+            
+            $stats = [
+                'totalUsers' => $totalUsers,
+                'totalParents' => $totalParents,
+                'totalChildren' => $totalChildren,
+                'totalAdmins' => $totalAdmins,
+                'usersGrowthPercentage' => $usersGrowth,
+                'parentsGrowthPercentage' => $parentsGrowth,
+                'childrenGrowthPercentage' => $childrenGrowth,
+                'adminsGrowthPercentage' => $adminsGrowth,
+                'recentActivity' => [
+                    'newUsersThisMonth' => $totalUsers - $lastMonthUsers,
+                    'newParentsThisMonth' => $totalParents - $lastMonthParents,
+                    'newChildrenThisMonth' => $totalChildren - $lastMonthChildren,
+                ]
+            ];
+            
+            Response::success($stats, 'Statistiques avec croissance récupérées avec succès');
+            
+        } catch (\Exception $e) {
+            Response::error('Erreur lors de la récupération des statistiques avec croissance: ' . $e->getMessage(), 500);
+        }
+    }
+    
+    /**
+     * Calcule le pourcentage de croissance entre deux valeurs
+     */
+    private function calculateGrowthPercentage($current, $previous) {
+        if ($previous == 0) {
+            return $current > 0 ? 100 : 0;
+        }
+        return round((($current - $previous) / $previous) * 100, 1);
+    }
     
 
     

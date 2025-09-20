@@ -330,4 +330,51 @@ class User extends BaseModel {
         $stmt->execute([$days]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+    
+    /**
+     * Compte les utilisateurs totaux du mois précédent
+     */
+    public static function countLastMonth() {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT COUNT(*) as count 
+            FROM " . self::$table . " 
+            WHERE DATE(createdAt) < DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+        ");
+        $stmt->execute();
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return (int)$result['count'];
+    }
+    
+    /**
+     * Compte les utilisateurs par type du mois précédent
+     */
+    public static function countByTypeLastMonth($type) {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT COUNT(*) as count 
+            FROM " . self::$table . " 
+            WHERE type = ? 
+            AND DATE(createdAt) < DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+        ");
+        $stmt->execute([$type]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return (int)$result['count'];
+    }
+    
+    /**
+     * Compte les utilisateurs par rôle du mois précédent
+     */
+    public static function countByRoleLastMonth($role) {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT COUNT(*) as count 
+            FROM " . self::$table . " 
+            WHERE role = ? 
+            AND DATE(createdAt) < DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+        ");
+        $stmt->execute([$role]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return (int)$result['count'];
+    }
 }
