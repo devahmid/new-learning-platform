@@ -19,6 +19,7 @@ import { SubjectGridComponent } from './subject-grid/subject-grid.component';
 import { AutoLogoutService } from './core/services/auto-logout.service';
 
 import { ChildSelectionModalComponent } from './shared/child-selection-modal/child-selection-modal.component';
+import { SupportButtonComponent } from './components/support-button/support-button.component';
 
 @Component({
   selector: 'app-root',
@@ -30,6 +31,7 @@ import { ChildSelectionModalComponent } from './shared/child-selection-modal/chi
     LoaderComponent,
 
     ChildSelectionModalComponent,
+    SupportButtonComponent,
     HeaderComponent,
     FooterComponent,
     FeaturesComponent,

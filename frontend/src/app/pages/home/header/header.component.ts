@@ -140,6 +140,21 @@ export class HeaderComponent implements OnInit {
     this.menuOpen.set(false);
   }
 
+  openSupport() {
+    // Ouvrir le menu de support du bouton flottant
+    const supportButton = document.querySelector('app-support-button');
+    if (supportButton) {
+      // Déclencher le clic sur le bouton de support flottant
+      const supportButtonElement = supportButton.querySelector('button');
+      if (supportButtonElement) {
+        supportButtonElement.click();
+      }
+    } else {
+      // Fallback : naviguer vers la page de contact
+      this.router.navigate(['/contact']);
+    }
+  }
+
   logout() {
     this.auth.logout();
     this.router.navigate(['/']);

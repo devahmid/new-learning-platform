@@ -35,6 +35,27 @@ import { ChildContextService } from '../../_children-context/_children-context/c
           </p>
         </div>
 
+        <!-- Accès aux cours en ligne -->
+        <div class="bg-green-50 rounded-lg p-4 mb-6">
+          <h3 class="font-semibold text-green-900 mb-2 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            Cours en ligne disponibles
+          </h3>
+          <p class="text-sm text-green-700 mb-3">
+            Même en attendant la validation, vous pouvez participer aux cours en ligne !
+          </p>
+          <button 
+            (click)="joinZoomClass()"
+            class="w-full bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            Rejoindre le cours Zoom
+          </button>
+        </div>
+
         <!-- Informations de contact -->
         <div class="bg-blue-50 rounded-lg p-4 mb-6">
           <h3 class="font-semibold text-blue-900 mb-2">Besoin d'aide ?</h3>
@@ -165,6 +186,12 @@ export class WaitingApprovalComponent implements OnInit {
         text: 'Erreur de connexion. Vérifiez votre connexion internet.'
       };
     }
+  }
+
+  joinZoomClass() {
+    // Ouvrir le lien Zoom dans un nouvel onglet
+    const zoomUrl = 'https://us02web.zoom.us/j/2432586827?pwd=RkpwaVhlcElXWjQxZmt6UkI5SmRiQT09';
+    window.open(zoomUrl, '_blank');
   }
 
   logout() {
