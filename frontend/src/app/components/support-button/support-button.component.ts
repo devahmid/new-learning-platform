@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-support-button',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <!-- Bouton de support flottant -->
-    <div class="fixed bottom-6 right-6 z-50">
+    <!-- Bouton de support flottant - visible seulement si connecté -->
+    <div *ngIf="isLoggedIn()" class="fixed bottom-6 right-6 z-50">
       <button 
         (click)="toggleSupportMenu()"
         class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group">
@@ -124,9 +125,16 @@ import { Router } from '@angular/router';
 export class SupportButtonComponent implements OnInit {
   showSupportMenu = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {}
+
+  isLoggedIn() {
+    return this.authService.isLoggedIn();
+  }
 
   toggleSupportMenu() {
     this.showSupportMenu = !this.showSupportMenu;

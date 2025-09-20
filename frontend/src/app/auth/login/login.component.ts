@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { AuthService } from '../auth.service';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { MessageModule } from 'primeng/message';
@@ -19,20 +19,50 @@ import { UserValidationService } from '../../services/user-validation.service';
   providers: [],
   templateUrl: './login.component.html'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   errorMessage: string = '';
+  sessionMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private messageService: MessageService,
     private userValidationService: UserValidationService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       motDePasse: ['', [Validators.required, Validators.minLength(6)]]
+    });
+  }
+
+  ngOnInit() {
+    // Vérifier s'il y a des paramètres de redirection (token expiré, etc.)
+    this.route.queryParams.subscribe(params => {
+      if (params['reason'] === 'token-expired') {
+        this.sessionMessage = params['message'] || 'Votre session a expiré. Veuillez vous reconnecter.';
+        this.messageService.add({ 
+          severity: 'warn', 
+          summary: 'Session expirée', 
+          detail: this.sessionMessage 
+        });
+      } else if (params['reason'] === 'invalid-token') {
+        this.sessionMessage = params['message'] || 'Token invalide. Veuillez vous reconnecter.';
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Session invalide', 
+          detail: this.sessionMessage 
+        });
+      } else if (params['reason'] === 'token-error') {
+        this.sessionMessage = params['message'] || 'Erreur de session. Veuillez vous reconnecter.';
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Erreur de session', 
+          detail: this.sessionMessage 
+        });
+      }
     });
   }
 

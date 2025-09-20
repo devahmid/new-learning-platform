@@ -34,11 +34,13 @@ import { User } from '../../models/user.model';
             >
               <div class="p-8 text-center">
                 <div class="relative mb-6">
-                  <img 
-                    class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-blue-200" 
-                    [src]="getChildAvatar(child, i)" 
-                    [alt]="child.firstName" 
-                  />
+                  <!-- Avatar avec initiales -->
+                  <div 
+                    class="w-24 h-24 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold border-4"
+                    [class]="getAvatarClasses(i)"
+                  >
+                    {{ getChildInitials(child) }}
+                  </div>
                   <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
                     <span class="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-semibold">En ligne</span>
                   </div>
@@ -183,15 +185,21 @@ export class NoChildrenInfoComponent implements OnInit {
     this.router.navigate(['/matières']);
   }
 
-  getChildAvatar(child: User, index: number): string {
-    const avatars = [
-      'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-.jpg',
-      'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-.jpg',
-      'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-.jpg',
-      'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-.jpg',
-      'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-.jpg'
+  getChildInitials(child: User): string {
+    const firstName = child.firstName || '';
+    const lastName = child.lastName || '';
+    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+  }
+
+  getAvatarClasses(index: number): string {
+    const colorSchemes = [
+      'bg-gradient-to-br from-blue-500 to-blue-600 border-blue-200',
+      'bg-gradient-to-br from-green-500 to-green-600 border-green-200',
+      'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-200',
+      'bg-gradient-to-br from-orange-500 to-orange-600 border-orange-200',
+      'bg-gradient-to-br from-pink-500 to-pink-600 border-pink-200'
     ];
-    return avatars[index % avatars.length];
+    return colorSchemes[index % colorSchemes.length];
   }
 
   getChildAge(child: User): number {

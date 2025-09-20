@@ -25,11 +25,6 @@
             <i class="fa-solid fa-envelope text-emerald-500"></i>
             Contact
           </a>
-          <button (click)="openSupport()" 
-             class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline border-none bg-transparent cursor-pointer">
-            <i class="fa-solid fa-headset text-emerald-500"></i>
-            Support
-          </button>
           <a routerLink="/login" 
              class="px-4 py-2 text-sm font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline">
             <i class="fa-solid fa-sign-in-alt"></i>
@@ -73,6 +68,12 @@
                class="fa-solid fa-lock text-gray-400 ml-1" 
                title="Disponible après validation"></i>
           </a>
+          
+          <button (click)="openSupport()" 
+             class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline border-none bg-transparent cursor-pointer">
+            <i class="fa-solid fa-headset text-emerald-500"></i>
+            Support
+          </button>
           
           <a *ngIf="role() === 'admin'" 
              [routerLink]="validationService.isMenuItemDisabled('admin') ? null : '/admin'"
@@ -199,13 +200,6 @@
           </div>
           <span class="text-sm font-medium">Contact</span>
         </a>
-        <button (click)="openSupport()" 
-           class="w-full flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline border-none bg-transparent cursor-pointer text-left">
-          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
-            <i class="fa-solid fa-headset text-emerald-600 text-xs"></i>
-          </div>
-          <span class="text-sm font-medium">Support</span>
-        </button>
         <a (click)="navigate('/login')" 
            class="flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline">
           <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
@@ -255,6 +249,14 @@
              class="fa-solid fa-lock text-gray-400 ml-auto" 
              title="Disponible après validation"></i>
         </a>
+        
+        <button (click)="openSupport()" 
+           class="w-full flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline border-none bg-transparent cursor-pointer text-left">
+          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
+            <i class="fa-solid fa-headset text-emerald-600 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Support</span>
+        </button>
         
         <a *ngIf="role() === 'admin'" 
            (click)="validationService.isMenuItemDisabled('admin') ? null : navigate('/admin')" 

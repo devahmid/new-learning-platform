@@ -18,6 +18,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './auth.interceptor';
 import { loaderInterceptor } from './shared/loader.interceptor';
 import { validationErrorInterceptor } from './interceptors/validation-error.interceptor';
+import { authErrorInterceptor } from './interceptors/auth-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,7 +34,7 @@ export const appConfig: ApplicationConfig = {
       ToastModule
     ),
     MessageService,
-    provideHttpClient(withInterceptors([authInterceptor, loaderInterceptor, validationErrorInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, loaderInterceptor, authErrorInterceptor, validationErrorInterceptor])),
     provideAnimations(),
   ],
 };

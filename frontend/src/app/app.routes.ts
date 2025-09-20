@@ -150,11 +150,8 @@ export const routes: Routes = [
       },
       {
         path: 'cours',
-        loadComponent: () =>
-          import('./cours/cours-list/cours-list.component').then(
-            (m) => m.CoursListComponent
-          ),
-        canActivate: [childGuard],
+        redirectTo: 'matières',
+        pathMatch: 'full'
       },
       {
         path: 'cours/:subjectName/:level',
@@ -501,7 +498,7 @@ export const routes: Routes = [
   },
 
   // 🚨 Fallback
-  { path: '**', redirectTo: 'matières' },
+  { path: '**', redirectTo: '' },
   // { path: '', component: RegistrationComponent },
   // { path: 'inscription-ok', component: ConfirmationComponent },
   // {
