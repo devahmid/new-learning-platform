@@ -208,7 +208,7 @@ class AdminCourseController {
             $fillableFields = [
                 'title', 'description', 'classeId', 'categoryId', 'subcategoryId', 
                 'instructorId', 'price', 'discountPrice', 'tags', 'order', 
-                'isActive', 'videoUrl', 'pdfUrl', 'imageUrl', 'duration', 'difficulty'
+                'isActive', 'videoUrl', 'pdfUrl', 'imageUrl', 'duration', 'difficulty', 'status'
             ];
             
             foreach ($fillableFields as $field) {

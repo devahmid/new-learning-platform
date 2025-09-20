@@ -140,7 +140,7 @@ class CourseController {
         $data = json_decode(file_get_contents('php://input'), true);
         
         // Mettre à jour les champs
-        $fillableFields = ['title', 'description', 'classeId', 'categoryId', 'subcategoryId', 'instructorId', 'price', 'discountPrice', 'tags', 'order', 'isActive'];
+        $fillableFields = ['title', 'description', 'classeId', 'categoryId', 'subcategoryId', 'instructorId', 'price', 'discountPrice', 'tags', 'order', 'isActive', 'status'];
         
         foreach ($fillableFields as $field) {
             if (isset($data[$field])) {

@@ -367,7 +367,6 @@ export class ListComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status: string): string {
-    console.log('status', status);
     switch (status) {
       case 'published':
         return 'Publié';
