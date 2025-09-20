@@ -26,10 +26,11 @@ export interface Course {
   pdfUrl?: string;
   instructor: User;
   category?: Category;
-  classe: Classe;  // ✅ Changé de level à classe
+  classe?: Classe;  // ✅ Optionnel pour rétrocompatibilité
   enrollments: Enrollment[];
   quizzes: Quiz[];
   lessons: Lesson[];
   createdAt: string;
   updatedAt: string;
+  classes?: Classe[];  // ✅ Nouveau format : array de classes
 }

@@ -287,17 +287,18 @@ class Course extends BaseModel {
     }
     
     /**
-     * Récupère les cours par classe
+     * Récupère les cours par classe (statistiques avec nouvelle relation many-to-many)
      */
     public static function getCoursesByClasse() {
         $db = \DatabaseConfig::getInstance()->getConnection();
         $stmt = $db->query("
             SELECT 
                 cl.name as classe_name,
-                COUNT(c.id) as count
+                COUNT(DISTINCT c.id) as count
             FROM " . self::$table . " c
-            LEFT JOIN classes cl ON c.classeId = cl.id
-            GROUP BY c.classeId, cl.name
+            INNER JOIN course_classes cc ON c.id = cc.courseId
+            LEFT JOIN classes cl ON cc.classeId = cl.id
+            GROUP BY cl.id, cl.name
             ORDER BY count DESC
         ");
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -345,32 +346,66 @@ class Course extends BaseModel {
     }
     
     /**
-     * Récupère les cours par classe
+     * Récupère les cours par classe (nouvelle relation many-to-many)
      */
     public static function findByClasse($classeId) {
-        return self::where(['classeId' => $classeId]);
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT c.* 
+            FROM " . self::$table . " c
+            INNER JOIN course_classes cc ON c.id = cc.courseId
+            WHERE cc.classeId = ?
+            ORDER BY c.order, c.title
+        ");
+        $stmt->execute([$classeId]);
+        $coursesData = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        // Convertir en objets Course
+        return array_map(function($data) {
+            $course = new Course();
+            foreach ($data as $key => $value) {
+                $course->$key = $value;
+            }
+            return $course;
+        }, $coursesData);
     }
     
     /**
-     * Récupère les cours par classe et catégorie
+     * Récupère les cours par classe et catégorie (nouvelle relation many-to-many)
      */
     public static function findByClasseAndCategory($classeId, $categoryId) {
-        return self::where([
-            'classeId' => $classeId,
-            'categoryId' => $categoryId
-        ]);
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT c.* 
+            FROM " . self::$table . " c
+            INNER JOIN course_classes cc ON c.id = cc.courseId
+            WHERE cc.classeId = ? AND c.categoryId = ?
+            ORDER BY c.order, c.title
+        ");
+        $stmt->execute([$classeId, $categoryId]);
+        $coursesData = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        // Convertir en objets Course
+        return array_map(function($data) {
+            $course = new Course();
+            foreach ($data as $key => $value) {
+                $course->$key = $value;
+            }
+            return $course;
+        }, $coursesData);
     }
     
     /**
-     * Récupère les catégories disponibles pour une classe
+     * Récupère les catégories disponibles pour une classe (nouvelle relation many-to-many)
      */
     public static function getCategoriesForClasse($classeId) {
         $db = \DatabaseConfig::getInstance()->getConnection();
         $stmt = $db->prepare("
             SELECT DISTINCT cat.*
             FROM " . self::$table . " c
+            INNER JOIN course_classes cc ON c.id = cc.courseId
             JOIN categories cat ON c.categoryId = cat.id
-            WHERE c.classeId = ? AND c.isActive = 1 AND cat.isActive = 1
+            WHERE cc.classeId = ? AND c.isActive = 1 AND cat.isActive = 1
             ORDER BY cat.order
         ");
         $stmt->execute([$classeId]);

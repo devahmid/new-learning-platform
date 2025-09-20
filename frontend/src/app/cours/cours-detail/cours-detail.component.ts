@@ -303,11 +303,11 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
         categoryToSubjectMap[cleanCategoryName] ||
         categoryToSubjectMap[this.cours.category.name] ||
         this.cours.category.name;
-      const classe = this.cours.classe.id;
+      const classe = this.getFirstClasseId();
 
       // Normaliser le nom de la matière pour l'URL
       const normalizedSubjectName = this.normalizeForUrl(subjectName);
-      const classeName = this.normalizeForUrl(this.cours.classe.name) || `classe-${classe}`;
+      const classeName = this.normalizeForUrl(this.getFirstClasseName()) || `classe-${classe}`;
 
       console.log('Navigation vers:', {
         categoryName: this.cours.category.name,
@@ -363,7 +363,7 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     // Retourner vers la page des classes pour cette matière
     const subjectName = this.getSubjectName();
     const normalizedSubjectName = this.normalizeForUrl(subjectName);
-    const classeId = this.cours.classe.id; // Utiliser l'ID de la classe, pas le nom
+    const classeId = this.getFirstClasseId(); // Utiliser l'ID de la première classe
     console.log('Retour vers:', `/cours/${normalizedSubjectName}/${classeId}`);
     this.router.navigate(['/cours', normalizedSubjectName, classeId]);
   }
@@ -401,8 +401,9 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
 
   getClasse(): string {
     // Utiliser les données du cours pour récupérer la classe
-    if (this.cours && this.cours.classe && this.cours.classe.id) {
-      return this.cours.classe.id.toString();
+    const classeId = this.getFirstClasseId();
+    if (classeId) {
+      return classeId.toString();
     }
     
     // Fallback vers les paramètres de route si disponibles
@@ -412,6 +413,35 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     }
     
     return '1'; // Valeur par défaut
+  }
+
+  // Méthodes helper pour gérer les classes multiples
+  getFirstClasseId(): number | null {
+    // Nouveau format : array de classes
+    if (this.cours?.classes && Array.isArray(this.cours.classes) && this.cours.classes.length > 0) {
+      return this.cours.classes[0].id;
+    }
+    
+    // Rétrocompatibilité : ancien format avec classe unique
+    if (this.cours?.classe?.id) {
+      return this.cours.classe.id;
+    }
+    
+    return null;
+  }
+
+  getFirstClasseName(): string {
+    // Nouveau format : array de classes
+    if (this.cours?.classes && Array.isArray(this.cours.classes) && this.cours.classes.length > 0) {
+      return this.cours.classes[0].name;
+    }
+    
+    // Rétrocompatibilité : ancien format avec classe unique
+    if (this.cours?.classe?.name) {
+      return this.cours.classe.name;
+    }
+    
+    return 'Classe 1'; // Valeur par défaut
   }
 
   mettreAJourProgression() {

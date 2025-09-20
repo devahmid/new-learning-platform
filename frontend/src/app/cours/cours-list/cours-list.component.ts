@@ -97,4 +97,33 @@ export class CoursListComponent implements OnInit {
   goBack() {
     this.location.back();
   }
+
+  // Méthodes helper pour gérer les classes multiples
+  getFirstClasseName(course: any): string {
+    // Nouveau format : array de classes
+    if (course.classes && Array.isArray(course.classes) && course.classes.length > 0) {
+      return course.classes[0].name;
+    }
+    
+    // Rétrocompatibilité : ancien format avec classe unique
+    if (course.classe?.name) {
+      return course.classe.name;
+    }
+    
+    return 'Classe ' + this.level; // Valeur par défaut
+  }
+
+  getClasseColorClass(course: any): string {
+    const className = this.getFirstClasseName(course);
+    
+    if (className.includes('1') || className.includes('CP')) {
+      return 'bg-green-200 text-green-900';
+    } else if (className.includes('2') || className.includes('CE1')) {
+      return 'bg-yellow-200 text-yellow-900';
+    } else if (className.includes('3') || className.includes('CE2')) {
+      return 'bg-red-200 text-red-900';
+    }
+    
+    return 'bg-blue-200 text-blue-900'; // Couleur par défaut
+  }
 }

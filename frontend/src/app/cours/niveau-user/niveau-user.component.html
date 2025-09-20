@@ -92,7 +92,7 @@
           <div class="flex items-center justify-between text-xs text-gray-500 mb-4">
             <div class="flex items-center gap-1">
               <i class="fa-solid fa-layer-group"></i>
-              <span>{{ course.classe?.name || 'Classe ' + classe }}</span>
+              <span>{{ getClassesDisplay(course) }}</span>
             </div>
             <div class="flex items-center gap-1">
               <i class="fa-solid fa-play-circle"></i>

@@ -419,4 +419,24 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     this.classe = selectedChild?.classe?.name || '';
     return this.classe;
   }
+
+  // Méthode pour afficher les classes d'un cours (nouvelle relation many-to-many)
+  getClassesDisplay(course: any): string {
+    // Nouveau format : array de classes
+    if (course.classes && Array.isArray(course.classes) && course.classes.length > 0) {
+      if (course.classes.length === 1) {
+        return course.classes[0].name;
+      } else {
+        return `${course.classes.length} classes`;
+      }
+    }
+    
+    // Rétrocompatibilité : ancien format avec classe unique
+    if (course.classe?.name) {
+      return course.classe.name;
+    }
+    
+    // Fallback : utiliser la classe de l'enfant sélectionné
+    return 'Classe ' + this.classe;
+  }
 }
