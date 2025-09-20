@@ -417,8 +417,19 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
 
   // Méthodes helper pour gérer les classes multiples
   getFirstClasseId(): number | null {
-    // Nouveau format : array de classes
+    // Essayer de trouver la classe de l'enfant sélectionné
+    const selectedChild = this.childContext.selectedChild();
+    const selectedClasseId = selectedChild?.classe?.id;
+    
+    // Nouveau format : array de classes - chercher la classe de l'enfant
     if (this.cours?.classes && Array.isArray(this.cours.classes) && this.cours.classes.length > 0) {
+      if (selectedClasseId) {
+        const matchingClasse = this.cours.classes.find(classe => classe.id === selectedClasseId);
+        if (matchingClasse) {
+          return matchingClasse.id;
+        }
+      }
+      // Fallback : première classe si pas de correspondance
       return this.cours.classes[0].id;
     }
     
@@ -427,18 +438,39 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       return this.cours.classe.id;
     }
     
+    // Fallback ultime : utiliser la classe de l'enfant sélectionné
+    if (selectedClasseId) {
+      return selectedClasseId;
+    }
+    
     return null;
   }
 
   getFirstClasseName(): string {
-    // Nouveau format : array de classes
+    // Essayer de trouver la classe de l'enfant sélectionné
+    const selectedChild = this.childContext.selectedChild();
+    const selectedClasseId = selectedChild?.classe?.id;
+    
+    // Nouveau format : array de classes - chercher la classe de l'enfant
     if (this.cours?.classes && Array.isArray(this.cours.classes) && this.cours.classes.length > 0) {
+      if (selectedClasseId) {
+        const matchingClasse = this.cours.classes.find(classe => classe.id === selectedClasseId);
+        if (matchingClasse) {
+          return matchingClasse.name;
+        }
+      }
+      // Fallback : première classe si pas de correspondance
       return this.cours.classes[0].name;
     }
     
     // Rétrocompatibilité : ancien format avec classe unique
     if (this.cours?.classe?.name) {
       return this.cours.classe.name;
+    }
+    
+    // Fallback ultime : utiliser la classe de l'enfant sélectionné
+    if (selectedChild?.classe?.name) {
+      return selectedChild.classe.name;
     }
     
     return 'Classe 1'; // Valeur par défaut
