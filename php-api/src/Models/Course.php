@@ -17,6 +17,7 @@ class Course extends BaseModel {
         'duration',
         'difficulty',
         'isActive',
+        'status',
         'categoryId',
         'subcategoryId',
         'classeId',
