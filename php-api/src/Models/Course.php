@@ -49,13 +49,89 @@ class Course extends BaseModel {
     }
     
     /**
-     * Récupère la classe du cours
+     * Récupère la classe du cours (ancienne méthode - rétrocompatibilité)
      */
     public function classe() {
         if ($this->classeId) {
             return Classe::find($this->classeId);
         }
         return null;
+    }
+    
+    /**
+     * Récupère toutes les classes associées au cours (relation many-to-many)
+     */
+    public function classes() {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT cl.* 
+            FROM classes cl
+            INNER JOIN course_classes cc ON cl.id = cc.classeId
+            WHERE cc.courseId = ?
+            ORDER BY cl.name
+        ");
+        $stmt->execute([$this->id]);
+        $classesData = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        // Convertir en objets Classe si nécessaire
+        return array_map(function($data) {
+            $classe = new Classe();
+            foreach ($data as $key => $value) {
+                $classe->$key = $value;
+            }
+            return $classe;
+        }, $classesData);
+    }
+    
+    /**
+     * Ajoute une classe au cours
+     */
+    public function addClasse($classeId) {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            INSERT IGNORE INTO course_classes (courseId, classeId) 
+            VALUES (?, ?)
+        ");
+        return $stmt->execute([$this->id, $classeId]);
+    }
+    
+    /**
+     * Supprime une classe du cours
+     */
+    public function removeClasse($classeId) {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            DELETE FROM course_classes 
+            WHERE courseId = ? AND classeId = ?
+        ");
+        return $stmt->execute([$this->id, $classeId]);
+    }
+    
+    /**
+     * Met à jour toutes les classes associées au cours
+     */
+    public function syncClasses($classeIds) {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        
+        // Supprimer toutes les associations existantes
+        $stmt = $db->prepare("DELETE FROM course_classes WHERE courseId = ?");
+        $stmt->execute([$this->id]);
+        
+        // Ajouter les nouvelles associations
+        if (!empty($classeIds)) {
+            $placeholders = str_repeat('(?,?),', count($classeIds) - 1) . '(?,?)';
+            $stmt = $db->prepare("INSERT INTO course_classes (courseId, classeId) VALUES $placeholders");
+            
+            $values = [];
+            foreach ($classeIds as $classeId) {
+                $values[] = $this->id;
+                $values[] = $classeId;
+            }
+            
+            return $stmt->execute($values);
+        }
+        
+        return true;
     }
     
     /**
@@ -104,9 +180,15 @@ class Course extends BaseModel {
             $array['subcategory'] = $this->subcategory()?->toArrayWithoutRelations();
         }
         
+        // Rétrocompatibilité - classe unique (ancienne relation)
         if ($this->classeId) {
             $array['classe'] = $this->classe()?->toArrayWithoutRelations();
         }
+        
+        // Nouvelle relation many-to-many - toutes les classes
+        $array['classes'] = array_map(function($classe) {
+            return $classe->toArrayWithoutRelations();
+        }, $this->classes());
         
         if ($this->instructorId) {
             $array['instructor'] = $this->instructor()?->toArrayWithoutRelations();

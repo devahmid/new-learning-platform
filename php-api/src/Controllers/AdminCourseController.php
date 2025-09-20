@@ -157,6 +157,16 @@ class AdminCourseController {
             error_log("DEBUG createCourse - Cours sauvegardé avec ID: " . $course->id);
             error_log("DEBUG createCourse - Cours sauvegardé: " . json_encode($course->toArray()));
             
+            // Associer le cours aux classes si spécifiées (relation many-to-many)
+            if (isset($data['classeIds']) && is_array($data['classeIds'])) {
+                $course->syncClasses($data['classeIds']);
+                error_log("DEBUG createCourse - Classes associées: " . json_encode($data['classeIds']));
+            } else if (isset($data['classeId'])) {
+                // Rétrocompatibilité : si classeId unique fourni, l'ajouter à la relation many-to-many
+                $course->addClasse($data['classeId']);
+                error_log("DEBUG createCourse - Classe unique associée: " . $data['classeId']);
+            }
+            
             // Créer les leçons si elles existent
             if (isset($data['lessons']) && is_array($data['lessons'])) {
                 $this->createLessons($course->id, $data['lessons']);
@@ -218,6 +228,11 @@ class AdminCourseController {
             }
             
             $course->save();
+            
+            // Mettre à jour les relations many-to-many avec les classes
+            if (isset($data['classeIds']) && is_array($data['classeIds'])) {
+                $course->syncClasses($data['classeIds']);
+            }
             
             // Mettre à jour les leçons si elles existent
             if (isset($data['lessons']) && is_array($data['lessons'])) {

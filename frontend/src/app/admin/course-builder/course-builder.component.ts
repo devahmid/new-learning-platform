@@ -29,7 +29,8 @@ interface CourseForm {
   description: string;
   categoryId: number;
   subcategoryId: number;
-  classeId: number;
+  classeId: number; // Rétrocompatibilité
+  classeIds: number[]; // Nouvelle propriété pour sélection multiple
   videoUrl?: string;
   pdfUrl?: string;
   lessons: LessonForm[];
@@ -119,7 +120,8 @@ export class CourseBuilderComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10)]],
       categoryId: [null, Validators.required],
       subcategoryId: [null, Validators.required],
-      classeId: [null, Validators.required],
+      classeId: [null, Validators.required], // Rétrocompatibilité
+      classeIds: [[], Validators.required], // Nouvelle sélection multiple
       videoUrl: [''],
       pdfUrl: [''],
       lessons: this.fb.array([]),
@@ -228,6 +230,44 @@ export class CourseBuilderComponent implements OnInit {
     } else {
       this.filteredSubcategories = [];
     }
+  }
+
+  // Gestion de la sélection multiple de classes
+  onClasseToggle(classeId: number) {
+    const currentClasses = this.courseForm.get('classeIds')?.value || [];
+    let updatedClasses: number[];
+    
+    if (currentClasses.includes(classeId)) {
+      // Supprimer la classe si elle est déjà sélectionnée
+      updatedClasses = currentClasses.filter((id: number) => id !== classeId);
+    } else {
+      // Ajouter la classe à la sélection
+      updatedClasses = [...currentClasses, classeId];
+    }
+    
+    this.courseForm.patchValue({ classeIds: updatedClasses });
+    
+    // Maintenir la rétrocompatibilité : mettre à jour classeId avec la première classe sélectionnée
+    if (updatedClasses.length > 0) {
+      this.courseForm.patchValue({ classeId: updatedClasses[0] });
+    } else {
+      this.courseForm.patchValue({ classeId: null });
+    }
+  }
+
+  isClasseSelected(classeId: number): boolean {
+    const selectedClasses = this.courseForm.get('classeIds')?.value || [];
+    return selectedClasses.includes(classeId);
+  }
+
+  getSelectedClassesCount(): number {
+    return (this.courseForm.get('classeIds')?.value || []).length;
+  }
+
+  getSelectedClassesNames(): string {
+    const selectedIds = this.courseForm.get('classeIds')?.value || [];
+    const selectedClasses = this.classes.filter(classe => selectedIds.includes(classe.id));
+    return selectedClasses.map(classe => classe.name).join(', ');
   }
 
   // Gestion des leçons
