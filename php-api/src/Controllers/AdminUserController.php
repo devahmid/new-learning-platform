@@ -745,4 +745,5 @@ class AdminUserController {
             Response::error('Erreur lors de la recherche avancée: ' . $e->getMessage(), 500);
         }
     }
+
 }
