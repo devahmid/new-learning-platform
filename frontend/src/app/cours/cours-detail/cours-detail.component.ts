@@ -154,15 +154,11 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     this.initializeChildTracking();
 
     this.courseService.getCourseById(id).subscribe((data: any) => {
-      console.log('DEBUG - Données reçues de l\'API:', data);
-      console.log('DEBUG - Leçons reçues:', data.lessons);
       
       this.cours = {
         ...data,
         lessons:
           data.lessons?.map((lesson: any) => {
-            console.log('DEBUG - Leçon individuelle:', lesson);
-            console.log('DEBUG - Sous-catégorie de la leçon:', lesson.subcategory);
             return {
               ...lesson,
               expanded: false,
@@ -202,11 +198,9 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
 
     // Utiliser seulement les leçons du cours actuel
     if (!this.cours || !this.cours.lessons) {
-      console.log('Aucune leçon trouvée pour ce cours');
       return;
     }
 
-    console.log(`Cours actuel "${this.cours.title}" - Catégorie: "${this.cours.category?.name}"`);
 
     // Trier les leçons par ordre
     const sortedLessons = [...this.cours.lessons].sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -238,17 +232,13 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       .sort()
       .concat(allSubcategories.includes('Leçons générales') ? ['Leçons générales'] : []);
 
-    console.log('Leçons organisées par sous-catégorie:', {
-      subcategories: this.subcategoryNames,
-      lessonsBySubcategory: this.lessonsBySubcategory
-    });
+   
   }
 
   loadPdf(pdfUrl: string) {
     fetch(pdfUrl)
       .then((res) => res.blob())
       .then((blob) => {
-        console.log('blob', blob);
         const blobUrl = URL.createObjectURL(blob);
         this.safePdfUrl =
           this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl);
@@ -277,7 +267,6 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
 
   toggleLesson(lesson: any) {
     // Navigation vers LessonDetailComponent au lieu d'étendre dans le même composant
-    console.log('Navigation vers la leçon:', lesson);
 
     // Récupérer les informations depuis les données du cours
     if (this.cours && this.cours.category && this.cours.classe) {
@@ -294,8 +283,6 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
         'Replay': 'replay', // Ajout pour les cours Replay
       };
 
-      console.log('Catégorie du cours:', this.cours.category.name);
-      console.log('Catégorie du cours (avec quotes):', `"${this.cours.category.name}"`);
       
       // Nettoyer le nom de catégorie avant le mapping
       const cleanCategoryName = this.cours.category.name.trim();
@@ -309,16 +296,8 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       const normalizedSubjectName = this.normalizeForUrl(subjectName);
       const classeName = this.normalizeForUrl(this.getFirstClasseName()) || `classe-${classe}`;
 
-      console.log('Navigation vers:', {
-        categoryName: this.cours.category.name,
-        subjectName,
-        normalizedSubjectName,
-        classe,
-        classeName,
-        lessonId: lesson.id,
-      });
+      
 
-      console.log('URL finale:', `/cours/${normalizedSubjectName}/${classeName}/lesson/${lesson.id}`);
       this.router.navigate(['/cours', normalizedSubjectName, classeName, 'lesson', lesson.id]);
     } else {
       console.error(
@@ -364,7 +343,6 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     const subjectName = this.getSubjectName();
     const normalizedSubjectName = this.normalizeForUrl(subjectName);
     const classeId = this.getFirstClasseId(); // Utiliser l'ID de la première classe
-    console.log('Retour vers:', `/cours/${normalizedSubjectName}/${classeId}`);
     this.router.navigate(['/cours', normalizedSubjectName, classeId]);
   }
 
@@ -526,16 +504,13 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     runInInjectionContext(this.injector, () => {
       effect(() => {
         const child = this.childContext.selectedChild();
-        console.log('Effect CoursDetail - Enfant actuel:', child);
         
         // Si on a un enfant et que c'est différent du précédent
         if (child && child.id !== this.currentChildId) {
-          console.log('Changement d\'enfant détecté dans CoursDetail:', child);
           this.handleChildChange(child);
         }
         // Si on n'a plus d'enfant sélectionné
         else if (!child && this.currentChildId) {
-          console.log('Aucun enfant sélectionné - Redirection vers matières');
           this.router.navigate(['/matières']);
         }
       });
@@ -549,10 +524,8 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     const childClasse = newChild.classe?.id || 1;
     const courseClasse = this.cours?.classe?.id || 1;
 
-    console.log(`Nouvel enfant classe ${childClasse}, cours classe ${courseClasse}`);
 
     // Rediriger vers matières pour forcer la sélection de la bonne classe
-    console.log('Changement d\'enfant détecté - Redirection vers matières');
     // Forcer la navigation immédiatement
     window.location.href = '/matières';
   }
@@ -705,7 +678,6 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
       .replace(/-+/g, '-')  // Remplacer les tirets multiples par un seul
       .replace(/^-|-$/g, '');  // Enlever les tirets en début/fin
     
-    console.log(`normalizeForUrl("${name}") = "${normalized}"`);
     return normalized;
   }
 }

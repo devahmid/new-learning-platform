@@ -179,7 +179,6 @@ export class UserValidationService {
         // Vérifier le contenu de la réponse 403 pour déterminer le statut
         try {
           const errorData = await response.json();
-          console.log('Réponse 403 reçue:', errorData);
           if (errorData.status === 'pending') {
             this._validationStatus.set('pending');
           } else if (errorData.status === 'rejected') {
@@ -198,7 +197,6 @@ export class UserValidationService {
             });
           }
         } catch {
-          console.log('Impossible de parser la réponse 403');
           this._validationStatus.set('pending'); // Si on ne peut pas parser la réponse
         }
       } else {

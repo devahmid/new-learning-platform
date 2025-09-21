@@ -40,7 +40,6 @@ export class PaymentComponent {
       next: ({ clientId }) => {
         // tu intègres ici PayPal JS SDK
         this.loading = false;
-        console.log('PayPal clientId:', clientId);
       },
       error: () => (this.loading = false)
     });

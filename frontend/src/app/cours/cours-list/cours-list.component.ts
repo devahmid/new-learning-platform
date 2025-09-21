@@ -33,7 +33,6 @@ export class CoursListComponent implements OnInit {
     // Vérifier qu'un enfant est sélectionné
     const selectedChild = this.childContext.selectedChild();
     if (!selectedChild) {
-      console.log('Aucun enfant sélectionné - Redirection vers no-children-info');
       this.router.navigate(['/no-children-info']);
       return;
     }
@@ -68,7 +67,6 @@ export class CoursListComponent implements OnInit {
 
     this.courseService.getCoursesByClasse(selectedChild.classeId).subscribe({
       next: (courses: any[]) => {
-        console.log("Cours récupérés depuis l'API pour la classe:", selectedChild.classeId, courses);
         this.courses = courses;
         this.totalCourses = courses.length;
         this.isLoading = false;

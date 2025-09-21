@@ -128,7 +128,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     // Récupérer la leçon depuis l'API
     this.courseService.getLessonById(Number(this.lessonId)).subscribe({
       next: (apiLesson: ApiLesson) => {
-        console.log("Leçon récupérée depuis l'API:", apiLesson);
         // Convertir l'API lesson vers le format local
         this.lesson = this.convertApiLessonToLocal(apiLesson);
         // Récupérer le courseId pour charger les quiz
@@ -147,12 +146,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         
         // Vérifier si l'erreur est récupérable
         if (this.isRecoverableError(err) && this.retryCount < this.maxRetries) {
-          console.log('Erreur récupérable, tentative de retry...');
           // Ne pas appeler retryLoadLesson() ici pour éviter la récursion
           // L'utilisateur pourra cliquer sur le bouton de retry
         } else {
           // Pas de données disponibles - afficher 0
-          console.log('Aucune donnée de leçon disponible');
           this.lesson = undefined;
           this.error = 'Aucune donnée de leçon disponible';
         }
@@ -440,7 +437,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       this.courseService.getCourseById(this.courseId).subscribe({
         next: (courseData) => {
           this.course = courseData;
-          console.log('Données du cours chargées:', courseData);
         },
         error: (err) => {
           console.error('Erreur lors du chargement du cours:', err);
@@ -489,7 +485,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
 
     this.courseService.getCourseQuizzes(this.courseId).subscribe({
       next: (quizzes: Quiz[]) => {
-        console.log("Quiz récupérés depuis l'API:", quizzes);
         if (quizzes && quizzes.length > 0) {
           // Prendre le premier quiz et convertir le format
           const quiz = quizzes[0];
@@ -505,13 +500,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
                 isCorrect: option.isCorrect,
               })),
             }));
-            console.log('Questions du quiz formatées:', this.quizQuestions);
           } else {
-            console.log('Quiz trouvé mais sans questions');
             this.quizQuestions = [];
           }
         } else {
-          console.log('Aucun quiz trouvé');
           this.quizQuestions = [];
         }
       },
@@ -571,7 +563,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       (correctAnswers / this.quizQuestions.length) * 100
     );
     
-    console.log(`Score calculé: ${this.quizScore}% (${correctAnswers}/${this.quizQuestions.length} correctes)`);
   }
 
   /**
@@ -618,12 +609,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       totalQuestions: this.quizQuestions.length
     };
 
-    console.log('Sauvegarde de la progression du quiz:', quizData);
 
     // Sauvegarder via l'API
     this.courseService.saveQuizProgress(currentQuiz.id, quizData).subscribe({
       next: (response) => {
-        console.log('✅ Progression du quiz sauvegardée:', response);
         // Optionnel: Afficher un message de succès à l'utilisateur
       },
       error: (error) => {
@@ -663,12 +652,9 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
 
     this.courseService.getLessonExercises(Number(this.lessonId)).subscribe({
       next: (exercises: Exercise[]) => {
-        console.log("Exercices récupérés depuis l'API:", exercises);
         if (exercises && exercises.length > 0) {
           this.exercises = exercises;
-          console.log('Exercices chargés:', this.exercises);
         } else {
-          console.log('Aucun exercice trouvé pour cette leçon');
           this.exercises = [];
         }
       },
@@ -776,7 +762,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         ? Math.round((correctAnswers / totalQuestions) * 100)
         : 0;
     
-    console.log(`Score exercices calculé: ${this.exerciseScore}% (${correctAnswers}/${totalQuestions} correctes)`);
   }
 
   restartExercise() {
@@ -825,12 +810,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       totalQuestions: currentExercise.questions?.length || 0
     };
 
-    console.log('Sauvegarde de la progression des exercices:', exerciseData);
 
     // Sauvegarder via l'API
     this.courseService.saveExerciseProgressNew(currentExercise.id, exerciseData).subscribe({
       next: (response) => {
-        console.log('✅ Progression des exercices sauvegardée:', response);
         // Optionnel: Afficher un message de succès à l'utilisateur
       },
       error: (error) => {
@@ -980,7 +963,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     this.isRetrying = true;
     this.retryCount++;
     
-    console.log(`Tentative ${this.retryCount}/${this.maxRetries} de chargement de la leçon`);
     
     // Attendre un peu avant de réessayer
     setTimeout(() => {
@@ -1056,7 +1038,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         // Démarrer la mise à jour de progression
         this.startProgressUpdate();
         
-        console.log('Suivi vidéo démarré:', session);
       },
       error: (error) => {
         console.error('Erreur lors du démarrage du suivi vidéo:', error);
@@ -1078,7 +1059,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     // Arrêter la mise à jour de progression
     this.stopProgressUpdate();
     
-    console.log('Suivi vidéo en pause');
   }
 
   /**
@@ -1088,7 +1068,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     if (!this.isVideoTracking || !this.currentVideoSession) return;
 
     this.videoTrackingService.recordEvent('seek', currentTime).subscribe();
-    console.log('Recherche enregistrée:', currentTime);
   }
 
   /**
@@ -1119,7 +1098,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       next: () => {
         this.isVideoTracking = false;
         this.currentVideoSession = null;
-        console.log('Suivi vidéo terminé');
       },
       error: (error) => {
         console.error('Erreur lors de la fin du suivi vidéo:', error);
@@ -1166,7 +1144,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       }
     });
 
-    console.log('Suivi Vimeo configuré');
   }
 
   /**
@@ -1209,7 +1186,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     link.click();
     document.body.removeChild(link);
     
-    console.log('Téléchargement du support de cours:', this.lesson.fileUrl);
   }
 
   /**

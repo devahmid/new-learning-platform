@@ -165,7 +165,6 @@ export class CoursAjoutComponent {
   }
   
   uploadFile(event: any, control: any) {
-    console.log('>> CONTROL TYPE:', control?.constructor.name, control);
 
     const file = event.files?.[0];
     if (!file) return;
@@ -175,11 +174,9 @@ export class CoursAjoutComponent {
   
     this.coursService.uploadFile(formData).subscribe((res: any) => {
       const uploadedUrl = res.url;
-      console.log('🧠 res =>', uploadedUrl);
       if (!uploadedUrl) return;
   
       control.setValue(uploadedUrl);
-      console.log('🧠 Après setValue =>', control.value);
   
       this.messageService.add({
         severity: 'success',
@@ -187,19 +184,16 @@ export class CoursAjoutComponent {
         detail: uploadedUrl
       });
   
-      console.log('✅ Fichier uploadé :', uploadedUrl);
     });
   }
   
   
   
   submit() {
-    console.log('submit ...: ',this.courseForm.value);
 
     const payload = this.courseForm.value;
     this.coursService.createCourse(payload).subscribe({
       next: (res) => {
-        console.log('Course created:', res);
         // show toast, redirect, etc.
       },
       error: (err) => {

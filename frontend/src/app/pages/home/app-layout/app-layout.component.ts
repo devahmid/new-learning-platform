@@ -21,7 +21,6 @@ export class AppLayoutComponent implements OnInit {
   ngOnInit() {
     // Charger les enfants dès que l'utilisateur est connecté
     if (this.auth.isLoggedIn()) {
-      console.log('AppLayout - Chargement des enfants...');
       this.childContext.loadChildren();
     }
   }

@@ -123,7 +123,6 @@ export class ListComponent implements OnInit {
       this.notif.show('ID utilisateur manquant', 'error');
       return;
     }
-    console.log('Navigation vers les détails de l\'utilisateur ID:', user.id);
     this.router.navigate(['/admin/users', user.id]);
   }
 
@@ -153,7 +152,6 @@ export class ListComponent implements OnInit {
     }
 
     this.sendingEmail = true;
-    console.log('Envoi d\'email à:', user.email, 'Message:', text);
     
     this.notif.sendEmail({ 
       to: user.email, 
@@ -161,7 +159,6 @@ export class ListComponent implements OnInit {
       content: text 
     }).subscribe({
       next: () => {
-        console.log('Email envoyé avec succès');
         this.notif.show('Email envoyé avec succès !', 'success');
         this.messageText = ''; // Vider le champ de message
         this.sendingEmail = false;
@@ -187,14 +184,12 @@ export class ListComponent implements OnInit {
     }
 
     this.sendingSMS = true;
-    console.log('Envoi de SMS à:', user.phoneNumber, 'Message:', text);
     
     this.notif.sendSms({ 
       to: user.phoneNumber, 
       message: text 
     }).subscribe({
       next: () => {
-        console.log('SMS envoyé avec succès');
         this.notif.show('SMS envoyé avec succès !', 'success');
         this.messageText = ''; // Vider le champ de message
         this.sendingSMS = false;

@@ -103,7 +103,6 @@ export class RegistrationComponent implements OnInit {
     this.registrationService.submitRegistration(this.form.value).subscribe({
       next: (response) => {
         this.submitting = false;
-        console.log('response ', response)
         this.form.reset();
         this.children.clear();
         this.addChild();

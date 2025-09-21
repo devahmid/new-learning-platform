@@ -36,7 +36,6 @@ export class LevelPageComponent implements OnInit {
 
   ngOnInit() {
     const name = this.route.snapshot.paramMap.get('name');
-    console.log('[NAME] : ', name);
     
     // Gestion spéciale pour "replay"
     if (name === 'replay') {
@@ -64,15 +63,11 @@ export class LevelPageComponent implements OnInit {
     if (child && child.classe && child.classe.id) {
       // La classe débloquée correspond à la classe de l'enfant
       this.unlockedClasse = child.classe.id;
-      console.log(
-        `[LEVEL-PAGE] Enfant sélectionné: ${child.firstName} ${child.lastName}, Classe: ${child.classe.id}`
-      );
+    
     } else {
       // Si aucun enfant sélectionné ou pas de classe, seule la classe 1 est accessible
       this.unlockedClasse = 1;
-      console.log(
-        '[LEVEL-PAGE] Aucun enfant sélectionné ou classe non définie, classe 1 uniquement'
-      );
+     
     }
   }
 

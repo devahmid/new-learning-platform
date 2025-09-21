@@ -37,7 +37,6 @@ export class AuthService {
   setToken(token: string) {
     localStorage.setItem('token', token);
     const payload = jwtDecode(token);
-    console.log('Decoded token:', payload);
     if (payload?.sub && payload?.email && payload?.role) {
       this.userSignal.set({
         id: payload.sub,
@@ -107,15 +106,12 @@ export class AuthService {
       .post<{ access_token: string }>(`${this.apiUrlAuth}/login`, payload)
       .pipe(
         tap((res) => {
-          console.log('Access token reçu = ', res.access_token);
           this.setToken(res.access_token);
         }),
         switchMap(() => {
-          console.log('On appelle fetchAndMergeParentProfile...');
           return this.fetchAndMergeParentProfile();
         }),
         tap(() => {
-          console.log('Après merge profile:', this.userSignal());
         }),
 
         map(() => true) // ou `of(true)` pour signaler que tout est OK

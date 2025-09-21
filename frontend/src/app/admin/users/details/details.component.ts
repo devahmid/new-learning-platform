@@ -58,7 +58,6 @@ export class DetailsComponent implements OnInit {
         }
         
         const id = Number(idParam);
-        console.log('Chargement des détails pour l\'utilisateur ID:', id);
         this.loading = true;
         
         // Utiliser le service admin pour récupérer les détails
@@ -87,7 +86,6 @@ export class DetailsComponent implements OnInit {
     private loadChildrenIfNeeded() {
         // Les enfants sont déjà chargés avec la méthode getUserById du service admin
         // qui utilise findById avec les relations ['level', 'children', 'parentProfile', 'payments']
-        console.log('Enfants chargés:', this.user.children);
     }
 
     getRoleBadgeClass(role: string): string {
@@ -174,7 +172,6 @@ export class DetailsComponent implements OnInit {
                 next: (user) => {
                     this.user = user;
                     this.childrenLoading = false;
-                    console.log('Enfants rechargés:', this.user.children);
                 },
                 error: (error) => {
                     console.error('Erreur lors du rechargement des enfants:', error);
@@ -258,7 +255,6 @@ export class DetailsComponent implements OnInit {
         // Utiliser le service admin pour mettre à jour l'enfant
         this.adminUserService.updateChild(this.selectedChild.id, this.selectedChild).subscribe({
             next: (updatedChild) => {
-                console.log('Enfant mis à jour avec succès:', updatedChild);
                 
                 // Mettre à jour l'enfant dans la liste locale
                 if (this.user.children) {
@@ -337,23 +333,18 @@ export class DetailsComponent implements OnInit {
 
     // Créer un nouvel enfant
     onCreateChild() {
-        console.log('onCreateChild appelé');
-        console.log('newChild:', this.newChild);
-        console.log('user:', this.user);
+        
         
         if (!this.newChild.firstName || !this.newChild.lastName) {
-            console.log('Validation échouée: prénom ou nom manquant');
             this.showErrorNotification('Le prénom et le nom sont obligatoires');
             return;
         }
         
         if (!this.newChild.level?.name && !this.newChild.level?.id) {
-            console.log('Validation échouée: niveau manquant');
             this.showErrorNotification('Le niveau est obligatoire pour un enfant');
             return;
         }
 
-        console.log('Validation réussie, début de la création');
         this.loading = true;
 
         // Préparer les données pour la création d'enfant
@@ -367,12 +358,10 @@ export class DetailsComponent implements OnInit {
             classeId: this.newChild.classe?.id || null
         };
 
-        console.log('Données à envoyer:', childData);
 
         // Utiliser le service admin pour créer l'enfant
         this.adminUserService.createChild(childData).subscribe({
             next: (createdChild) => {
-                console.log('Enfant créé avec succès:', createdChild);
                 
                 // Ajouter l'enfant à la liste locale
                 if (!this.user.children) {
@@ -409,19 +398,15 @@ export class DetailsComponent implements OnInit {
     }
 
     onClasseChange(classeId: string | number) {
-        console.log('onClasseChange appelé avec classeId:', classeId, 'type:', typeof classeId);
-        console.log('classes disponibles:', this.classes);
+       
         
         // Convertir classeId en number si c'est une string
         const numericClasseId = typeof classeId === 'string' ? parseInt(classeId, 10) : classeId;
-        console.log('classeId converti en number:', numericClasseId);
         
         const selectedClasse = this.classes.find(c => c.id === numericClasseId);
-        console.log('classe sélectionnée:', selectedClasse);
         
         if (selectedClasse && this.newChild) {
             this.newChild.classe = { id: selectedClasse.id, name: selectedClasse.name };
-            console.log('newChild.classe mis à jour:', this.newChild.classe);
         }
     }
 }

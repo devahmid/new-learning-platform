@@ -50,7 +50,6 @@ export class ContactComponent implements OnInit {
       
       this.contactService.sendMessage(messageData).subscribe({
         next: (response) => {
-          console.log('Message envoyé avec succès:', response);
           this.isSubmitting = false;
           this.submitSuccess = true;
           

@@ -370,7 +370,6 @@ export class UserDashboardComponent implements OnInit {
     effect(() => {
       const user = this.auth.user();
       this.user = user;
-      console.log('user******** ', user);
       this.fullName = this.auth.fullName();
       this.email = this.auth.email();
       this.role = this.auth.role();
@@ -417,8 +416,6 @@ export class UserDashboardComponent implements OnInit {
     // loadUserPreferences() supprimé - section préférences supprimée
 
     setTimeout(() => {
-      console.log('USER APRÈS LOGIN', this.auth.user());
-      console.log('this.profilComplet', this.profilComplet);
 
       // Vérifier et célébrer les accomplissements
       this.checkAndCelebrateAccomplishments();
@@ -445,7 +442,6 @@ export class UserDashboardComponent implements OnInit {
     });
 
     this.classeService.findAll().subscribe((res) => {
-      console.log('[Classe]', res);
       this.mesClasses = res;
     });
   }
@@ -1047,17 +1043,12 @@ export class UserDashboardComponent implements OnInit {
 
   loadLevels() {
     this.isLoading = true;
-    console.log('🔄 Chargement des niveaux...');
     this.auth.getLevels().subscribe({
       next: (res) => {
-        console.log('📚 Niveaux chargés:', res);
-        console.log('📊 Nombre de niveaux:', res?.length);
         this.levels = res;
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('❌ Erreur chargement niveaux:', err);
-        this.handleError(err, 'le chargement des niveaux');
         this.isLoading = false;
       },
     });
@@ -1066,11 +1057,8 @@ export class UserDashboardComponent implements OnInit {
   // ✅ Nouvelle méthode pour charger les classes
   loadClasses() {
     this.isLoading = true;
-    console.log('🔄 Chargement des classes...');
     this.classeService.findAll().subscribe({
       next: (res) => {
-        console.log('📚 Classes chargées:', res);
-        console.log('📊 Nombre de classes:', res?.length);
         this.classes = res.filter(c => c.isActive);
         this.isLoading = false;
       },
@@ -1123,7 +1111,6 @@ export class UserDashboardComponent implements OnInit {
     if (this.editForm.invalid) return;
 
     const fv = this.editForm.value;
-    console.log('Infos mises à jour:', fv);
     const payload = {
       ...fv,
       parentProfile: {
@@ -1182,15 +1169,11 @@ export class UserDashboardComponent implements OnInit {
   }
 
   addChild() {
-    console.log('AddChild ', this.addChildForm, this.addChildForm.value);
     if (this.addChildForm.invalid) {
-      console.log('Formulaire invalide:', this.addChildForm.errors);
       return;
     }
 
     const fv = this.addChildForm.value;
-    console.log('Classes disponibles:', this.classes);
-    console.log('classeId sélectionné:', fv.classeId);
 
     const payload: CreateChildPayload = {
       parentId: this.auth.id()!,
@@ -1209,7 +1192,6 @@ export class UserDashboardComponent implements OnInit {
       },
     };
 
-    console.log('Payload envoyé:', payload);
 
     this.auth.addChild(payload).subscribe({
       next: () => {
@@ -1267,7 +1249,6 @@ export class UserDashboardComponent implements OnInit {
       rejectButtonStyleClass:
         'bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md',
       accept: () => {
-        console.log('Suppression enfant', child);
         this.auth.deleteChild(child.id).subscribe({
           next: () => {
             // Désélectionner l'enfant supprimé s'il était sélectionné
@@ -1382,7 +1363,6 @@ export class UserDashboardComponent implements OnInit {
   }
 
   openChildDetails(child: any) {
-    console.log('child details ', child);
     this.selectedChild = child;
     this.childDetailsDialog = true;
   }
@@ -1669,7 +1649,6 @@ export class UserDashboardComponent implements OnInit {
       this.isSubmitting = true;
 
       const formValue = this.editChildForm.value;
-      console.log('Soumission du formulaire:', formValue);
 
       // Préparer les données pour l'API
       const updateData = {
@@ -1680,14 +1659,12 @@ export class UserDashboardComponent implements OnInit {
         classeId: formValue.classeId,
       };
 
-      console.log("Données à envoyer à l'API:", updateData);
 
       // Appel à l'API pour mettre à jour l'enfant
       this.http
         .patch(`${ApiPaths.users}/children/${updateData.id}`, updateData)
         .subscribe({
           next: (response: any) => {
-            console.log('Enfant mis à jour:', response);
             this.updateLocalChildData(response);
             this.isSubmitting = false;
             this.closeEditChildModal();
@@ -1867,7 +1844,6 @@ export class UserDashboardComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.quizStats = response.data;
-          console.log('Statistiques de quiz chargées:', this.quizStats);
         }
         this.isLoadingQuizStats = false;
       },

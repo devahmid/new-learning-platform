@@ -438,7 +438,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // 📚 Actions sur les cours
   onCourseAction(action: any, course: Course) {
-    console.log('Action cours:', action, course);
 
     if (!this.hasPermission(action.permission)) {
       this.showError('Permission insuffisante pour cette action');
@@ -460,7 +459,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // 🚀 Actions principales
   onMainActionClick(action: any) {
-    console.log('Action principale:', action);
 
     if (!this.hasPermission(action.permission)) {
       this.showError('Permission insuffisante pour cette action');
@@ -472,13 +470,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // 👥 Clic sur un utilisateur
   onUserRowClick(user: User) {
-    console.log('Utilisateur sélectionné:', user);
     this.router.navigate(['/admin/users', user.id]);
   }
 
   // 📚 Clic sur un cours
   onCourseRowClick(course: Course) {
-    console.log('Cours sélectionné:', course);
     this.router.navigate(['/admin/courses', course.id]);
   }
 
@@ -497,7 +493,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   // 📅 Changement de période
   onTimeRangeChange(timeRange: string) {
     this.selectedTimeRange = timeRange;
-    console.log('Période sélectionnée:', timeRange);
     // Recharger les données pour la nouvelle période
     this.loadAllData();
   }
@@ -508,7 +503,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.adminService.refreshDashboard().subscribe({
       next: () => {
         this.isRefreshing = false;
-        console.log('Dashboard rafraîchi avec succès');
       },
       error: (error) => {
         this.isRefreshing = false;

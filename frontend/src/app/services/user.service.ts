@@ -44,7 +44,6 @@ export class UserService {
   }
 
   update(id: number, data: Partial<User>): Observable<User> {
-    console.log('****************** ', id, data)
     return this.http.patch<User>(`${this.baseUrl}/${id}`, data);
   }
 

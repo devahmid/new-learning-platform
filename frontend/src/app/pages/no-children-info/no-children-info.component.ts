@@ -142,7 +142,6 @@ export class NoChildrenInfoComponent implements OnInit {
     this.isLoading = true;
     this.parentService.getChildrenOfLoggedInParent().subscribe({
       next: (children) => {
-        console.log('Enfants chargés depuis la BDD:', children);
         this.children = children || [];
         
         // Charger les statistiques des enfants
@@ -164,7 +163,6 @@ export class NoChildrenInfoComponent implements OnInit {
 
     this.childStatsService.getChildrenStats().subscribe({
       next: (stats) => {
-        console.log('Statistiques chargées:', stats);
         // Créer une map des statistiques par ID d'enfant
         this.childrenStats.clear();
         stats.forEach(stat => {

@@ -45,7 +45,6 @@ export class ExerciseComponent implements OnInit, OnDestroy {
             this.exercise = exercises[this.current - 1];
           }
           this.dots = new Array(this.total).fill(0);
-          console.log('Exercices chargés:', this.exercise);
         },
         error: (error) => {
           console.error('Erreur lors du chargement des exercices:', error);
@@ -90,7 +89,6 @@ export class ExerciseComponent implements OnInit, OnDestroy {
   }
   sendToBackend() {
     // this.exerciseService.submitResults(this.score, this.total).subscribe({
-    //   next: () => console.log('Résultat envoyé'),
     //   error: err => console.error('Erreur envoi', err)
     // });
   }

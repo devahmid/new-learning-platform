@@ -28,7 +28,6 @@ export class PaymentPopupComponent implements AfterViewInit {
     this.card = this.stripe.create('card');
 
     const cardElement = document.getElementById('card-element');
-    console.log('cardElement in ngAfterViewInit:', cardElement);
 
     if (cardElement) {
       this.card.mount(cardElement);

@@ -369,7 +369,6 @@ export class ParentProgressOverviewComponent implements OnInit, OnDestroy {
       next: (response) => {
         if (response.success) {
           this.quizStats = response.data;
-          console.log('Statistiques de quiz chargées:', this.quizStats);
         }
         this.isLoadingQuizStats = false;
       },

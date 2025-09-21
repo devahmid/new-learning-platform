@@ -35,7 +35,6 @@ export class SubjectGridComponent implements OnInit {
 
   goToLevel(level: number) {
     // par ex. pour plus tard : router.navigate(['/subject', this.subject.name, 'level', level]);
-    console.log(`On va lancer le niveau ${level}`);
   }
   go(section: string) {
     console.log(`Naviguer vers ${section} du niveau ${this.level}`);

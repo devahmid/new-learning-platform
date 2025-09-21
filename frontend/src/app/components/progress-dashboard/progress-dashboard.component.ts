@@ -270,7 +270,6 @@ export class ProgressDashboardComponent implements OnInit, OnDestroy {
    */
   markRecommendationAsCompleted(recommendationId: number): void {
     // Implémenter la logique pour marquer comme terminée
-    console.log('Marquer la recommandation comme terminée:', recommendationId);
   }
 
   /**

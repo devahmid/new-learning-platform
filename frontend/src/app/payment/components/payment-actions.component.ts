@@ -59,7 +59,6 @@
 //   //   this.paymentService.getPayPalClientId().subscribe({
 //   //     next: ({ clientId }) => {
 //   //       this.loading = false;
-//   //       console.log('➡️ PayPal clientId:', clientId);
 //   //       // À compléter avec PayPal JS SDK si tu veux le faire propre
 //   //     },
 //   //     error: () => (this.loading = false),
