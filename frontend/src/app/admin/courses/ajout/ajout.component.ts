@@ -21,7 +21,8 @@ interface CourseForm {
   description: string;
   categoryId: number;
   subcategoryId: number;
-  classeId: number;
+  classeId: number; // Rétrocompatibilité pour l'ancien format
+  classeIds: number[]; // Nouveau format pour plusieurs classes
   videoUrl?: string;
   pdfUrl?: string;
   instructorId?: number;
@@ -34,7 +35,6 @@ interface CourseForm {
 interface LessonForm {
   title: string;
   description: string;
-  content: string;
   duration: number;
   videoUrl?: string;
   fileUrl?: string;
@@ -120,6 +120,13 @@ export class AjoutComponent implements OnInit {
     this.courseId = this.route.snapshot.paramMap.get('id') ? Number(this.route.snapshot.paramMap.get('id')) : null;
     this.isEditMode = !!this.courseId;
     
+    // Écouter les changements de catégorie pour réinitialiser la sous-catégorie
+    this.courseForm.get('categoryId')?.valueChanges.subscribe(categoryId => {
+      // Réinitialiser la sous-catégorie quand la catégorie change
+      this.courseForm.patchValue({ subcategoryId: null });
+      console.log('Catégorie changée:', categoryId, 'Sous-catégories filtrées:', this.filteredSubcategories.length);
+    });
+    
     this.loadFormData();
     
     // Si en mode édition, charger les données du cours
@@ -149,7 +156,8 @@ export class AjoutComponent implements OnInit {
       ],
       categoryId: [null, Validators.required],
       subcategoryId: [null, Validators.required],
-      classeId: [null, Validators.required],
+      classeId: [null], // Optionnel pour rétrocompatibilité
+      classeIds: [[], Validators.required], // Nouveau champ pour plusieurs classes
       videoUrl: [''],
       pdfUrl: [''],
       instructorId: [null],
@@ -165,7 +173,7 @@ export class AjoutComponent implements OnInit {
     try {
       this.isLoading = true;
 
-      // Charger les catégories, sous-catégories et classes depuis l'API
+      // Charger les catégories, sous-catégories, classes et instructeurs depuis l'API
       const [categories, subcategories, classes] = await Promise.all([
         this.adminService.getCategories().toPromise(),
         this.adminService.getSubcategories().toPromise(),
@@ -175,12 +183,10 @@ export class AjoutComponent implements OnInit {
       this.categories = categories || [];
       this.subcategories = subcategories || [];
       this.classes = classes || [];
-
-      // Instructeurs simulés pour l'instant
+      
+      // Utiliser les instructeurs par défaut
       this.instructors = [
-        { id: 1, name: 'Ahmed Benali', specialty: 'Langues' },
-        { id: 2, name: 'Marie Dubois', specialty: 'Mathématiques' },
-        { id: 3, name: 'Pierre Martin', specialty: 'Sciences' },
+        { id: 1, name: 'Moualim Omar', specialty: 'Langues, religion', email: 'ahmed.benali@exemple.com' },
       ];
     } catch (error) {
       console.error('Erreur API, utilisation des données par défaut:', error);
@@ -343,13 +349,29 @@ export class AjoutComponent implements OnInit {
       console.log('Cours récupéré pour édition:', course);
       console.log('URLs trouvées - videoUrl:', course.videoUrl, 'pdfUrl:', course.pdfUrl);
 
+      // Préparer les IDs de classes
+      let classeIds: number[] = [];
+      let classeId: number | null = null;
+      
+      // Nouveau format : array de classes
+      if (course.classes && Array.isArray(course.classes)) {
+        classeIds = course.classes.map((c: any) => c.id);
+        classeId = classeIds[0] || null; // Premier pour rétrocompatibilité
+      }
+      // Ancien format : classe unique
+      else if (course.classe?.id || course.classeId) {
+        classeId = course.classe?.id || course.classeId;
+        classeIds = classeId ? [classeId] : [];
+      }
+
       // Remplir le formulaire avec les données du cours
       this.courseForm.patchValue({
         title: course.title,
         description: course.description,
         categoryId: course.category?.id || course.categoryId,
         subcategoryId: course.subcategory?.id || course.subcategoryId,
-        classeId: course.classe?.id || course.classeId,
+        classeId: classeId,
+        classeIds: classeIds,
         videoUrl: course.videoUrl || course.video_url || course.video || '',
         pdfUrl: course.pdfUrl || course.fileUrl || course.pdf_url || course.file_url || course.file || '',
         instructorId: course.instructor?.id || course.instructorId,
@@ -369,7 +391,6 @@ export class AjoutComponent implements OnInit {
           this.lessonsArray.at(lastIndex).patchValue({
             title: lesson.title || '',
             description: lesson.description || '',
-            content: lesson.content || '',
             duration: lesson.duration || 0,
             videoUrl: lesson.videoUrl || lesson.video_url || lesson.video || '',
             fileUrl: lesson.fileUrl || lesson.file_url || lesson.file || '',
@@ -435,11 +456,12 @@ export class AjoutComponent implements OnInit {
           this.courseForm.get('description')?.valid &&
           this.courseForm.get('categoryId')?.valid &&
           this.courseForm.get('subcategoryId')?.valid &&
-          this.courseForm.get('classeId')?.valid
+          this.courseForm.get('classeIds')?.valid &&
+          this.courseForm.get('classeIds')?.value?.length > 0
         );
 
-      case 2: // Leçons
-        return this.lessonsArray.length > 0 && this.lessonsArray.valid;
+      case 2: // Leçons (optionnelles)
+        return this.lessonsArray.length === 0 || this.lessonsArray.valid;
 
       case 3: // Quiz et exercices
         return true; // Optionnel
@@ -461,7 +483,6 @@ export class AjoutComponent implements OnInit {
     const lesson = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
-      content: ['', [Validators.required, Validators.minLength(20)]],
       duration: [
         30,
         [Validators.required, Validators.min(5), Validators.max(180)],
@@ -574,7 +595,8 @@ export class AjoutComponent implements OnInit {
           description: courseData.description,
           categoryId: courseData.categoryId,
           subcategoryId: courseData.subcategoryId,
-          classeId: courseData.classeId,
+          classeId: courseData.classeId, // Rétrocompatibilité
+          classeIds: courseData.classeIds || [], // Nouveau format
           instructorId: courseData.instructorId,
           videoUrl: courseData.videoUrl || null,
           pdfUrl: courseData.pdfUrl || null,
@@ -583,7 +605,6 @@ export class AjoutComponent implements OnInit {
           lessons: courseData.lessons?.map((lesson: any) => ({
             title: lesson.title,
             description: lesson.description || '',
-            content: lesson.content || '',
             duration: lesson.duration || 0,
             videoUrl: lesson.videoUrl || null,
             fileUrl: lesson.fileUrl || null,
@@ -676,8 +697,9 @@ export class AjoutComponent implements OnInit {
   // 🔄 Filtrage des sous-catégories
   get filteredSubcategories(): any[] {
     const categoryId = this.courseForm.get('categoryId')?.value;
-    if (!categoryId) return [];
-    return this.subcategories.filter((sub) => sub.categoryId === categoryId);
+    if (!categoryId || !this.subcategories.length) return [];
+    const filtered = this.subcategories.filter((sub) => sub.categoryId === parseInt(categoryId));
+    return filtered;
   }
 
   // 🔄 Filtrage des sous-catégories pour une leçon spécifique
@@ -715,6 +737,49 @@ export class AjoutComponent implements OnInit {
     if (!classeId) return 'Non définie';
     const classe = this.classes.find((c) => c.id === classeId);
     return classe?.name || 'Non définie';
+  }
+
+  // Nouvelles méthodes pour gérer les classes multiples
+  onClasseToggle(classeId: number): void {
+    const classeIds = this.courseForm.get('classeIds')?.value || [];
+    const index = classeIds.indexOf(classeId);
+    
+    if (index > -1) {
+      // Retirer la classe
+      classeIds.splice(index, 1);
+    } else {
+      // Ajouter la classe
+      classeIds.push(classeId);
+    }
+    
+    this.courseForm.patchValue({ 
+      classeIds: classeIds,
+      classeId: classeIds[0] || null // Rétrocompatibilité : première classe sélectionnée
+    });
+  }
+
+  isClasseSelected(classeId: number): boolean {
+    const classeIds = this.courseForm.get('classeIds')?.value || [];
+    return classeIds.includes(classeId);
+  }
+
+  getSelectedClassesCount(): number {
+    const classeIds = this.courseForm.get('classeIds')?.value || [];
+    return classeIds.length;
+  }
+
+  getSelectedClassesNames(): string {
+    const classeIds = this.courseForm.get('classeIds')?.value || [];
+    if (classeIds.length === 0) return 'Aucune classe sélectionnée';
+    
+    const names = classeIds.map((id: number) => {
+      const classe = this.classes.find(c => c.id === id);
+      return classe?.name || 'Inconnue';
+    });
+    
+    if (names.length === 1) return names[0];
+    if (names.length === 2) return names.join(' et ');
+    return `${names.slice(0, -1).join(', ')} et ${names[names.length - 1]}`;
   }
 
   getSubcategoryNameForLesson(subcategoryId: number | null): string {

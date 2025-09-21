@@ -260,7 +260,6 @@ export class HeaderComponent implements OnInit {
   }
 
   getLevelName(levelId?: any): string {
-    console.log('[HEADER] Classe:', levelId);
     switch (levelId.id) {
       case 1:
         return 'Débutant';

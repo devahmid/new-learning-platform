@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, timer } from 'rxjs';
+import { Observable, BehaviorSubject, timer, of } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
@@ -574,6 +574,7 @@ export class AdminService {
         })
       );
   }
+
 
   // 🏷️ Créer une sous-catégorie
   createSubcategory(subcategoryData: any): Observable<any> {
