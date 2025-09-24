@@ -22,3 +22,8 @@ spl_autoload_register(function ($className) {
 require_once __DIR__ . '/../src/Utils/Response.php';
 require_once __DIR__ . '/../src/Utils/Validator.php';
 require_once __DIR__ . '/../src/Utils/JWT.php';
+
+// Chargement des configurations
+require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/email.php';
+require_once __DIR__ . '/stripe.php';

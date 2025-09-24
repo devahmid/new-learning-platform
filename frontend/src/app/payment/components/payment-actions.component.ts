@@ -402,7 +402,13 @@ export class PaymentActionsComponent {
     const amountCents = Math.round(this.amount * 100);
 
     this.paymentService.createStripeSession(amountCents, userId!).subscribe({
-      next: (res) => window.location.href = res.url,
+      next: (res) => {
+        if (res.success && res.data && res.data.url) {
+          window.location.href = res.data.url;
+        } else {
+          this.loading = false;
+        }
+      },
       error: () => this.loading = false,
     });
   }

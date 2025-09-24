@@ -22,7 +22,7 @@ export class PaymentService {
   }
 
   createStripeSession(amount: number, userId: number) {
-    return this.http.post<{ url: string }>(`${API_URL}/stripe-session`, { amount, userId });
+    return this.http.post<{ success: boolean; data: { url: string; amount: number; userId: number; description: string; note?: string } }>(`${API_URL}/stripe-session`, { amount, userId });
   }
 
   getPaymentHistory(userId: number) {

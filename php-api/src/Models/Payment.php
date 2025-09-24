@@ -16,6 +16,8 @@ class Payment extends BaseModel {
         'status',
         'paymentMethod',
         'transactionId',
+        'description',
+        'metadata',
         'paidAt'
     ];
     

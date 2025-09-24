@@ -60,6 +60,7 @@ import { CourseService } from '../../services/course.service';
     DropdownModule,
     PasswordModule,
     FicheEnfantComponent,
+    PaymentComponent,
     PaymentPageComponent,
     CalendarClasseComponent,
     BadgeModule,
@@ -1527,17 +1528,29 @@ export class UserDashboardComponent implements OnInit {
   }
 
   // Méthodes pour bloquer les boutons
-  onDisabledButtonClick(type: 'courses' | 'payment') {
+  onDisabledButtonClick(type: 'courses') {
     let message = '';
     switch (type) {
       case 'courses':
         message = 'Les cours seront bientôt disponibles !';
         break;
-      case 'payment':
-        message = 'Le paiement sera bientôt disponible !';
-        break;
     }
     alert(message);
+  }
+
+  // Méthode appelée quand un paiement SumUp est réussi
+  onPaymentSuccess() {
+    console.log('Paiement SumUp réussi !');
+    // Ici vous pouvez ajouter une notification de succès
+    // ou rediriger vers une page de confirmation
+    this.showNotification = true;
+    this.notificationType = 'success';
+    this.notificationMessage = 'Paiement effectué avec succès !';
+    
+    // Masquer la notification après 5 secondes
+    setTimeout(() => {
+      this.hideNotification();
+    }, 5000);
   }
 
   getActivityColor(type: string): string {

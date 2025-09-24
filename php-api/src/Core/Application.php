@@ -279,6 +279,18 @@ class Application {
         $this->routes['PUT']['/api/messages/{id}/read'] = ['App\Controllers\MessagingController', 'markAsRead'];
         $this->routes['PUT']['/api/messages/{id}/important'] = ['App\Controllers\MessagingController', 'toggleImportant'];
         $this->routes['DELETE']['/api/messages/{id}'] = ['App\Controllers\MessagingController', 'deleteMessage'];
+        
+        // Routes de paiement Stripe et PayPal
+        $this->routes['POST']['/api/payment/stripe-session'] = ['App\Controllers\PaymentController', 'createStripeSession'];
+        $this->routes['POST']['/api/payment/intent'] = ['App\Controllers\PaymentController', 'createPaymentIntent'];
+        $this->routes['GET']['/api/payment/paypal-client-id'] = ['App\Controllers\PaymentController', 'getPayPalClientId'];
+        $this->routes['GET']['/api/payment/paypal'] = ['App\Controllers\PaymentController', 'createPayPalOrder'];
+        $this->routes['POST']['/api/payment/paypal-capture'] = ['App\Controllers\PaymentController', 'capturePayPal'];
+        $this->routes['GET']['/api/payment/status/{id}'] = ['App\Controllers\PaymentController', 'getPaymentStatus'];
+        $this->routes['GET']['/api/payment/history/{userId}'] = ['App\Controllers\PaymentController', 'getUserPaymentHistory'];
+        $this->routes['GET']['/api/payment/success'] = ['App\Controllers\PaymentController', 'paymentSuccess'];
+        $this->routes['GET']['/api/payment/callback'] = ['App\Controllers\PaymentController', 'paymentCallback'];
+        $this->routes['GET']['/api/payment/test'] = ['App\Controllers\PaymentController', 'test'];
     }
     
     /**
