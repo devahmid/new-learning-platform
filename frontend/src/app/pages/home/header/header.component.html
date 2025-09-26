@@ -119,6 +119,13 @@
 
       <!-- Actions groupées (si connecté) -->
       <div class="flex items-center gap-2" *ngIf="isLoggedIn()">
+        <!-- Bouton Zoom -->
+        <button (click)="goToZoom()" 
+                class="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
+                title="Cours en ligne">
+          <i class="fas fa-video text-sm"></i>
+        </button>
+
         <!-- Dark Mode -->
         <button (click)="toggleDarkMode()" 
                 class="p-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200"
@@ -256,6 +263,15 @@
             <i class="fa-solid fa-headset text-emerald-600 text-xs"></i>
           </div>
           <span class="text-sm font-medium">Support</span>
+        </button>
+        
+        <!-- Bouton Zoom mobile -->
+        <button (click)="goToZoom()" 
+           class="w-full flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all duration-200 group no-underline border-none bg-transparent cursor-pointer text-left">
+          <div class="w-6 h-6 bg-orange-100 rounded flex items-center justify-center group-hover:bg-orange-200 transition-colors duration-200">
+            <i class="fas fa-video text-xs text-orange-600"></i>
+          </div>
+          <span class="text-sm font-medium">Cours en ligne</span>
         </button>
         
         <a *ngIf="role() === 'admin'" 

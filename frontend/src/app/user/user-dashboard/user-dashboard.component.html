@@ -340,6 +340,114 @@
       </div>
     </div>
 
+    <!-- Section: Cours en ligne (Zoom) -->
+    <div *ngIf="activeSection === 'zoom'" class="animate-fade-in space-y-8">
+      <!-- Carte principale Zoom -->
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-xl p-8 text-white">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+              <i class="fas fa-video text-3xl text-white"></i>
+            </div>
+            <div>
+              <h2 class="text-3xl font-bold">Cours en ligne</h2>
+              <p class="text-blue-100 text-lg">Rejoignez vos cours en direct via Zoom</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-bold">{{ getCurrentTime() }}</div>
+            <div class="text-blue-100">{{ getCurrentDate() }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bouton principal pour rejoindre Zoom -->
+      <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-video text-blue-600 text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Salle de cours en ligne</h3>
+        <p class="text-gray-600 mb-6">Une seule salle Zoom pour tous vos cours</p>
+        <button 
+          (click)="joinZoomMeeting()"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg transition-colors flex items-center justify-center space-x-3 mx-auto">
+          <i class="fas fa-video"></i>
+          <span>Rejoindre la salle Zoom</span>
+        </button>
+      </div>
+
+      <!-- Informations importantes -->
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+        <div class="flex items-start space-x-3">
+          <i class="fas fa-info-circle text-yellow-600 text-xl mt-1"></i>
+          <div>
+            <h4 class="font-semibold text-yellow-800 mb-2">Informations importantes</h4>
+            <ul class="text-yellow-700 space-y-1 text-sm">
+              <li>• Assurez-vous d'avoir installé Zoom sur votre appareil</li>
+              <li>• Testez votre micro et caméra avant le cours</li>
+              <li>• Rejoignez la session 5 minutes avant l'heure</li>
+              <li>• En cas de problème, contactez le support technique</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prochaines sessions -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center">
+            <i class="fas fa-calendar-alt text-purple-600 mr-2"></i>
+            Prochaines sessions
+          </h3>
+          <button 
+            (click)="loadUpcomingSessions()" 
+            [disabled]="isLoadingSessions"
+            class="flex items-center space-x-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 disabled:opacity-50 transition-colors text-sm">
+            <i class="fas fa-refresh" [class.fa-spin]="isLoadingSessions"></i>
+            <span>Actualiser</span>
+          </button>
+        </div>
+
+        <!-- Loading state -->
+        <div *ngIf="isLoadingSessions" class="flex items-center justify-center py-8">
+          <div class="flex items-center space-x-3">
+            <i class="fas fa-spinner fa-spin text-purple-600 text-xl"></i>
+            <span class="text-gray-600">Chargement des sessions...</span>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!isLoadingSessions && upcomingSessions.length === 0" class="text-center py-8">
+          <div class="text-gray-400 text-6xl mb-4">📅</div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune session programmée</h3>
+          <p class="text-gray-500">Aucun cours n'est programmé pour les prochains jours.</p>
+        </div>
+
+        <!-- Liste des sessions -->
+        <div *ngIf="!isLoadingSessions && upcomingSessions.length > 0" class="space-y-3">
+          <div *ngFor="let session of upcomingSessions" 
+               class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <div class="flex items-center space-x-4">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center" [style.background-color]="session.color + '20'">
+                <i class="fas fa-video" [style.color]="session.color"></i>
+              </div>
+              <div>
+                <div class="font-medium text-gray-900">{{ session.title }}</div>
+                <div class="text-sm text-gray-500">{{ session.date }} à {{ session.time }}</div>
+                <div class="text-xs text-gray-400">{{ session.teacher }} • {{ session.location }}</div>
+              </div>
+            </div>
+            <button 
+              (click)="joinZoomMeeting(session)"
+              class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+              <i class="fas fa-video"></i>
+              <span>Rejoindre</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Section: Paiement -->
     <div *ngIf="activeSection === 'payment'" class="animate-fade-in space-y-8">
       <!-- Formulaire de paiement -->

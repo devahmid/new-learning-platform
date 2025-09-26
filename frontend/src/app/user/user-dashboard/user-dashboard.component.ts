@@ -102,11 +102,19 @@ export class UserDashboardComponent implements OnInit {
   paymentHistory: any[] = [];
   isLoadingPaymentHistory = false;
 
+  // Données pour les sessions Zoom
+  upcomingSessions: any[] = [];
+  isLoadingSessions = false;
+
+  // URL unique de la salle Zoom (une seule salle pour tous les cours)
+  zoomUrl = 'https://us02web.zoom.us/j/2432586827?pwd=RkpwaVhlcElXWjQxZmt6UkI5SmRiQT09';
+
   // Type pour les sections du dashboard
   private readonly sectionTypes = [
     'overview',
     'children',
     'courses',
+    'zoom',
     'payment',
     'stats',
     'settings',
@@ -424,6 +432,7 @@ export class UserDashboardComponent implements OnInit {
     this.loadQuizStats();
     this.loadClasses(); // ✅ Ajouter le chargement des classes
     this.loadPaymentHistory(); // ✅ Charger l'historique des paiements
+    this.loadUpcomingSessions(); // ✅ Charger les sessions Zoom depuis le planning
     this.setupKeyboardShortcuts();
     this.initTheme();
     this.setupPushNotifications();
@@ -444,6 +453,8 @@ export class UserDashboardComponent implements OnInit {
 
     this.route.queryParams.subscribe((params) => {
       const status = params['status'];
+      const section = params['section'];
+      
       if (status === 'success') {
         this.messageService.add({
           severity: 'success',
@@ -456,6 +467,14 @@ export class UserDashboardComponent implements OnInit {
           summary: 'Paiement annulé ❌',
           detail: 'Le paiement a échoué ou a été annulé.',
         });
+      }
+      
+      // Activer la section Zoom si demandée via URL
+      if (section === 'zoom') {
+        this.activeSection = 'zoom';
+      } else if (section === undefined && this.activeSection === 'zoom') {
+        // Si pas de paramètre section et qu'on était sur zoom, revenir à overview
+        this.activeSection = 'overview';
       }
     });
 
@@ -1482,6 +1501,12 @@ export class UserDashboardComponent implements OnInit {
       badge: null,
     },
     {
+      id: 'zoom',
+      label: 'Cours en ligne',
+      icon: 'fas fa-video',
+      badge: null,
+    },
+    {
       id: 'payment',
       label: 'Paiement',
       icon: 'fa-solid fa-credit-card',
@@ -1542,6 +1567,28 @@ export class UserDashboardComponent implements OnInit {
   // Méthodes pour la navigation
   setActiveSection(sectionId: any) {
     this.activeSection = sectionId;
+    
+    // Mettre à jour l'URL pour refléter la section active
+    this.updateUrlForSection(sectionId);
+  }
+
+  // Mettre à jour l'URL selon la section active
+  private updateUrlForSection(sectionId: string) {
+    if (sectionId === 'zoom') {
+      // Garder le paramètre section=zoom pour la section Zoom
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { section: 'zoom' },
+        replaceUrl: true
+      });
+    } else {
+      // Supprimer le paramètre section pour les autres sections
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+    }
   }
 
   // Méthodes pour bloquer les boutons
@@ -2051,5 +2098,141 @@ export class UserDashboardComponent implements OnInit {
       case 'sumup': return 'pi pi-mobile';
       default: return 'pi pi-money-bill';
     }
+  }
+
+
+  /**
+   * Obtenir l'heure actuelle formatée
+   */
+  getCurrentTime(): string {
+    const now = new Date();
+    return now.toLocaleTimeString('fr-FR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  }
+
+  /**
+   * Obtenir la date actuelle formatée
+   */
+  getCurrentDate(): string {
+    const now = new Date();
+    return now.toLocaleDateString('fr-FR', { 
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  /**
+   * Charger les prochaines sessions depuis le planning des classes
+   */
+  loadUpcomingSessions(): void {
+    this.isLoadingSessions = true;
+    
+    this.classeService.findAll().subscribe({
+      next: (classes) => {
+        this.upcomingSessions = this.buildUpcomingSessions(classes);
+        this.isLoadingSessions = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des sessions:', error);
+        this.isLoadingSessions = false;
+        this.upcomingSessions = [];
+      }
+    });
+  }
+
+  /**
+   * Construire la liste des prochaines sessions à partir des classes
+   */
+  private buildUpcomingSessions(classes: any[]): any[] {
+    const sessions: any[] = [];
+    const today = new Date();
+    const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    classes.forEach(classe => {
+      if (classe.schedules && classe.schedules.length > 0) {
+        classe.schedules.forEach((schedule: any) => {
+          // Générer les sessions pour les 7 prochains jours
+          for (let i = 0; i < 7; i++) {
+            const sessionDate = new Date(today.getTime() + i * 24 * 60 * 60 * 1000);
+            const dayName = this.getDayName(sessionDate.getDay());
+            
+            if (this.getDayName(schedule.day) === dayName) {
+              sessions.push({
+                id: `${classe.id}-${schedule.id}-${i}`,
+                title: classe.name,
+                description: schedule.description || `Cours de ${classe.name}`,
+                date: this.formatSessionDate(sessionDate),
+                time: schedule.startHour,
+                endTime: schedule.endHour,
+                day: schedule.day,
+                classeId: classe.id,
+                scheduleId: schedule.id,
+                teacher: schedule.teacher?.firstName + ' ' + schedule.teacher?.lastName || 'Professeur',
+                location: schedule.location || 'En ligne',
+                online: schedule.online !== false, // Par défaut en ligne
+                color: classe.color || '#3B82F6'
+              });
+            }
+          }
+        });
+      }
+    });
+
+    // Trier par date et heure
+    return sessions.sort((a, b) => {
+      const dateA = new Date(`${a.date} ${a.time}`);
+      const dateB = new Date(`${b.date} ${b.time}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }
+
+  /**
+   * Obtenir le nom du jour en français
+   */
+  private getDayName(dayIndex: number): string {
+    const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    return days[dayIndex];
+  }
+
+  /**
+   * Formater la date de session
+   */
+  private formatSessionDate(date: Date): string {
+    return date.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    });
+  }
+
+  /**
+   * Rejoindre une réunion Zoom (version simplifiée avec une seule salle)
+   */
+  joinZoomMeeting(session?: any): void {
+    if (!this.zoomUrl) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'URL de réunion Zoom non configurée.',
+        life: 5000
+      });
+      return;
+    }
+
+    // Ouvrir la réunion Zoom dans un nouvel onglet
+    window.open(this.zoomUrl, '_blank');
+    
+    // Afficher une notification de succès
+    const sessionInfo = session ? ` pour ${session.title}` : '';
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Ouverture Zoom',
+      detail: `La réunion Zoom s'ouvre dans un nouvel onglet${sessionInfo}.`,
+      life: 3000
+    });
   }
 }

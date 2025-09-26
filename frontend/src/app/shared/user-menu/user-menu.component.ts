@@ -54,6 +54,14 @@ export class UserMenuComponent {
     this.router.navigate(['/messaging']);
   }
 
+  goToZoom() {
+    // Vérifier si l'utilisateur peut accéder aux cours en ligne
+    if (this.validationService.isMenuItemDisabled('mon-compte')) {
+      return; // Bloquer l'accès si le compte n'est pas validé
+    }
+    this.router.navigate(['/mon-compte'], { queryParams: { section: 'zoom' } });
+  }
+
   logout() {
     this.auth.logout();
     this.childContext.clearAll(); // Nettoyer le contexte des enfants

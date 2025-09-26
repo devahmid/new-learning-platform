@@ -241,6 +241,34 @@ export class HeaderComponent implements OnInit {
     }
   }
 
+  // Navigation vers la section Zoom
+  goToZoom(): void {
+    console.log('goToZoom() appelée');
+    console.log('isMenuItemDisabled mon-compte:', this.validationService.isMenuItemDisabled('mon-compte'));
+    
+    // Temporairement, permettre l'accès même si le compte n'est pas validé
+    // TODO: Remettre la validation plus tard
+    /*
+    if (this.validationService.isMenuItemDisabled('mon-compte')) {
+      console.log('Accès bloqué - compte non validé');
+      return;
+    }
+    */
+    
+    console.log('Redirection vers /mon-compte?section=zoom');
+    
+    // Vérifier si on est déjà sur /mon-compte
+    if (this.router.url.includes('/mon-compte')) {
+      // Si on est déjà sur mon-compte, forcer le rechargement avec le paramètre
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigate(['/mon-compte'], { queryParams: { section: 'zoom' } });
+      });
+    } else {
+      // Sinon, naviguer vers mon-compte avec le paramètre
+      this.router.navigate(['/mon-compte'], { queryParams: { section: 'zoom' } });
+    }
+  }
+
   // Méthodes pour le sélecteur d'enfant
   openChildSelectionModal() {
     this.modalService.openModalAutomatically();
