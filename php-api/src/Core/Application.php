@@ -282,6 +282,7 @@ class Application {
         
         // Routes de paiement Stripe et PayPal
         $this->routes['POST']['/api/payment/stripe-session'] = ['App\Controllers\PaymentController', 'createStripeSession'];
+        $this->routes['POST']['/api/payment/confirm-stripe'] = ['App\Controllers\PaymentController', 'confirmStripePayment'];
         $this->routes['POST']['/api/payment/intent'] = ['App\Controllers\PaymentController', 'createPaymentIntent'];
         $this->routes['GET']['/api/payment/paypal-client-id'] = ['App\Controllers\PaymentController', 'getPayPalClientId'];
         $this->routes['GET']['/api/payment/paypal'] = ['App\Controllers\PaymentController', 'createPayPalOrder'];

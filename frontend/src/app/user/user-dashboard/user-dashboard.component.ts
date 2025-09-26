@@ -2000,7 +2000,7 @@ export class UserDashboardComponent implements OnInit {
    * Confirmer un paiement Stripe avec l'API
    */
   private confirmStripePayment(sessionId: string): void {
-    this.http.post('https://centre-culturel-olivier.com/api/payment/confirm-stripe', {
+    this.http.post('https://centre-culturel-olivier.fr/api/payment/confirm-stripe', {
       session_id: sessionId
     }).subscribe({
       next: (response: any) => {

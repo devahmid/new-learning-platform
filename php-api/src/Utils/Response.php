@@ -18,16 +18,16 @@ class Response {
             // Autoriser les domaines spécifiques
             $allowedOrigins = [
                 'http://localhost:4200',
-                'https://arrisala.fr',
-                'https://www.arrisala.fr'
+                'https://centre-culturel-olivier.fr',
+                'https://www.centre-culturel-olivier.fr'
             ];
             
             $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
             if (in_array($origin, $allowedOrigins)) {
                 header("Access-Control-Allow-Origin: $origin");
             } else {
-                // Fallback pour les requêtes sans origin
-                header("Access-Control-Allow-Origin: http://localhost:4200");
+                // Fallback pour les requêtes sans origin - autoriser le domaine de production
+                header("Access-Control-Allow-Origin: https://centre-culturel-olivier.fr");
             }
             
             header("Access-Control-Allow-Credentials: true");

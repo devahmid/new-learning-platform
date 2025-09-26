@@ -8,6 +8,7 @@ use App\Models\Lesson;
 use App\Models\Exercise;
 use App\Models\Quiz;
 use App\Models\ClassModel;
+use App\Models\Payment;
 use App\Utils\Response;
 use App\Utils\JWT;
 
@@ -49,6 +50,19 @@ class AdminDashboardController {
                 $popularCourses = [];
             }
             
+            // Statistiques des revenus
+            $totalRevenue = Payment::getTotalRevenue();
+            $currentMonthRevenue = Payment::getCurrentMonthRevenue();
+            $lastMonthRevenue = Payment::getLastMonthRevenue();
+            
+            // Calculer le pourcentage de croissance des revenus
+            $revenueGrowth = 0;
+            if ($lastMonthRevenue > 0) {
+                $revenueGrowth = round((($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1);
+            } elseif ($currentMonthRevenue > 0) {
+                $revenueGrowth = 100;
+            }
+            
             $stats = [
                 'users' => [
                     'total' => $totalUsers,
@@ -63,6 +77,12 @@ class AdminDashboardController {
                     'exercises' => $totalExercises,
                     'quizzes' => $totalQuizzes,
                     'classes' => $totalClasses
+                ],
+                'revenue' => [
+                    'total' => $totalRevenue,
+                    'currentMonth' => $currentMonthRevenue,
+                    'lastMonth' => $lastMonthRevenue,
+                    'growthPercentage' => $revenueGrowth
                 ],
                 'popularCourses' => $popularCourses
             ];

@@ -31,7 +31,7 @@ $router->get('/payment/paypal', function() use ($paymentController) {
     return $paymentController->createPayPalOrder();
 });
 
-$router->post('/payment/paypal-capture', function() use ($paymentController) {
+$router->post('/api/payment/paypal-capture', function() use ($paymentController) {
     return $paymentController->capturePayPal();
 });
 

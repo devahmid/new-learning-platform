@@ -90,7 +90,7 @@ class PaymentController {
                 // Enregistrer le paiement en base de données
                 $payment = new Payment();
                 $payment->userId = $userId;
-                $payment->amount = $amount; // Montant en centimes
+                $payment->amount = $amount / 100; // Convertir les centimes en euros
                 $payment->currency = 'EUR';
                 $payment->status = 'pending'; // Statut initial
                 $payment->paymentMethod = 'stripe';
@@ -182,20 +182,21 @@ class PaymentController {
         try {
             $amount = floatval($_GET['amount'] ?? 0);
             $userId = intval($_GET['userId'] ?? 0);
+            $paypalOrderId = $_GET['paypalOrderId'] ?? null;
             
             if (!$amount || !$userId) {
                 return Response::error('Paramètres manquants', 400);
             }
             
-            // TODO: Implémenter l'intégration PayPal
-            $orderId = "paypal_order_" . uniqid();
+            // Utiliser l'order ID de PayPal si fourni, sinon générer un ID temporaire
+            $orderId = $paypalOrderId ?: "paypal_order_" . uniqid();
             
             // Enregistrer le paiement en base de données
             $payment = new Payment();
             $payment->userId = $userId;
-            $payment->amount = $amount * 100; // Convertir en centimes
+            $payment->amount = $amount; // PayPal travaille déjà en euros
             $payment->currency = 'EUR';
-            $payment->status = 'pending'; // Statut initial
+            $payment->status = $paypalOrderId ? 'completed' : 'pending'; // Si order ID PayPal fourni, c'est déjà complet
             $payment->paymentMethod = 'paypal';
             $payment->transactionId = $orderId; // Order ID PayPal
             $payment->description = 'Paiement cours';
@@ -239,7 +240,7 @@ class PaymentController {
             if ($payment) {
                 // Mettre à jour le statut du paiement
                 $payment->status = 'completed';
-                $payment->paidAt = date('Y-m-d H:i:s');
+                $payment->updatedAt = date('Y-m-d H:i:s');
                 $payment->save();
                 
                 return Response::success([
@@ -332,7 +333,7 @@ class PaymentController {
 
             // Mettre à jour le statut du paiement
             $payment->status = 'completed';
-            $payment->paidAt = date('Y-m-d H:i:s');
+            $payment->updatedAt = date('Y-m-d H:i:s');
             $payment->save();
 
             return Response::success([
@@ -352,7 +353,9 @@ class PaymentController {
      * GET /payment/success
      */
     public function paymentSuccess() {
-        return Response::success(['message' => 'Paiement réussi ! Merci pour votre achat.']);
+        // Rediriger vers la page de succès du frontend
+        header('Location: https://centre-culturel-olivier.fr/mon-compte?payment=success');
+        exit;
     }
     
     /**
@@ -360,7 +363,21 @@ class PaymentController {
      * GET /payment/callback
      */
     public function paymentCallback() {
-        return Response::success(['message' => 'Callback reçu.']);
+        // Récupérer le checkout_id depuis les paramètres GET
+        $checkoutId = $_GET['checkout_id'] ?? null;
+        
+        if ($checkoutId) {
+            // Traiter le callback SumUp si nécessaire
+            // Ici on pourrait vérifier le statut du paiement avec SumUp
+            
+            // Rediriger vers la page de succès du frontend
+            header('Location: https://centre-culturel-olivier.fr/mon-compte?payment=success&checkout_id=' . urlencode($checkoutId));
+            exit;
+        }
+        
+        // Fallback si pas de checkout_id
+        header('Location: https://centre-culturel-olivier.fr/mon-compte?payment=success');
+        exit;
     }
     
     /**
@@ -413,7 +430,7 @@ class PaymentController {
                 // Enregistrer le paiement en base de données
                 $payment = new Payment();
                 $payment->userId = $userId;
-                $payment->amount = $amount * 100; // Convertir en centimes
+                $payment->amount = $amount; // SumUp travaille déjà en euros
                 $payment->currency = $currency;
                 $payment->status = 'pending'; // Statut initial
                 $payment->paymentMethod = 'sumup';

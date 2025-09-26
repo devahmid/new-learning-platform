@@ -58,4 +58,46 @@ class Payment extends BaseModel {
         
         return $array;
     }
+    
+    /**
+     * Calculer le total des revenus (paiements complétés)
+     */
+    public static function getTotalRevenue() {
+        $db = Database::getInstance();
+        $sql = "SELECT SUM(amount) as total FROM " . static::$table . " WHERE status = 'completed'";
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
+    }
+    
+    /**
+     * Calculer les revenus du mois en cours
+     */
+    public static function getCurrentMonthRevenue() {
+        $db = Database::getInstance();
+        $sql = "SELECT SUM(amount) as total FROM " . static::$table . " 
+                WHERE status = 'completed' 
+                AND MONTH(createdAt) = MONTH(CURRENT_DATE()) 
+                AND YEAR(createdAt) = YEAR(CURRENT_DATE())";
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
+    }
+    
+    /**
+     * Calculer les revenus du mois précédent
+     */
+    public static function getLastMonthRevenue() {
+        $db = Database::getInstance();
+        $sql = "SELECT SUM(amount) as total FROM " . static::$table . " 
+                WHERE status = 'completed' 
+                AND MONTH(createdAt) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH)) 
+                AND YEAR(createdAt) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))";
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
+    }
 }
