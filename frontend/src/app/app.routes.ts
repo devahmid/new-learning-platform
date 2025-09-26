@@ -474,6 +474,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./admin/components/email-notification/email-notification.component').then(
+            (m) => m.EmailNotificationComponent
+          ),
+      },
+      {
         path: 'settings/security',
         loadComponent: () =>
           import('./admin/settings/security/security.component').then(

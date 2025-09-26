@@ -4,6 +4,9 @@ namespace App\Controllers;
 
 use App\Utils\Response;
 use App\Utils\Validator;
+use App\Utils\EmailService;
+use App\Models\User;
+use App\Models\Notification;
 
 /**
  * Contrôleur de notifications - Équivalent du NotificationsController NestJS
@@ -129,5 +132,139 @@ class NotificationController {
         }
         
         error_log("✅ Email réel envoyé à: {$to} - Sujet: {$subject}");
+        return true;
+    }
+
+    /**
+     * Envoyer une notification à tous les utilisateurs
+     */
+    public function sendToAll() {
+        try {
+            $rawInput = file_get_contents('php://input');
+            $input = json_decode($rawInput, true);
+            
+            // Debug
+            error_log("sendToAll - Raw input: " . $rawInput);
+            error_log("sendToAll - Input décodé: " . print_r($input, true));
+            
+            if (!$input || !isset($input['subject']) || !isset($input['content'])) {
+                error_log("sendToAll - Validation échouée. Input: " . print_r($input, true));
+                return Response::error('Sujet et contenu requis', 400);
+            }
+
+            $subject = $input['subject'];
+            $content = $input['content'];
+            $adminId = $input['admin_id'] ?? 1; // TODO: Récupérer depuis la session
+
+            // Récupérer tous les utilisateurs (pas seulement les actifs)
+            $users = User::where([]);
+            
+            if (empty($users)) {
+                return Response::error('Aucun utilisateur trouvé', 404);
+            }
+
+            $successCount = 0;
+            $errorCount = 0;
+            $errors = [];
+
+            // TODO: Enregistrer la notification en base quand la classe sera déployée
+            // $notification = new Notification();
+            // $notification->subject = $subject;
+            // $notification->content = $content;
+            // $notification->admin_id = $adminId;
+            // $notification->total_recipients = count($users);
+            // $notification->sent_at = date('Y-m-d H:i:s');
+            // $notification->save();
+
+            // Envoyer à chaque utilisateur avec le même format que les emails individuels
+            foreach ($users as $user) {
+                try {
+                    $personalizedContent = $this->personalizeContent($content, $user);
+                    
+                    $sent = $this->sendRealEmail(
+                        $user->email,
+                        $subject,
+                        $personalizedContent
+                    );
+
+                    if ($sent) {
+                        $successCount++;
+                    } else {
+                        $errorCount++;
+                        $errors[] = "Erreur pour {$user->email}";
+                    }
+                } catch (\Exception $e) {
+                    $errorCount++;
+                    $errors[] = "Erreur pour {$user->email}: " . $e->getMessage();
+                }
+            }
+
+            // TODO: Mettre à jour les statistiques quand la classe sera déployée
+            // $notification->success_count = $successCount;
+            // $notification->error_count = $errorCount;
+            // $notification->update();
+
+            return Response::success([
+                'notification_id' => 0, // TODO: Récupérer l'ID quand la classe sera déployée
+                'total_recipients' => count($users),
+                'success_count' => $successCount,
+                'error_count' => $errorCount,
+                'errors' => $errors
+            ]);
+
+        } catch (\Exception $e) {
+            error_log('NotificationController Error (sendToAll): ' . $e->getMessage());
+            return Response::error('Erreur lors de l\'envoi des notifications: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Récupérer l'historique des notifications
+     */
+    public function getHistory() {
+        try {
+            // TODO: Récupérer l'historique quand la classe Notification sera déployée
+            return Response::success([]);
+        } catch (\Exception $e) {
+            error_log('NotificationController Error (getHistory): ' . $e->getMessage());
+            return Response::error('Erreur lors de la récupération de l\'historique: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Récupérer les statistiques des utilisateurs
+     */
+    public function getUserStats() {
+        try {
+            $totalUsers = count(User::where([]));
+            $activeUsers = count(User::where(['status' => 'active']));
+            $parents = count(User::where(['role' => 'parent']));
+            $teachers = count(User::where(['role' => 'teacher']));
+
+            return Response::success([
+                'total_users' => $totalUsers,
+                'active_users' => $activeUsers,
+                'parents' => $parents,
+                'teachers' => $teachers
+            ]);
+        } catch (\Exception $e) {
+            error_log('NotificationController Error (getUserStats): ' . $e->getMessage());
+            return Response::error('Erreur lors de la récupération des statistiques: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Personnaliser le contenu avec les données de l'utilisateur
+     */
+    private function personalizeContent($content, $user) {
+        $replacements = [
+            '{{first_name}}' => $user->firstName ?? '',
+            '{{last_name}}' => $user->lastName ?? '',
+            '{{full_name}}' => ($user->firstName ?? '') . ' ' . ($user->lastName ?? ''),
+            '{{email}}' => $user->email ?? '',
+            '{{phone}}' => $user->phoneNumber ?? '',
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $content);
     }
 }

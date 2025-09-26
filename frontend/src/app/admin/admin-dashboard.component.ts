@@ -633,6 +633,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/users/validation']);
   }
 
+  // 📧 Naviguer vers la page des notifications
+  goToNotifications() {
+    this.router.navigate(['/admin/notifications']);
+  }
+
   // 🏷️ Obtenir la classe CSS pour le badge de statut
   getStatusBadgeClass(status: string): string {
     switch (status) {

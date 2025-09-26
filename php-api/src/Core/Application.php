@@ -287,6 +287,11 @@ class Application {
         $this->routes['GET']['/api/payment/paypal'] = ['App\Controllers\PaymentController', 'createPayPalOrder'];
         $this->routes['POST']['/api/payment/paypal-capture'] = ['App\Controllers\PaymentController', 'capturePayPal'];
         
+        // Routes de notifications par email
+        $this->routes['POST']['/api/notifications/send'] = ['App\Controllers\NotificationController', 'sendToAll'];
+        $this->routes['GET']['/api/notifications/history'] = ['App\Controllers\NotificationController', 'getHistory'];
+        $this->routes['GET']['/api/notifications/stats'] = ['App\Controllers\NotificationController', 'getUserStats'];
+        
         // Routes de paiement SumUp
         $this->routes['POST']['/api/payment/sumup-checkout'] = ['App\Controllers\PaymentController', 'createSumUpCheckout'];
         $this->routes['POST']['/api/payment/sumup-webhook'] = ['App\Controllers\PaymentController', 'processSumUpWebhook'];
