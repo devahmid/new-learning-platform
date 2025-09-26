@@ -156,7 +156,7 @@ export class AdminService {
               totalUsers: apiData.users?.total || 0,
               activeUsers: apiData.users?.active || 0,
               totalCourses: apiData.content?.courses || 0,
-              totalRevenue: 0, // Pas encore implémenté
+              totalRevenue: apiData.revenue?.total || 0, // Maintenant implémenté
               newUsersThisMonth: apiData.users?.active || 0,
               courseCompletionRate: 0 // Pas encore implémenté
             };

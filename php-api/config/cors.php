@@ -6,8 +6,8 @@
 // Domaines autorisés
 const ALLOWED_ORIGINS = [
     'http://localhost:4200',    // Développement local
-    'https://arrisala.fr',      // Production
-    'https://www.arrisala.fr'   // Production avec www
+    'https://centre-culturel-olivier.fr',      // Production
+    'https://www.centre-culturel-olivier.fr'   // Production avec www
 ];
 
 /**

@@ -388,9 +388,36 @@ export class PaymentComponent implements OnInit {
 
   onPayPalSuccess(event: any) {
     console.log('PayPal Success:', event);
-    this.successMessage = 'Paiement PayPal réussi !';
-    this.errorMessage = '';
-    // TODO: Traiter le paiement réussi
+    this.loading = true;
+    
+    // Utiliser l'order ID de PayPal directement
+    const paypalOrderId = event.orderId;
+    console.log('PayPal Order ID:', paypalOrderId);
+    
+    if (!paypalOrderId) {
+      console.error('PayPal Order ID is missing');
+      this.errorMessage = 'Erreur: Order ID PayPal manquant.';
+      this.loading = false;
+      return;
+    }
+    
+    // Créer un paiement en base avec l'order ID de PayPal
+    this.paymentService.createPayPalOrder(this.amount, this.userId, paypalOrderId).subscribe({
+      next: (orderResponse) => {
+        console.log('PayPal Order created in DB:', orderResponse);
+        
+        // Le paiement PayPal est déjà complet, pas besoin de capture
+        this.successMessage = 'Paiement PayPal réussi et enregistré !';
+        this.errorMessage = '';
+        this.showPayPalButton = false;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Erreur création order PayPal:', error);
+        this.errorMessage = 'Erreur lors de la création du paiement PayPal.';
+        this.loading = false;
+      }
+    });
   }
 
   onPayPalError(event: any) {

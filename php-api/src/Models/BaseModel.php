@@ -249,6 +249,27 @@ abstract class BaseModel {
     }
     
     /**
+     * Trouve un record par un champ spécifique
+     */
+    public static function findBy($field, $value) {
+        $db = \DatabaseConfig::getInstance()->getConnection();
+        $stmt = $db->prepare("SELECT * FROM " . static::$table . " WHERE `$field` = ?");
+        $stmt->execute([$value]);
+        
+        $row = $stmt->fetch();
+        if (!$row) {
+            return null;
+        }
+        
+        $model = new static($row);
+        $model->attributes = $row;
+        $model->exists = true;
+        $model->original = $row;
+        
+        return $model;
+    }
+    
+    /**
      * Crée un nouveau record
      */
     public static function create($attributes = []) {

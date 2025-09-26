@@ -17,8 +17,12 @@ export class PaymentService {
     return this.http.post(`${API_URL}/paypal-capture`, { orderId });
   }
 
-  createPayPalOrder(amount: number, userId: number) {
-    return this.http.get<{ id: string }>(`${API_URL}/paypal?amount=${amount}&userId=${userId}`);
+  createPayPalOrder(amount: number, userId: number, paypalOrderId?: string) {
+    let url = `${API_URL}/paypal?amount=${amount}&userId=${userId}`;
+    if (paypalOrderId) {
+      url += `&paypalOrderId=${encodeURIComponent(paypalOrderId)}`;
+    }
+    return this.http.get<{ id: string }>(url);
   }
 
   createStripeSession(amount: number, userId: number) {
