@@ -16,7 +16,7 @@ export class UserValidationService {
     private authService: AuthService,
     private http: HttpClient
   ) {
-    // Initialiser le statut au démarrage
+    // Initialiser le statut au démarrage (sans requêtes automatiques)
     this.initValidationStatus();
   }
 
@@ -51,8 +51,8 @@ export class UserValidationService {
       return;
     }
 
-    // Faire un appel API pour obtenir le statut réel
-    this.refreshValidationStatus();
+    // Utiliser le statut depuis le profil utilisateur déjà chargé (sans requête API)
+    this.initStatusAfterLogin();
   }
 
   refreshValidationStatus(): void {
@@ -220,5 +220,11 @@ export class UserValidationService {
         this._validationStatus.set('pending');
       }
     });
+  }
+
+  // 🚫 Désactiver complètement les requêtes automatiques
+  public disableAutoRefresh(): void {
+    // Cette méthode peut être appelée pour désactiver les requêtes automatiques
+    // Le service utilise maintenant uniquement les données du profil utilisateur
   }
 }

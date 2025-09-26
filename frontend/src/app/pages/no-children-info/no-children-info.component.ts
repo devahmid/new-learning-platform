@@ -5,6 +5,7 @@ import { ChildContextService } from '../../_children-context/_children-context/c
 import { ParentService } from '../../_children-context/_children-context/parent.service';
 import { ChildStatsService, ChildStats } from '../../services/child-stats.service';
 import { User } from '../../models/user.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-no-children-info',
@@ -23,6 +24,23 @@ import { User } from '../../models/user.model';
           <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           <p class="mt-4 text-gray-600">Chargement des enfants...</p>
         </div>
+
+        <!-- Bouton Zoom principal -->
+        <section class="mb-12" *ngIf="!isLoading">
+          <div class="text-center">
+            <button
+              (click)="openZoom()"
+              class="inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-6 px-12 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl text-xl"
+            >
+              <i class="fa-solid fa-video mr-4 text-2xl"></i>
+              <div class="text-left">
+                <div class="text-2xl">🎥 Cours en direct sur Zoom</div>
+                <div class="text-lg opacity-90">Rejoignez la session maintenant</div>
+              </div>
+              <i class="fa-solid fa-external-link-alt ml-4 text-xl"></i>
+            </button>
+          </div>
+        </section>
 
         <!-- Children cards -->
         <section id="children-cards" class="mb-12" *ngIf="!isLoading && children.length > 0">
@@ -89,9 +107,25 @@ import { User } from '../../models/user.model';
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Aucun enfant enregistré</h3>
             <p class="text-gray-600 mb-6">Pour accéder aux matières, vous devez ajouter un enfant à votre compte.</p>
+            
+            <!-- Bouton Zoom -->
+            <div class="mb-6">
+              <button
+                (click)="openZoom()"
+                class="inline-flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                <i class="fa-solid fa-video mr-3 text-xl"></i>
+                <div class="text-left">
+                  <div class="text-lg">Rejoindre le cours en direct</div>
+                  <div class="text-sm opacity-90">Cliquez pour ouvrir Zoom</div>
+                </div>
+                <i class="fa-solid fa-external-link-alt ml-3"></i>
+              </button>
+            </div>
+            
             <button
               routerLink="/mon-compte"
-              class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+              class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
             >
               <i class="fa-solid fa-user-plus mr-2"></i>Ajouter un enfant
             </button>
@@ -108,6 +142,22 @@ import { User } from '../../models/user.model';
               <h3 class="text-xl font-bold text-gray-900 mb-2">Ajouter un enfant</h3>
               <p class="text-gray-600">Créez un profil pour un nouvel enfant</p>
             </div>
+            
+            <!-- Bouton Zoom -->
+            <div class="mb-6">
+              <button
+                (click)="openZoom()"
+                class="inline-flex items-center justify-center w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                <i class="fa-solid fa-video mr-3 text-xl"></i>
+                <div class="text-left">
+                  <div class="text-lg">Cours en direct</div>
+                  <div class="text-sm opacity-90">Rejoindre Zoom maintenant</div>
+                </div>
+                <i class="fa-solid fa-external-link-alt ml-3"></i>
+              </button>
+            </div>
+            
             <button 
               routerLink="/mon-compte"
               class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
@@ -130,6 +180,14 @@ export class NoChildrenInfoComponent implements OnInit {
   children: User[] = [];
   childrenStats: Map<number, ChildStats> = new Map();
   isLoading = true;
+  
+  // Lien Zoom depuis l'environnement
+  zoomLink = environment.zoomLink;
+
+  // Méthode pour ouvrir Zoom avec des paramètres optimisés
+  openZoom() {
+    window.open(this.zoomLink, '_blank', 'noopener,noreferrer,width=1200,height=800,scrollbars=yes,resizable=yes');
+  }
 
   ngOnInit() {
     this.loadChildren();

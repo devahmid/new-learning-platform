@@ -19,8 +19,8 @@ export class ProgressNotificationsService {
   public unreadCount$ = this.unreadCountSubject.asObservable();
   
   // Configuration
-  private refreshInterval = 30000; // 30 secondes
-  private autoRefresh = true;
+  private refreshInterval = 300000; // 5 minutes (au lieu de 30 secondes)
+  private autoRefresh = false; // Désactivé par défaut
 
   constructor(private http: HttpClient) {
     // Démarrer le rafraîchissement automatique si activé

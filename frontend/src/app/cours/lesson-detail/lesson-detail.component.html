@@ -70,6 +70,21 @@
 
       <!-- Section Vidéo -->
       <div *ngIf="currentSection === 'video'" class="section-enter section-transition">
+        <!-- Indicateur de progression des leçons -->
+        <div class="mb-6" *ngIf="allLessons.length > 0">
+          <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-medium text-gray-700">Progression du cours</h3>
+              <span class="text-sm text-gray-500">{{ getLessonProgress() }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-300"
+                   [style.width.%]="((currentLessonIndex + 1) / allLessons.length) * 100">
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Container principal de la vidéo -->
         <div class="relative w-full aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-lg mb-12"
           *ngIf="lesson?.videoUrl">
@@ -223,18 +238,50 @@
             </div>
             <span class="text-green-600 font-bold">{{ lesson.progress }}%</span>
           </div>
-          <p class="text-sm text-gray-600">14 sur 20 mots maîtrisés</p>
+          <!-- <p class="text-sm text-gray-600">14 sur 20 mots maîtrisés</p> -->
         </div>
 
-        <div class="flex justify-between mt-8">
+        <!-- Navigation entre les leçons -->
+        <div class="mt-8">
+          <div class="flex justify-between items-center gap-4">
+            <!-- Bouton leçon précédente -->
+            <button (click)="goToPreviousLesson()" 
+                    [disabled]="isFirstLesson || allLessons.length === 0"
+                    [class]="(isFirstLesson || allLessons.length === 0) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'"
+                    class="flex items-center gap-2 px-6 py-3 rounded-full bg-blue-100 text-blue-700 font-medium transition-all duration-200">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>{{ isFirstLesson ? 'Première leçon' : 'Leçon précédente' }}</span>
+            </button>
+
+            <!-- Informations de la leçon actuelle -->
+            <div class="text-center">
+              <div class="text-sm text-gray-500 mb-1" *ngIf="allLessons.length > 0">
+                Leçon {{ currentLessonIndex + 1 }} sur {{ allLessons.length }}
+              </div>
+              <div class="text-sm text-gray-500 mb-1" *ngIf="allLessons.length === 0">
+                Chargement des leçons...
+              </div>
+              <div class="text-xs text-gray-400" *ngIf="nextLesson">Suivante: {{ nextLesson.title }}</div>
+            </div>
+
+            <!-- Bouton leçon suivante -->
+            <button (click)="goToNextLesson()" 
+                    [disabled]="isLastLesson || allLessons.length === 0"
+                    [class]="(isLastLesson || allLessons.length === 0) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-50'"
+                    class="flex items-center gap-2 px-6 py-3 rounded-full bg-green-100 text-green-700 font-medium transition-all duration-200">
+              <span>{{ isLastLesson ? 'Dernière leçon' : 'Leçon suivante' }}</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+
+        <!-- Bouton retour (gardé pour compatibilité) -->
+        <div class="flex justify-center mt-6">
           <button (click)="goBack()"
-            class="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 hover:bg-gray-200">
+            class="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all duration-200">
             <i class="fa-solid fa-arrow-left"></i>
-            <span>Précédent</span>
-          </button>
-          <button class="flex items-center gap-2 px-6 py-3 rounded-full bg-green-600 text-white hover:bg-green-700">
-            <span>Suivant</span>
-            <i class="fa-solid fa-arrow-right"></i>
+            <span>Retour aux leçons</span>
           </button>
         </div>
       </div>

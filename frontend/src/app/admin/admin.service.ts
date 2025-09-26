@@ -91,25 +91,54 @@ export class AdminService {
   private refreshTimer: any;
 
   constructor(private http: HttpClient) {
-    this.startAutoRefresh();
+    // Désactivé pour éviter la saturation du réseau et les "sauts" d'écran
+    // this.startAutoRefresh();
   }
 
-  // 🚀 Démarrer le rafraîchissement automatique
+  // 🚀 Démarrer le rafraîchissement automatique (désactivé par défaut)
   private startAutoRefresh(): void {
-    this.refreshTimer = timer(0, 30000); // Rafraîchir toutes les 30 secondes
+    this.refreshTimer = timer(0, 300000); // Rafraîchir toutes les 5 minutes (au lieu de 30s)
     this.refreshTimer.subscribe(() => {
       this.refreshAllData();
     });
   }
 
-  // 🔄 Rafraîchir toutes les données
+  // 🔄 Méthode publique pour activer le rafraîchissement automatique si nécessaire
+  public enableAutoRefresh(): void {
+    if (!this.refreshTimer) {
+      this.startAutoRefresh();
+    }
+  }
+
+  // ⏹️ Méthode publique pour désactiver le rafraîchissement automatique
+  public disableAutoRefresh(): void {
+    if (this.refreshTimer) {
+      this.refreshTimer.unsubscribe();
+      this.refreshTimer = null;
+    }
+  }
+
+  // 🔄 Rafraîchir manuellement sans causer de "sauts" d'écran
+  public refreshDataSilently(): void {
+    this.refreshAllData();
+  }
+
+  // 🚫 Désactiver complètement le rafraîchissement automatique
+  public disableAllAutoRefresh(): void {
+    this.disableAutoRefresh();
+    // Désactiver aussi le rafraîchissement des notifications
+    // this.progressService.stopAutoRefresh();
+  }
+
+  // 🔄 Rafraîchir toutes les données (sans déclencher de rechargement UI)
   private refreshAllData(): void {
-    this.loadDashboardStats();
-    this.loadRecentUsers();
-    this.loadPopularCourses();
-    this.loadRecentActivities();
-    this.loadSystemAlerts();
-    this.loadPerformanceStats();
+    // Charger les données en arrière-plan sans forcer le rechargement des composants
+    this.loadDashboardStats().subscribe();
+    this.loadRecentUsers().subscribe();
+    this.loadPopularCourses().subscribe();
+    this.loadRecentActivities().subscribe();
+    this.loadSystemAlerts().subscribe();
+    this.loadPerformanceStats().subscribe();
   }
 
   // 📊 Charger les statistiques du dashboard

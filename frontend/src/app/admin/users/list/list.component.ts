@@ -27,6 +27,10 @@ export class ListComponent implements OnInit {
   filteredUsers: User[] = [];
   globalFilter: string = '';
   selectedUser: User | null = null;
+  
+  // Filtres par type d'utilisateur
+  showParents: boolean = true;
+  showChildren: boolean = true;
   displayUserDialog: boolean = false;
   messageText: string = '';
   displayChatDialog = false;
@@ -57,11 +61,17 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.subs.forEach(s => s.unsubscribe());
     
-    // Utiliser le service admin pour récupérer les utilisateurs (avec statut de validation)
-    this.adminUserService.getAllUsers().subscribe({
+    // Charger TOUS les utilisateurs (sans pagination)
+    this.loadAllUsers();
+  }
+
+  // Méthode pour charger tous les utilisateurs
+  private loadAllUsers(): void {
+    this.adminUserService.getAllUsers({ limit: 1000 }).subscribe({
       next: (response) => {
-        this.users = response.users;
-        this.filteredUsers = response.users;
+        this.users = response.users || [];
+        this.applyFilters(); // Appliquer les filtres après le chargement
+        console.log(`✅ ${this.users.length} utilisateurs chargés sur ${response.total} total`);
       },
       error: (error) => {
         console.error('Erreur lors du chargement des utilisateurs:', error);
@@ -72,19 +82,56 @@ export class ListComponent implements OnInit {
     });
   }
 
+  // Méthode publique pour recharger tous les utilisateurs
+  public refreshUsers(): void {
+    this.loadAllUsers();
+  }
+
+
   onSearchChange(): void {
-    if (!this.globalFilter.trim()) {
-      this.filteredUsers = this.users;
-      return;
+    this.applyFilters();
+  }
+
+  // Appliquer tous les filtres (recherche + type)
+  private applyFilters(): void {
+    let filtered = [...this.users];
+
+    // Filtre par type d'utilisateur
+    if (!this.showParents || !this.showChildren) {
+      filtered = filtered.filter(user => {
+        if (user.type === 'parent' && !this.showParents) return false;
+        if (user.type === 'child' && !this.showChildren) return false;
+        return true;
+      });
     }
 
-    const filter = this.globalFilter.toLowerCase();
-    this.filteredUsers = this.users.filter(user => 
-      `${user.firstName} ${user.lastName}`.toLowerCase().includes(filter) ||
-      user.email?.toLowerCase().includes(filter) ||
-      user.type?.toLowerCase().includes(filter) ||
-      user.level?.name?.toLowerCase().includes(filter)
-    );
+    // Filtre par recherche textuelle
+    if (this.globalFilter.trim()) {
+      const filter = this.globalFilter.toLowerCase();
+      filtered = filtered.filter(user => 
+        `${user.firstName} ${user.lastName}`.toLowerCase().includes(filter) ||
+        user.email?.toLowerCase().includes(filter) ||
+        user.type?.toLowerCase().includes(filter) ||
+        user.level?.name?.toLowerCase().includes(filter)
+      );
+    }
+
+    this.filteredUsers = filtered;
+  }
+
+  // Méthode appelée quand les checkboxes changent
+  onFilterChange(): void {
+    this.applyFilters();
+  }
+
+  // Compter le nombre de parents
+  getParentCount(): number {
+    return this.users.filter(user => user.type === 'parent').length;
+  }
+
+  // Compter le nombre d'enfants
+  getChildCount(): number {
+    return this.users.filter(user => user.type === 'child').length;
   }
 
   exportToCsv() {

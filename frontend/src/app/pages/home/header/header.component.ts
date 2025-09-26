@@ -102,15 +102,8 @@ export class HeaderComponent implements OnInit {
   ngOnInit() {
     if (this.auth.isLoggedIn()) {
       this.childContext.loadChildren();
-      // Forcer la mise à jour du statut de validation
+      // Forcer la mise à jour du statut de validation (une seule fois)
       this.validationService.forceUpdateStatus();
-      
-      // Vérifier périodiquement le statut de validation (toutes les 30 secondes)
-      setInterval(() => {
-        if (this.auth.isLoggedIn()) {
-          this.validationService.forceUpdateStatus();
-        }
-      }, 30000);
     }
     // Initialiser le thème
     this.initTheme();

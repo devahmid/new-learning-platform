@@ -35,6 +35,14 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   // Navigation properties (simplified for testing)
   currentLevel: number = 1;
   currentCourseId: number = 1;
+  
+  // Next lesson navigation properties
+  allLessons: ApiLesson[] = [];
+  currentLessonIndex: number = -1;
+  nextLesson: ApiLesson | null = null;
+  previousLesson: ApiLesson | null = null;
+  isLastLesson: boolean = false;
+  isFirstLesson: boolean = false;
 
   // Navigation entre sections
   currentSection: 'video' | 'quiz' | 'exercises' = 'video';
@@ -83,6 +91,15 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Écouter les changements de paramètres de route
+    this.route.paramMap.subscribe(params => {
+      const newLessonId = params.get('id') || '';
+      if (newLessonId !== this.lessonId) {
+        this.lessonId = newLessonId;
+        this.loadLessonData();
+      }
+    });
+
     this.lessonId = this.route.snapshot.paramMap.get('id') || '';
     const subjectName = this.route.snapshot.paramMap.get('subject');
     const level = this.route.snapshot.paramMap.get('level');
@@ -124,6 +141,9 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   private loadLessonData() {
     this.isLoading = true;
     this.error = null;
+    
+    // Charger les leçons du cours en parallèle
+    this.loadCourseLessons();
 
     // Récupérer la leçon depuis l'API
     this.courseService.getLessonById(Number(this.lessonId)).subscribe({
@@ -137,6 +157,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         // Charger les données du quiz et des exercices maintenant qu'on a le courseId
         this.loadQuizData();
         this.loadExerciseData();
+        
+        // Charger toutes les leçons du cours pour la navigation
+        this.loadCourseLessons();
+        
         this.isLoading = false;
         this.resetRetryCount(); // Reset du compteur en cas de succès
       },
@@ -396,6 +420,119 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   goBack() {
     this.location.back();
   }
+
+  // Navigation entre les leçons
+  loadCourseLessons() {
+    if (!this.courseId) {
+      return;
+    }
+    
+    this.courseService.getLessonsByCourse(this.courseId).subscribe({
+      next: (lessons) => {
+        this.allLessons = lessons.sort((a, b) => a.order - b.order);
+        this.updateLessonNavigation();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des leçons:', error);
+        // En cas d'erreur, on peut essayer de charger les leçons depuis le cours
+        this.loadLessonsFromCourse();
+      }
+    });
+  }
+
+  // Méthode de fallback pour charger les leçons depuis le cours
+  loadLessonsFromCourse() {
+    if (!this.course) return;
+    
+    if (this.course.lessons && this.course.lessons.length > 0) {
+      this.allLessons = this.course.lessons.sort((a, b) => a.order - b.order);
+      this.updateLessonNavigation();
+    }
+  }
+
+  updateLessonNavigation() {
+    if (!this.lesson || this.allLessons.length === 0) {
+      return;
+    }
+
+    // Trouver l'index de la leçon actuelle
+    this.currentLessonIndex = this.allLessons.findIndex(l => l.id === this.lesson?.id);
+    
+    if (this.currentLessonIndex === -1) {
+      return;
+    }
+
+    // Déterminer la leçon suivante et précédente
+    this.nextLesson = this.currentLessonIndex < this.allLessons.length - 1 
+      ? this.allLessons[this.currentLessonIndex + 1] 
+      : null;
+    
+    this.previousLesson = this.currentLessonIndex > 0 
+      ? this.allLessons[this.currentLessonIndex - 1] 
+      : null;
+
+    // Mettre à jour les états
+    this.isLastLesson = this.currentLessonIndex === this.allLessons.length - 1;
+    this.isFirstLesson = this.currentLessonIndex === 0;
+  }
+
+  goToNextLesson() {
+    if (this.nextLesson) {
+      this.navigateToLesson(this.nextLesson);
+    }
+  }
+
+  goToPreviousLesson() {
+    if (this.previousLesson) {
+      this.navigateToLesson(this.previousLesson);
+    }
+  }
+
+  navigateToLesson(targetLesson: ApiLesson) {
+    if (!targetLesson) {
+      return;
+    }
+
+    // Marquer la leçon actuelle comme complétée avant de naviguer
+    this.markCurrentLessonAsCompleted();
+
+    // Construire l'URL de navigation en utilisant les paramètres de la route actuelle
+    const subjectName = this.route.snapshot.paramMap.get('subject');
+    const level = this.route.snapshot.paramMap.get('level');
+    
+    if (!subjectName || !level) {
+      return;
+    }
+    
+    // Navigation avec Angular Router
+    this.router.navigate(['/cours', subjectName, level, 'lesson', targetLesson.id]);
+  }
+
+  markCurrentLessonAsCompleted() {
+    if (!this.lesson) return;
+    
+    // Sauvegarder dans le localStorage pour l'instant
+    const completedLessons = this.getCompletedLessons();
+    if (!completedLessons.includes(this.lesson.id)) {
+      completedLessons.push(this.lesson.id);
+      localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+    }
+  }
+
+  getCompletedLessons(): number[] {
+    const stored = localStorage.getItem('completedLessons');
+    return stored ? JSON.parse(stored) : [];
+  }
+
+  isLessonCompleted(lessonId: number): boolean {
+    return this.getCompletedLessons().includes(lessonId);
+  }
+
+  getLessonProgress(): string {
+    if (this.allLessons.length === 0) return '0/0';
+    return `${this.currentLessonIndex + 1}/${this.allLessons.length}`;
+  }
+
 
   // Méthodes helper pour le breadcrumb
   getCurrentLevel(): number {

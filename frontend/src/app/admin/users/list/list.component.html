@@ -6,34 +6,77 @@
         <h1 class="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
         <p class="text-sm text-gray-600 mt-1">{{ filteredUsers.length }} utilisateur(s) trouvé(s)</p>
       </div>
-      <button
-        (click)="exportToCsv()"
-        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
-      >
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        Exporter la liste
-      </button>
+      <div class="flex gap-3">
+        <button
+          (click)="refreshUsers()"
+          class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Recharger tous
+        </button>
+        <button
+          (click)="exportToCsv()"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          Exporter la liste
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Barre de recherche -->
+<!-- Barre de recherche et filtres -->
 <div class="bg-white px-6 py-4 border-b border-gray-200">
-  <div class="relative max-w-md">
-    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-      </svg>
+  <div class="flex flex-col lg:flex-row gap-4">
+    <!-- Barre de recherche -->
+    <div class="relative flex-1 max-w-md">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+      <input
+        type="text"
+        [(ngModel)]="globalFilter"
+        (input)="onSearchChange()"
+        placeholder="Rechercher par nom, email, rôle..."
+        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+      />
     </div>
-    <input
-      type="text"
-      [(ngModel)]="globalFilter"
-      (input)="onSearchChange()"
-      placeholder="Rechercher par nom, email, rôle..."
-      class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-    />
+    
+    <!-- Filtres par type -->
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="showParents"
+          [(ngModel)]="showParents"
+          (change)="onFilterChange()"
+          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <label for="showParents" class="text-sm font-medium text-gray-700">
+          Parents ({{ getParentCount() }})
+        </label>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="showChildren"
+          [(ngModel)]="showChildren"
+          (change)="onFilterChange()"
+          class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+        />
+        <label for="showChildren" class="text-sm font-medium text-gray-700">
+          Enfants ({{ getChildCount() }})
+        </label>
+      </div>
+    </div>
   </div>
 </div>
 

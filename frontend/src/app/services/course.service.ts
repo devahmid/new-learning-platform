@@ -114,8 +114,7 @@ export class CourseService {
   // Récupérer les leçons d'un cours
   getLessonsByCourse(courseId: number): Observable<Lesson[]> {
     return this.http
-      .get<Course>(`${environment.apiUrl}/courses/${courseId}/complete`)
-      .pipe(map((course) => course.lessons || []));
+      .get<Lesson[]>(`${environment.apiUrl}/courses/${courseId}/lessons`);
   }
 
   // Récupérer la progression d'un utilisateur pour un cours
