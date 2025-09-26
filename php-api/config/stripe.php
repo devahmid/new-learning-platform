@@ -5,15 +5,15 @@
  */
 
 class StripeConfig {
-    // Configuration Stripe - Remplacez par vos vraies clés
-    const SECRET_KEY = 'sk_test_your_stripe_secret_key'; // Clé secrète Stripe
-    const PUBLISHABLE_KEY = 'pk_test_your_stripe_publishable_key'; // Clé publique Stripe
-    const WEBHOOK_SECRET = 'whsec_your_webhook_secret'; // Secret webhook
+    // Configuration Stripe - Clés de production
+    const SECRET_KEY = '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'; // Clé secrète Stripe
+    const PUBLISHABLE_KEY = 'pk_live_your_stripe_publishable_key'; // Clé publique Stripe (à récupérer dans votre dashboard)
+    const WEBHOOK_SECRET = 'whsec_kCRq8Gdmz62ke4lTN91tnnWLkNTsgoh8'; // Secret webhook
     
-    // Configuration pour production (décommentez quand vous passerez en live)
-    // const SECRET_KEY = 'sk_live_your_live_stripe_secret_key';
-    // const PUBLISHABLE_KEY = 'pk_live_your_live_stripe_publishable_key';
-    // const WEBHOOK_SECRET = 'whsec_your_live_webhook_secret';
+    // Configuration pour test (décommentez si vous voulez tester en mode sandbox)
+    // const SECRET_KEY = 'sk_test_your_stripe_secret_key';
+    // const PUBLISHABLE_KEY = 'pk_test_your_stripe_publishable_key';
+    // const WEBHOOK_SECRET = 'whsec_your_webhook_secret';
     
     // URLs de l'API Stripe
     const API_URL = 'https://api.stripe.com/v1/';
@@ -22,8 +22,8 @@ class StripeConfig {
     const DEFAULT_CURRENCY = 'eur';
     
     // URLs de retour (à adapter selon votre domaine)
-    const SUCCESS_URL = 'https://centre-culturel-olivier.com/api/payment/success?session_id={CHECKOUT_SESSION_ID}';
-    const CANCEL_URL = 'https://centre-culturel-olivier.com/api/payment/cancel';
+    const SUCCESS_URL = 'https://centre-culturel-olivier.fr/mon-compte?payment=success&session_id={CHECKOUT_SESSION_ID}';
+    const CANCEL_URL = 'https://centre-culturel-olivier.fr/mon-compte?payment=cancel';
     
     /**
      * Obtenir la clé secrète

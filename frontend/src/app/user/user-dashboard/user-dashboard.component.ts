@@ -42,6 +42,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ApiPaths } from '../../shared/api-paths';
 import { CourseService } from '../../services/course.service';
+import { PaymentService } from '../../services/payment.service';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -91,7 +92,15 @@ export class UserDashboardComponent implements OnInit {
 
   // Statistiques de quiz
   quizStats: any = null;
+  
+  // Gestion des retours de paiement
+  paymentStatus: 'success' | 'cancel' | null = null;
+  paymentSessionId: string | null = null;
   isLoadingQuizStats = false;
+
+  // Historique des paiements
+  paymentHistory: any[] = [];
+  isLoadingPaymentHistory = false;
 
   // Type pour les sections du dashboard
   private readonly sectionTypes = [
@@ -290,6 +299,7 @@ export class UserDashboardComponent implements OnInit {
   mesClasses: any = [];
   classes: any[] = []; // ✅ Ajouter la liste des classes
   childContext = inject(ChildContextService);
+  private paymentService = inject(PaymentService);
 
   // Propriétés pour le mode focus
   isFocusMode = signal(false);
@@ -406,15 +416,22 @@ export class UserDashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Récupérer l'ID utilisateur depuis AuthService
+    this.id = this.auth.id();
+    
     this.loadChildren();
     this.loadLevels();
     this.loadQuizStats();
     this.loadClasses(); // ✅ Ajouter le chargement des classes
+    this.loadPaymentHistory(); // ✅ Charger l'historique des paiements
     this.setupKeyboardShortcuts();
     this.initTheme();
     this.setupPushNotifications();
     this.initAnalyticsData();
     // loadUserPreferences() supprimé - section préférences supprimée
+    
+    // Gestion des retours de paiement
+    this.handlePaymentReturn();
 
     setTimeout(() => {
 
@@ -1541,16 +1558,47 @@ export class UserDashboardComponent implements OnInit {
   // Méthode appelée quand un paiement SumUp est réussi
   onPaymentSuccess() {
     console.log('Paiement SumUp réussi !');
-    // Ici vous pouvez ajouter une notification de succès
-    // ou rediriger vers une page de confirmation
-    this.showNotification = true;
-    this.notificationType = 'success';
-    this.notificationMessage = 'Paiement effectué avec succès !';
+    // Notification de succès
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Paiement validé ✅',
+      detail: 'Votre paiement SumUp a été enregistré avec succès.',
+      life: 5000
+    });
     
-    // Masquer la notification après 5 secondes
+    // Recharger les données utilisateur pour refléter le nouveau paiement
+    this.auth.fetchAndMergeParentProfile().subscribe();
+    
+    // Fermer le popup de paiement si ouvert
+    this.popupVisible = false;
+    
+    // Déclencher l'animation de célébration
     setTimeout(() => {
-      this.hideNotification();
-    }, 5000);
+      this.triggerConfetti();
+    }, 500);
+  }
+
+  // Méthode pour créer un paiement SumUp
+  payWithSumUp(amount: number) {
+    if (!this.profilComplet) {
+      this.handleWarning('Vous devez compléter votre profil avant d\'effectuer un paiement.');
+      this.editInfosDialog = true;
+      return;
+    }
+
+    const userId = this.auth.id();
+    if (!userId) {
+      this.handleError('error', 'Utilisateur non identifié');
+      return;
+    }
+
+    // Créer le checkout SumUp via le service de paiement
+    // Note: Vous devrez adapter selon votre service de paiement
+    this.handleInfo('Redirection vers SumUp en cours...');
+    
+    // Exemple d'URL de redirection vers SumUp
+    const sumupUrl = `/api/payment/sumup-checkout?amount=${amount}&userId=${userId}`;
+    window.open(sumupUrl, '_blank');
   }
 
   getActivityColor(type: string): string {
@@ -1865,5 +1913,143 @@ export class UserDashboardComponent implements OnInit {
         this.isLoadingQuizStats = false;
       }
     });
+  }
+
+  /**
+   * Gestion des retours de paiement Stripe
+   */
+  private handlePaymentReturn(): void {
+    const paymentStatus = this.route.snapshot.queryParams['payment'];
+    const sessionId = this.route.snapshot.queryParams['session_id'];
+
+    if (paymentStatus === 'success' && sessionId) {
+      this.paymentStatus = 'success';
+      this.paymentSessionId = sessionId;
+      
+      // Confirmer le paiement avec l'API
+      this.confirmStripePayment(sessionId);
+
+    } else if (paymentStatus === 'cancel') {
+      this.paymentStatus = 'cancel';
+      
+      // Afficher un message d'annulation
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Paiement annulé',
+        detail: 'Votre paiement a été annulé. Vous pouvez réessayer à tout moment.',
+        life: 5000
+      });
+
+      // Nettoyer l'URL des paramètres de paiement
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+    }
+  }
+
+  /**
+   * Confirmer un paiement Stripe avec l'API
+   */
+  private confirmStripePayment(sessionId: string): void {
+    this.http.post('https://centre-culturel-olivier.com/api/payment/confirm-stripe', {
+      session_id: sessionId
+    }).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          // Afficher un message de succès
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Paiement réussi !',
+            detail: 'Votre paiement a été traité avec succès. Merci pour votre achat !',
+            life: 5000
+          });
+        } else {
+          // Afficher un message d'erreur
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur de confirmation',
+            detail: 'Erreur lors de la confirmation du paiement.',
+            life: 5000
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Erreur confirmation paiement:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur de confirmation',
+          detail: 'Erreur lors de la confirmation du paiement.',
+          life: 5000
+        });
+      },
+      complete: () => {
+        // Nettoyer l'URL des paramètres de paiement
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {},
+          replaceUrl: true
+        });
+      }
+    });
+  }
+
+  /**
+   * Charger l'historique des paiements de l'utilisateur
+   */
+  loadPaymentHistory(): void {
+    if (!this.id) return;
+
+    this.isLoadingPaymentHistory = true;
+    this.paymentService.getPaymentHistory(this.id).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.paymentHistory = response.data || [];
+        } else {
+          console.error('Erreur lors du chargement de l\'historique des paiements:', response.message);
+          this.paymentHistory = [];
+        }
+        this.isLoadingPaymentHistory = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement de l\'historique des paiements:', error);
+        this.paymentHistory = [];
+        this.isLoadingPaymentHistory = false;
+      }
+    });
+  }
+
+  /**
+   * Formater le montant pour l'affichage
+   */
+  formatAmount(amount: string | number): string {
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return numAmount.toFixed(2) + ' €';
+  }
+
+  /**
+   * Obtenir la couleur du statut de paiement
+   */
+  getPaymentStatusColor(status: string): string {
+    switch (status) {
+      case 'completed': return 'green';
+      case 'pending': return 'orange';
+      case 'failed': return 'red';
+      case 'cancelled': return 'gray';
+      default: return 'blue';
+    }
+  }
+
+  /**
+   * Obtenir l'icône de la méthode de paiement
+   */
+  getPaymentMethodIcon(method: string): string {
+    switch (method) {
+      case 'stripe': return 'pi pi-credit-card';
+      case 'paypal': return 'pi pi-paypal';
+      case 'sumup': return 'pi pi-mobile';
+      default: return 'pi pi-money-bill';
+    }
   }
 }

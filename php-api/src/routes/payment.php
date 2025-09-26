@@ -18,6 +18,10 @@ $router->post('/payment/intent', function() use ($paymentController) {
     return $paymentController->createPaymentIntent();
 });
 
+$router->post('/payment/confirm-stripe', function() use ($paymentController) {
+    return $paymentController->confirmStripePayment();
+});
+
 // Routes pour les paiements PayPal
 $router->get('/payment/paypal-client-id', function() use ($paymentController) {
     return $paymentController->getPayPalClientId();
@@ -29,6 +33,19 @@ $router->get('/payment/paypal', function() use ($paymentController) {
 
 $router->post('/payment/paypal-capture', function() use ($paymentController) {
     return $paymentController->capturePayPal();
+});
+
+// Routes pour les paiements SumUp
+$router->post('/payment/sumup-checkout', function() use ($paymentController) {
+    return $paymentController->createSumUpCheckout();
+});
+
+$router->post('/payment/sumup-webhook', function() use ($paymentController) {
+    return $paymentController->processSumUpWebhook();
+});
+
+$router->get('/payment/sumup-pay', function() use ($paymentController) {
+    return $paymentController->showSumUpPaymentPage();
 });
 
 // Routes générales

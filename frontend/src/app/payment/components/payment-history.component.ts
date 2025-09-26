@@ -23,9 +23,9 @@ import { BadgeModule }  from 'primeng/badge';
     >
       <!-- Provider + montant -->
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-        <span class="text-sm font-medium text-gray-800">{{ p.provider }}</span>
+        <span class="text-sm font-medium text-gray-800">{{ p.paymentMethod }}</span>
         <span class="text-sm text-gray-600">
-          {{ p.amount }} {{ p.currency.toUpperCase() }}
+          {{ p.amount.toFixed(2) }} {{ p.currency.toUpperCase() }}
         </span>
       </div>
 
@@ -35,9 +35,9 @@ import { BadgeModule }  from 'primeng/badge';
           {{ p.createdAt | date:'dd/MM/yyyy' }}
         </span>
         <p-badge
-          [value]="'✅'"
+          [value]="p.status === 'completed' ? '✅' : p.status === 'pending' ? '⏳' : '❌'"
           [severity]="
-            p.status === 'paid' ? 'success' :
+            p.status === 'completed' ? 'success' :
             p.status === 'pending' ? 'warning' :
             'danger'
           "
@@ -71,8 +71,18 @@ export class PaymentHistoryComponent implements OnInit {
     if (!userId) return;
 
     this.paymentService.getPaymentHistory(userId).subscribe({
-      next: (data) => this.payments.set(data),
-      error: () => console.error('Erreur récupération paiements'),
+      next: (response) => {
+        if (response.success) {
+          this.payments.set(response.data);
+        } else {
+          console.error('Erreur récupération paiements:', response.message);
+          this.payments.set([]);
+        }
+      },
+      error: (error) => {
+        console.error('Erreur récupération paiements:', error);
+        this.payments.set([]);
+      },
     });
   }
 

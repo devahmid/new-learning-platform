@@ -286,6 +286,13 @@ class Application {
         $this->routes['GET']['/api/payment/paypal-client-id'] = ['App\Controllers\PaymentController', 'getPayPalClientId'];
         $this->routes['GET']['/api/payment/paypal'] = ['App\Controllers\PaymentController', 'createPayPalOrder'];
         $this->routes['POST']['/api/payment/paypal-capture'] = ['App\Controllers\PaymentController', 'capturePayPal'];
+        
+        // Routes de paiement SumUp
+        $this->routes['POST']['/api/payment/sumup-checkout'] = ['App\Controllers\PaymentController', 'createSumUpCheckout'];
+        $this->routes['POST']['/api/payment/sumup-webhook'] = ['App\Controllers\PaymentController', 'processSumUpWebhook'];
+        $this->routes['GET']['/api/payment/sumup-pay'] = ['App\Controllers\PaymentController', 'showSumUpPaymentPage'];
+        
+        // Routes générales de paiement
         $this->routes['GET']['/api/payment/status/{id}'] = ['App\Controllers\PaymentController', 'getPaymentStatus'];
         $this->routes['GET']['/api/payment/history/{userId}'] = ['App\Controllers\PaymentController', 'getUserPaymentHistory'];
         $this->routes['GET']['/api/payment/success'] = ['App\Controllers\PaymentController', 'paymentSuccess'];

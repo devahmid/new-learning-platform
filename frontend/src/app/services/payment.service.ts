@@ -26,10 +26,41 @@ export class PaymentService {
   }
 
   getPaymentHistory(userId: number) {
-    return this.http.get<Payment[]>(`${API_URL}/history?userId=${userId}`);
+    return this.http.get<{ success: boolean; message: string; data: Payment[] }>(`${API_URL}/history/${userId}`);
   }
 
   createPaymentIntent(userId: number, amount: number) {
     return this.http.post<{ clientSecret: string }>(`${API_URL}/intent`, { userId, amount });
+  }
+
+  // Méthodes SumUp
+  createSumUpCheckout(amount: number, userId: number, description?: string) {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: {
+        checkout_id: string;
+        checkout_url: string;
+        amount: number;
+        currency: string;
+        userId: number;
+        description: string;
+        merchant_code: string;
+        status: string;
+      }
+    }>(`${API_URL}/sumup-checkout`, { 
+      amount, 
+      userId, 
+      currency: 'EUR', 
+      description: description || 'Paiement cours' 
+    });
+  }
+
+  getSumUpCheckoutStatus(checkoutId: string) {
+    return this.http.get<{
+      success: boolean;
+      status: string;
+      data: any;
+    }>(`${API_URL}/sumup-status/${checkoutId}`);
   }
 }
