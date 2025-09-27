@@ -11,6 +11,13 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
       
       // Vérifier si c'est une erreur d'authentification (401 Unauthorized)
       if (error.status === 401) {
+        // Ne pas intercepter les erreurs 401 qui viennent de la page de connexion
+        // car ce sont des erreurs de mauvais identifiants, pas des tokens expirés
+        if (error.url && error.url.includes('/auth/login')) {
+          console.log('🔍 Erreur 401 de connexion détectée, laisser passer pour gestion dans le composant');
+          return throwError(() => error);
+        }
+        
         console.warn('🚨 Token expiré ou invalide, déconnexion automatique');
         
         try {

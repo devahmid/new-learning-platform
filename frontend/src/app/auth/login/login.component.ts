@@ -118,7 +118,37 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         console.error("Erreur lors de la connexion :", err);
-        this.errorMessage = err.error.message || "Email ou mot de passe incorrect.";
+        
+        // Gestion spécifique des erreurs de connexion
+        if (err.status === 401) {
+          this.errorMessage = "Email ou mot de passe incorrect.";
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Erreur de connexion', 
+            detail: 'Email ou mot de passe incorrect.' 
+          });
+        } else if (err.status === 403) {
+          this.errorMessage = "Compte non autorisé ou suspendu.";
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Accès refusé', 
+            detail: 'Votre compte n\'est pas autorisé à se connecter.' 
+          });
+        } else if (err.status === 0 || err.status >= 500) {
+          this.errorMessage = "Erreur de connexion au serveur. Veuillez réessayer.";
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Erreur serveur', 
+            detail: 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.' 
+          });
+        } else {
+          this.errorMessage = err.error?.message || "Une erreur inattendue s'est produite.";
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Erreur de connexion', 
+            detail: this.errorMessage 
+          });
+        }
       }
     });
 
