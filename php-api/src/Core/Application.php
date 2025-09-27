@@ -304,6 +304,17 @@ class Application {
         $this->routes['GET']['/api/admin/payments'] = ['App\Controllers\PaymentController', 'getAllPaymentsWithUsers'];
         $this->routes['PATCH']['/api/admin/payments/{id}/status'] = ['App\Controllers\PaymentController', 'updatePaymentStatus'];
         $this->routes['GET']['/api/admin/payments/stats'] = ['App\Controllers\PaymentController', 'getPaymentStats'];
+        
+        // Routes admin pour les devoirs
+        $this->routes['GET']['/api/admin/assignments'] = ['App\Controllers\AssignmentController', 'getAllAssignments'];
+        $this->routes['POST']['/api/admin/assignments'] = ['App\Controllers\AssignmentController', 'createAssignment'];
+        $this->routes['PUT']['/api/admin/assignments/{id}'] = ['App\Controllers\AssignmentController', 'updateAssignment'];
+        $this->routes['DELETE']['/api/admin/assignments/{id}'] = ['App\Controllers\AssignmentController', 'deleteAssignment'];
+        $this->routes['GET']['/api/admin/assignments/stats'] = ['App\Controllers\AssignmentController', 'getAssignmentStats'];
+        
+        // Routes parent pour les devoirs
+        $this->routes['GET']['/api/assignments/parent'] = ['App\Controllers\AssignmentController', 'getParentAssignments'];
+        $this->routes['GET']['/api/assignments/user'] = ['App\Controllers\AssignmentController', 'getUserAssignments'];
     }
     
     /**

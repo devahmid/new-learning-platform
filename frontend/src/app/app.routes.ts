@@ -199,6 +199,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'devoirs',
+        loadComponent: () =>
+          import('./user/assignments/parent-assignments.component').then(
+            (m) => m.ParentAssignmentsComponent
+          ),
+      },
+      {
         path: 'progress',
         loadChildren: () =>
           import('./progress/progress.module').then((m) => m.ProgressModule),
@@ -499,6 +506,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/payments/admin-payments.component').then(
             (m) => m.AdminPaymentsComponent
+          ),
+      },
+      {
+        path: 'assignments',
+        loadComponent: () =>
+          import('./admin/assignments/admin-assignments.component').then(
+            (m) => m.AdminAssignmentsComponent
           ),
       },
     ],

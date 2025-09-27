@@ -1,0 +1,241 @@
+<div class="admin-assignments">
+  <div class="header">
+    <h1>📚 Gestion des Devoirs</h1>
+    <button class="btn btn-primary" (click)="toggleCreateForm()">
+      <i class="fas fa-plus"></i> Nouveau Devoir
+    </button>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="stats-section" *ngIf="stats && !statsLoading">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">{{ stats.total }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card overdue">
+        <div class="stat-number">{{ stats.overdue }}</div>
+        <div class="stat-label">En retard</div>
+      </div>
+      <div class="stat-card due-soon">
+        <div class="stat-number">{{ stats.due_soon }}</div>
+        <div class="stat-label">Bientôt dû</div>
+      </div>
+      <div class="stat-card upcoming">
+        <div class="stat-number">{{ stats.upcoming }}</div>
+        <div class="stat-label">À venir</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire de création -->
+  <div class="create-form" *ngIf="showCreateForm">
+    <div class="form-header">
+      <h3>Créer un nouveau devoir</h3>
+      <button class="btn btn-secondary" (click)="toggleCreateForm()">Annuler</button>
+    </div>
+    
+    <form (ngSubmit)="createAssignment()" #assignmentForm="ngForm">
+      <div class="form-group">
+        <label for="title">Titre du devoir *</label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          [(ngModel)]="newAssignment.title" 
+          required 
+          class="form-control"
+          placeholder="Ex: Exercices de mathématiques"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea 
+          id="description" 
+          name="description" 
+          [(ngModel)]="newAssignment.description" 
+          class="form-control"
+          rows="4"
+          placeholder="Détails du devoir, consignes, etc."
+        ></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="classeId">Classe *</label>
+          <select 
+            id="classeId" 
+            name="classeId" 
+            [(ngModel)]="newAssignment.classeId" 
+            required 
+            class="form-control"
+          >
+            <option value="">Sélectionner une classe</option>
+            <option *ngFor="let classe of classes" [value]="classe.id">
+              {{ classe.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="dueDate">Date limite</label>
+          <input 
+            type="datetime-local" 
+            id="dueDate" 
+            name="dueDate" 
+            [(ngModel)]="newAssignment.dueDate" 
+            class="form-control"
+          >
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn btn-primary" 
+          [disabled]="creating || !assignmentForm.form.valid"
+        >
+          <span *ngIf="creating">Création...</span>
+          <span *ngIf="!creating">Créer le devoir</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-section">
+    <div class="filters">
+      <div class="filter-group">
+        <label for="classeFilter">Classe</label>
+        <select 
+          id="classeFilter" 
+          [(ngModel)]="classeId" 
+          (change)="applyFilters()"
+          class="form-control"
+        >
+          <option value="">Toutes les classes</option>
+          <option *ngFor="let classe of classes" [value]="classe.id">
+            {{ classe.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="statusFilter">Statut</label>
+        <select 
+          id="statusFilter" 
+          [(ngModel)]="status" 
+          (change)="applyFilters()"
+          class="form-control"
+        >
+          <option *ngFor="let status of statuses" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-secondary" (click)="clearFilters()">
+          Effacer les filtres
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages d'erreur -->
+  <div class="error-message" *ngIf="error">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Liste des devoirs -->
+  <div class="assignments-section">
+    <div class="section-header">
+      <h3>Liste des devoirs ({{ total }})</h3>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" *ngIf="loading">
+      <i class="fas fa-spinner fa-spin"></i>
+      Chargement des devoirs...
+    </div>
+
+    <!-- Liste vide -->
+    <div class="empty-state" *ngIf="!loading && assignments.length === 0">
+      <i class="fas fa-clipboard-list"></i>
+      <p>Aucun devoir trouvé</p>
+    </div>
+
+    <!-- Liste des devoirs -->
+    <div class="assignments-list" *ngIf="!loading && assignments.length > 0">
+      <div class="assignment-card" *ngFor="let assignment of assignments">
+        <div class="assignment-header">
+          <div class="assignment-title">
+            <h4>{{ assignment.title }}</h4>
+            <span class="classe-badge" [style.background-color]="assignment.classe?.color">
+              {{ assignment.classe?.name }}
+            </span>
+          </div>
+          <div class="assignment-actions">
+            <span class="status-badge" [ngClass]="getStatusClass(assignment.status)">
+              {{ getStatusLabel(assignment.status) }}
+            </span>
+            <button 
+              class="btn btn-danger btn-sm" 
+              (click)="deleteAssignment(assignment)"
+              title="Supprimer"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="assignment-content" *ngIf="assignment.description">
+          <p>{{ assignment.description }}</p>
+        </div>
+
+        <div class="assignment-footer">
+          <div class="assignment-info">
+            <span class="info-item">
+              <i class="fas fa-calendar"></i>
+              <strong>Date limite:</strong> {{ formatDate(assignment.dueDate) }}
+            </span>
+            <span class="info-item">
+              <i class="fas fa-user"></i>
+              <strong>Créé par:</strong> {{ assignment.creator?.firstName }} {{ assignment.creator?.lastName }}
+            </span>
+            <span class="info-item">
+              <i class="fas fa-clock"></i>
+              <strong>Créé le:</strong> {{ formatDate(assignment.createdAt) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loading && pages > 1">
+      <button 
+        class="btn btn-secondary" 
+        (click)="goToPage(page - 1)"
+        [disabled]="page <= 1"
+      >
+        <i class="fas fa-chevron-left"></i> Précédent
+      </button>
+      
+      <span class="page-info">
+        Page {{ page }} sur {{ pages }}
+      </span>
+      
+      <button 
+        class="btn btn-secondary" 
+        (click)="goToPage(page + 1)"
+        [disabled]="page >= pages"
+      >
+        Suivant <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+

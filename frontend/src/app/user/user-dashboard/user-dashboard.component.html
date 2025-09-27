@@ -304,6 +304,125 @@
       </div>
     </div>
 
+    <!-- Section: Devoirs -->
+    <div *ngIf="activeSection === 'assignments'" class="animate-fade-in">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900">📚 Devoirs de vos enfants</h3>
+              <p class="text-gray-600 mt-1">Consultez les devoirs assignés à vos enfants par classe</p>
+            </div>
+            <a routerLink="/devoirs" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <i class="fa-solid fa-external-link-alt mr-2"></i>
+              Voir tous les devoirs
+            </a>
+          </div>
+        </div>
+        
+        <!-- Statistiques des devoirs -->
+        <div class="p-6 border-b border-gray-100" *ngIf="!assignmentsLoading && assignments.length > 0">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-gray-900">{{ getTotalAssignments() }}</div>
+              <div class="text-sm text-gray-600">Total</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-red-600">{{ getOverdueAssignments() }}</div>
+              <div class="text-sm text-gray-600">En retard</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-orange-600">{{ getDueSoonAssignments() }}</div>
+              <div class="text-sm text-gray-600">Bientôt dû</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-blue-600">{{ getUrgentAssignments() }}</div>
+              <div class="text-sm text-gray-600">Urgents</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <!-- Loading -->
+          <div *ngIf="assignmentsLoading" class="text-center py-8">
+            <i class="fa-solid fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600">Chargement des devoirs...</p>
+          </div>
+
+          <!-- Erreur -->
+          <div *ngIf="assignmentsError && !assignmentsLoading" class="text-center py-8">
+            <i class="fa-solid fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+            <p class="text-red-600 mb-4">{{ assignmentsError }}</p>
+            <button (click)="fetchAssignments()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Réessayer
+            </button>
+          </div>
+
+          <!-- Liste vide -->
+          <div *ngIf="!assignmentsLoading && !assignmentsError && assignments.length === 0" class="text-center py-8">
+            <i class="fa-solid fa-clipboard-list text-4xl text-gray-400 mb-4"></i>
+            <h4 class="text-lg font-medium text-gray-900 mb-2">Aucun devoir</h4>
+            <p class="text-gray-600 mb-4">Aucun devoir n'a été assigné à vos enfants pour le moment</p>
+          </div>
+
+          <!-- Liste des devoirs par classe -->
+          <div *ngIf="!assignmentsLoading && !assignmentsError && assignments.length > 0" class="space-y-6">
+            <div *ngFor="let classeData of assignments" class="border border-gray-200 rounded-lg">
+              <!-- En-tête de la classe -->
+              <div class="p-4 bg-gray-50 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-4 h-4 rounded-full" [style.background-color]="classeData.classe.color"></div>
+                    <h4 class="font-semibold text-gray-900">{{ classeData.classe.name }}</h4>
+                    <span class="px-2 py-1 bg-gray-200 text-gray-700 text-sm rounded-full">
+                      {{ classeData.assignments.length }} devoir{{ classeData.assignments.length > 1 ? 's' : '' }}
+                    </span>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <span *ngIf="getUrgentAssignmentsForClasse(classeData).length > 0" 
+                          class="px-2 py-1 bg-red-100 text-red-700 text-sm rounded-full">
+                      {{ getUrgentAssignmentsForClasse(classeData).length }} urgent{{ getUrgentAssignmentsForClasse(classeData).length > 1 ? 's' : '' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Liste des devoirs -->
+              <div class="p-4">
+                <div class="space-y-3">
+                  <div *ngFor="let assignment of classeData.assignments" 
+                       class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1">
+                        <h5 class="font-medium text-gray-900 mb-1">{{ assignment.title }}</h5>
+                        <p *ngIf="assignment.description" class="text-sm text-gray-600 mb-2">{{ assignment.description }}</p>
+                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                          <span>
+                            <i class="fa-solid fa-calendar mr-1"></i>
+                            {{ formatDate(assignment.dueDate) }}
+                          </span>
+                          <span *ngIf="assignment.creator">
+                            <i class="fa-solid fa-user mr-1"></i>
+                            {{ assignment.creator.firstName }} {{ assignment.creator.lastName }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="ml-4">
+                        <span class="px-2 py-1 text-xs rounded-full" 
+                              [ngClass]="getStatusClass(assignment.status)">
+                          {{ getStatusLabel(assignment.status) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Section: Mes Cours -->
     <div *ngIf="activeSection === 'courses'" class="animate-fade-in">
       <div class="bg-white rounded-xl shadow-sm border border-gray-100">

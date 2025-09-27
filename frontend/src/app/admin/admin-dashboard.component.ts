@@ -216,6 +216,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       permission: 'canManageSystem',
     },
     {
+      label: 'Gérer les devoirs',
+      icon: 'fa-solid fa-clipboard-list',
+      type: 'success',
+      route: '/admin/assignments',
+      permission: 'canManageCourses',
+    },
+    {
       label: 'Gérer les paramètres',
       icon: 'fa-solid fa-cog',
       type: 'secondary',

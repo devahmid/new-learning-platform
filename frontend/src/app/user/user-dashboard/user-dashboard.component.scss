@@ -5,3 +5,20 @@
   height: 1.8rem !important;
   border-radius: 9999px !important;
 }
+
+// Styles pour les statuts des devoirs
+.status-overdue {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-due-soon {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.status-upcoming {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.status-no-date {
+  @apply bg-gray-100 text-gray-800;
+}

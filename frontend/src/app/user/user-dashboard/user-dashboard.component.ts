@@ -43,6 +43,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { ApiPaths } from '../../shared/api-paths';
 import { CourseService } from '../../services/course.service';
 import { PaymentService } from '../../services/payment.service';
+import { AssignmentService, Assignment, ParentAssignmentsResponse } from '../../services/assignment.service';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -108,6 +109,11 @@ export class UserDashboardComponent implements OnInit {
 
   // URL unique de la salle Zoom (une seule salle pour tous les cours)
   zoomUrl = 'https://us02web.zoom.us/j/2432586827?pwd=RkpwaVhlcElXWjQxZmt6UkI5SmRiQT09';
+
+  // Données pour les devoirs
+  assignments: any[] = [];
+  assignmentsLoading = false;
+  assignmentsError: string | null = null;
 
   // Type pour les sections du dashboard
   private readonly sectionTypes = [
@@ -384,7 +390,8 @@ export class UserDashboardComponent implements OnInit {
     private route: ActivatedRoute,
     private classeService: ClasseService,
     private http: HttpClient,
-    private courseService: CourseService
+    private courseService: CourseService,
+    private assignmentService: AssignmentService
   ) {
     effect(() => {
       const user = this.auth.user();
@@ -1495,6 +1502,12 @@ export class UserDashboardComponent implements OnInit {
       badge: null,
     },
     {
+      id: 'assignments',
+      label: 'Devoirs',
+      icon: 'fa-solid fa-clipboard-list',
+      badge: null,
+    },
+    {
       id: 'courses',
       label: 'Mes Cours',
       icon: 'fa-solid fa-book',
@@ -1570,6 +1583,11 @@ export class UserDashboardComponent implements OnInit {
     
     // Mettre à jour l'URL pour refléter la section active
     this.updateUrlForSection(sectionId);
+    
+    // Charger les devoirs quand on accède à la section assignments
+    if (sectionId === 'assignments' && this.assignments.length === 0) {
+      this.fetchAssignments();
+    }
   }
 
   // Mettre à jour l'URL selon la section active
@@ -1589,6 +1607,97 @@ export class UserDashboardComponent implements OnInit {
         replaceUrl: true
       });
     }
+  }
+
+  // Méthode pour récupérer les devoirs
+  fetchAssignments(): void {
+    this.assignmentsLoading = true;
+    this.assignmentsError = null;
+
+    // Debug: Vérifier les informations de l'utilisateur
+    console.log('User info:', this.user);
+    console.log('User role:', this.auth.role());
+    console.log('Is parent:', this.auth.isParent());
+    console.log('Token:', localStorage.getItem('token'));
+
+    this.assignmentService.getParentAssignments().subscribe({
+      next: (response: ParentAssignmentsResponse) => {
+        if (response.success && response.data) {
+          // Convertir l'objet en tableau
+          this.assignments = Object.values(response.data);
+          
+          // Trier par nombre de devoirs urgents
+          this.assignments.sort((a, b) => {
+            const urgentA = a.assignments.filter((assignment: Assignment) => 
+              this.assignmentService.isUrgent(assignment)
+            ).length;
+            const urgentB = b.assignments.filter((assignment: Assignment) => 
+              this.assignmentService.isUrgent(assignment)
+            ).length;
+            return urgentB - urgentA;
+          });
+        } else {
+          this.assignmentsError = response.message || 'Erreur lors de la récupération des devoirs';
+        }
+        this.assignmentsLoading = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des devoirs:', error);
+        this.assignmentsError = 'Erreur lors de la récupération des devoirs';
+        this.assignmentsLoading = false;
+      }
+    });
+  }
+
+  // Méthodes utilitaires pour les devoirs
+  getTotalAssignments(): number {
+    return this.assignments.reduce((total, classe) => total + classe.assignments.length, 0);
+  }
+
+  getUrgentAssignments(): number {
+    return this.assignments.reduce((total, classe) => {
+      return total + classe.assignments.filter((assignment: Assignment) => 
+        this.assignmentService.isUrgent(assignment)
+      ).length;
+    }, 0);
+  }
+
+  getOverdueAssignments(): number {
+    return this.assignments.reduce((total, classe) => {
+      return total + classe.assignments.filter((assignment: Assignment) => 
+        assignment.status === 'overdue'
+      ).length;
+    }, 0);
+  }
+
+  getDueSoonAssignments(): number {
+    return this.assignments.reduce((total, classe) => {
+      return total + classe.assignments.filter((assignment: Assignment) => 
+        assignment.status === 'due_soon'
+      ).length;
+    }, 0);
+  }
+
+  formatDate(dateString: string | null): string {
+    return this.assignmentService.formatDate(dateString);
+  }
+
+  getStatusLabel(status: string): string {
+    return this.assignmentService.getStatusLabel(status);
+  }
+
+  getStatusClass(status: string): string {
+    return this.assignmentService.getStatusClass(status);
+  }
+
+  isUrgent(assignment: Assignment): boolean {
+    return this.assignmentService.isUrgent(assignment);
+  }
+
+  getUrgentAssignmentsForClasse(classeData: any): Assignment[] {
+    return classeData.assignments.filter((assignment: Assignment) => 
+      this.assignmentService.isUrgent(assignment)
+    );
   }
 
   // Méthodes pour bloquer les boutons

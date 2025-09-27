@@ -162,6 +162,31 @@ class EmailService
     }
 
     /**
+     * Envoyer une notification de devoir aux parents
+     */
+    public function sendAssignmentNotification($email, $parentName, $assignment)
+    {
+        $template = $this->getAssignmentNotificationTemplate();
+        
+        $variables = [
+            'parent_name' => $parentName,
+            'assignment_title' => $assignment['title'],
+            'assignment_description' => nl2br($assignment['description'] ?? ''),
+            'classe_name' => $assignment['classe']['name'] ?? 'Classe',
+            'due_date' => $assignment['dueDate'] ? date('d/m/Y à H:i', strtotime($assignment['dueDate'])) : 'Non spécifiée',
+            'platform_url' => $_ENV['PLATFORM_URL'] ?? 'https://centre-culturel-olivier.fr',
+            'dashboard_url' => ($_ENV['PLATFORM_URL'] ?? 'https://centre-culturel-olivier.fr') . '/dashboard'
+        ];
+
+        return $this->sendTemplateEmail(
+            $email,
+            'Nouveau devoir pour votre enfant - ' . ($assignment['classe']['name'] ?? 'Classe'),
+            $template,
+            $variables
+        );
+    }
+
+    /**
      * Traiter un template avec des variables
      */
     private function processTemplate($template, $variables)
@@ -396,6 +421,65 @@ class EmailService
                     
                     <div class="footer">
                         <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+                        <p>© 2024 Centre Culturel Olivier - Plateforme Éducative</p>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>';
+    }
+
+    /**
+     * Template pour les notifications de devoirs
+     */
+    private function getAssignmentNotificationTemplate()
+    {
+        return '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Nouveau devoir pour votre enfant</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: #10b981; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+                .assignment-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981; }
+                .button { display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+                .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+                .info-box { background: #eff6ff; border: 1px solid #3b82f6; padding: 15px; border-radius: 6px; margin: 20px 0; }
+                .due-date { color: #dc2626; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>📚 Nouveau devoir</h1>
+                </div>
+                
+                <div class="content">
+                    <p>Bonjour <strong>{parent_name}</strong>,</p>
+                    
+                    <p>Un nouveau devoir a été assigné à votre enfant dans la classe <strong>{classe_name}</strong>.</p>
+                    
+                    <div class="assignment-box">
+                        <h3>📝 {assignment_title}</h3>
+                        
+                        {assignment_description}
+                        
+                        <div class="info-box">
+                            <p><strong>📅 Date limite :</strong> <span class="due-date">{due_date}</span></p>
+                            <p><strong>🏫 Classe :</strong> {classe_name}</p>
+                        </div>
+                    </div>
+                    
+                    <p>Nous vous encourageons à accompagner votre enfant dans la réalisation de ce devoir.</p>
+                    
+                    <a href="{dashboard_url}" class="button">Voir le tableau de bord</a>
+                    
+                    <div class="footer">
+                        <p>Cet email a été envoyé automatiquement par {platform_url}</p>
                         <p>© 2024 Centre Culturel Olivier - Plateforme Éducative</p>
                     </div>
                 </div>

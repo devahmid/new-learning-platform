@@ -1,0 +1,149 @@
+<div class="parent-assignments">
+  <div class="header">
+    <h1>📚 Devoirs de vos enfants</h1>
+    <p class="subtitle">Consultez les devoirs assignés à vos enfants par classe</p>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="stats-section" *ngIf="!loading && assignments.length > 0">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">{{ getTotalAssignments() }}</div>
+        <div class="stat-label">Total des devoirs</div>
+      </div>
+      <div class="stat-card urgent">
+        <div class="stat-number">{{ getUrgentAssignments() }}</div>
+        <div class="stat-label">Urgents</div>
+      </div>
+      <div class="stat-card overdue">
+        <div class="stat-number">{{ getOverdueAssignments() }}</div>
+        <div class="stat-label">En retard</div>
+      </div>
+      <div class="stat-card due-soon">
+        <div class="stat-number">{{ getDueSoonAssignments() }}</div>
+        <div class="stat-label">Bientôt dû</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div class="error-message" *ngIf="error">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <i class="fas fa-spinner fa-spin"></i>
+    Chargement des devoirs...
+  </div>
+
+  <!-- Liste vide -->
+  <div class="empty-state" *ngIf="!loading && assignments.length === 0">
+    <i class="fas fa-clipboard-list"></i>
+    <h3>Aucun devoir</h3>
+    <p>Vos enfants n'ont pas encore de devoirs assignés.</p>
+  </div>
+
+  <!-- Liste des devoirs par classe -->
+  <div class="assignments-by-classe" *ngIf="!loading && assignments.length > 0">
+    <div class="classe-section" *ngFor="let classeData of assignments">
+      <div class="classe-header" (click)="toggleClasse(classeData.classe.id)">
+        <div class="classe-info">
+          <div class="classe-name" [style.color]="classeData.classe.color">
+            <i class="fas fa-graduation-cap"></i>
+            {{ classeData.classe.name }}
+          </div>
+          <div class="classe-stats">
+            <span class="total-assignments">{{ classeData.assignments.length }} devoir(s)</span>
+            <span class="urgent-count" *ngIf="getUrgentAssignmentsForClasse(classeData).length > 0">
+              {{ getUrgentAssignmentsForClasse(classeData).length }} urgent(s)
+            </span>
+          </div>
+        </div>
+        <div class="classe-toggle">
+          <i class="fas" [ngClass]="isClasseSelected(classeData.classe.id) ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </div>
+      </div>
+
+      <div class="classe-content" *ngIf="isClasseSelected(classeData.classe.id)">
+        <!-- Devoirs urgents -->
+        <div class="urgent-assignments" *ngIf="getUrgentAssignmentsForClasse(classeData).length > 0">
+          <h4 class="section-title urgent">
+            <i class="fas fa-exclamation-triangle"></i>
+            Devoirs urgents ({{ getUrgentAssignmentsForClasse(classeData).length }})
+          </h4>
+          <div class="assignments-list urgent">
+            <div class="assignment-card urgent" *ngFor="let assignment of getUrgentAssignmentsForClasse(classeData)">
+              <div class="assignment-header">
+                <h5 class="assignment-title">{{ assignment.title }}</h5>
+                <span class="status-badge" [ngClass]="getStatusClass(assignment.status)">
+                  {{ getStatusLabel(assignment.status) }}
+                </span>
+              </div>
+              <div class="assignment-content" *ngIf="assignment.description">
+                <p>{{ assignment.description }}</p>
+              </div>
+              <div class="assignment-footer">
+                <div class="due-date">
+                  <i class="fas fa-calendar"></i>
+                  <strong>Date limite:</strong> {{ formatDate(assignment.dueDate) }}
+                </div>
+                <div class="created-info">
+                  <i class="fas fa-clock"></i>
+                  Assigné le {{ formatDate(assignment.createdAt) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Devoirs à venir -->
+        <div class="upcoming-assignments" *ngIf="getUpcomingAssignmentsForClasse(classeData).length > 0">
+          <h4 class="section-title upcoming">
+            <i class="fas fa-calendar-alt"></i>
+            Devoirs à venir ({{ getUpcomingAssignmentsForClasse(classeData).length }})
+          </h4>
+          <div class="assignments-list upcoming">
+            <div class="assignment-card upcoming" *ngFor="let assignment of getUpcomingAssignmentsForClasse(classeData)">
+              <div class="assignment-header">
+                <h5 class="assignment-title">{{ assignment.title }}</h5>
+                <span class="status-badge" [ngClass]="getStatusClass(assignment.status)">
+                  {{ getStatusLabel(assignment.status) }}
+                </span>
+              </div>
+              <div class="assignment-content" *ngIf="assignment.description">
+                <p>{{ assignment.description }}</p>
+              </div>
+              <div class="assignment-footer">
+                <div class="due-date">
+                  <i class="fas fa-calendar"></i>
+                  <strong>Date limite:</strong> {{ formatDate(assignment.dueDate) }}
+                </div>
+                <div class="created-info">
+                  <i class="fas fa-clock"></i>
+                  Assigné le {{ formatDate(assignment.createdAt) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message si aucun devoir -->
+        <div class="no-assignments" *ngIf="classeData.assignments.length === 0">
+          <i class="fas fa-clipboard-check"></i>
+          <p>Aucun devoir assigné pour cette classe</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions" *ngIf="!loading && assignments.length > 0">
+    <button class="btn btn-primary" (click)="fetchAssignments()">
+      <i class="fas fa-sync-alt"></i>
+      Actualiser
+    </button>
+  </div>
+</div>
+
