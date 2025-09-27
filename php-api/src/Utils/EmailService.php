@@ -18,7 +18,7 @@ class EmailService
         $this->smtpPort = $_ENV['SMTP_PORT'] ?? 587;
         $this->smtpUsername = $_ENV['SMTP_USERNAME'] ?? '';
         $this->smtpPassword = $_ENV['SMTP_PASSWORD'] ?? '';
-        $this->fromEmail = $_ENV['FROM_EMAIL'] ?? 'noreply@votre-domaine.com';
+        $this->fromEmail = $_ENV['FROM_EMAIL'] ?? 'noreply@centre-culturel-olivier.fr';
         $this->fromName = $_ENV['FROM_NAME'] ?? 'Plateforme Éducative';
     }
 
@@ -42,7 +42,7 @@ class EmailService
             
             return $result;
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             error_log('Erreur envoi email: ' . $e->getMessage());
             return false;
         }
@@ -78,8 +78,8 @@ class EmailService
             'message_subject' => $message['subject'],
             'message_content' => nl2br($message['content']),
             'message_date' => date('d/m/Y à H:i', strtotime($message['created_at'])),
-            'platform_url' => $_ENV['PLATFORM_URL'] ?? 'https://votre-domaine.com',
-            'login_url' => ($_ENV['PLATFORM_URL'] ?? 'https://votre-domaine.com') . '/login'
+            'platform_url' => $_ENV['PLATFORM_URL'] ?? 'https://centre-culturel-olivier.fr',
+            'login_url' => ($_ENV['PLATFORM_URL'] ?? 'https://centre-culturel-olivier.fr') . '/login'
         ];
 
         return $this->sendTemplateEmail(
@@ -104,7 +104,7 @@ class EmailService
             'study_time' => $progressData['study_time'] ?? '0 minutes',
             'lessons_completed' => $progressData['lessons_completed'] ?? 0,
             'average_score' => $progressData['average_score'] ?? 0,
-            'platform_url' => $_ENV['PLATFORM_URL'] ?? 'https://votre-domaine.com'
+            'platform_url' => $_ENV['PLATFORM_URL'] ?? 'https://centre-culturel-olivier.fr'
         ];
 
         return $this->sendTemplateEmail(
@@ -127,13 +127,35 @@ class EmailService
             'course_name' => $paymentData['course_name'] ?? 'Cours',
             'amount' => $paymentData['amount'] ?? 0,
             'due_date' => $paymentData['due_date'] ?? date('d/m/Y'),
-            'payment_url' => ($_ENV['PLATFORM_URL'] ?? 'https://votre-domaine.com') . '/payment',
-            'platform_url' => $_ENV['PLATFORM_URL'] ?? 'https://votre-domaine.com'
+            'payment_url' => ($_ENV['PLATFORM_URL'] ?? 'https://centre-culturel-olivier.fr') . '/payment',
+            'platform_url' => $_ENV['PLATFORM_URL'] ?? 'https://centre-culturel-olivier.fr'
         ];
 
         return $this->sendTemplateEmail(
             $parent['email'],
             'Rappel de paiement - ' . $paymentData['course_name'],
+            $template,
+            $variables
+        );
+    }
+
+    /**
+     * Envoyer un email de réinitialisation de mot de passe
+     */
+    public function sendPasswordResetEmail($email, $token, $firstName)
+    {
+        $template = $this->getPasswordResetTemplate();
+        
+        $variables = [
+            'first_name' => $firstName,
+            'reset_url' => ($_ENV['PLATFORM_URL'] ?? 'https://centre-culturel-olivier.fr') . '/reset-password?token=' . $token,
+            'platform_url' => $_ENV['PLATFORM_URL'] ?? 'https://centre-culturel-olivier.fr',
+            'token' => $token
+        ];
+
+        return $this->sendTemplateEmail(
+            $email,
+            'Réinitialisation de votre mot de passe',
             $template,
             $variables
         );
@@ -313,6 +335,69 @@ class EmailService
                 </div>
                 <div class="footer">
                     <p>Cet email a été envoyé automatiquement par {platform_url}</p>
+                </div>
+            </div>
+        </body>
+        </html>';
+    }
+
+    /**
+     * Template pour l'email de réinitialisation de mot de passe
+     */
+    private function getPasswordResetTemplate()
+    {
+        return '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Réinitialisation de mot de passe</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+                .reset-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6; }
+                .button { display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+                .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+                .warning { background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 6px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🔐 Réinitialisation de mot de passe</h1>
+                </div>
+                
+                <div class="content">
+                    <p>Bonjour <strong>{first_name}</strong>,</p>
+                    
+                    <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte sur notre plateforme éducative.</p>
+                    
+                    <div class="reset-box">
+                        <h3>Pour réinitialiser votre mot de passe :</h3>
+                        <p>Cliquez sur le bouton ci-dessous pour accéder à la page de réinitialisation :</p>
+                        
+                        <a href="{reset_url}" class="button">Réinitialiser mon mot de passe</a>
+                        
+                        <p><small>Ou copiez ce lien dans votre navigateur :<br>{reset_url}</small></p>
+                    </div>
+                    
+                    <div class="warning">
+                        <p><strong>⚠️ Important :</strong></p>
+                        <ul>
+                            <li>Ce lien est valide pendant 1 heure seulement</li>
+                            <li>Si vous n\'avez pas demandé cette réinitialisation, ignorez cet email</li>
+                            <li>Votre mot de passe actuel reste valide jusqu\'à ce que vous le changiez</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Si vous rencontrez des difficultés, n\'hésitez pas à nous contacter.</p>
+                    
+                    <div class="footer">
+                        <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+                        <p>© 2024 Centre Culturel Olivier - Plateforme Éducative</p>
+                    </div>
                 </div>
             </div>
         </body>

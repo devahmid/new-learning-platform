@@ -178,7 +178,7 @@ class AuthController {
             // Toujours retourner le même message pour la sécurité
             Response::success(null, 'Si cet email existe, un lien de réinitialisation a été envoyé');
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             error_log("RequestPasswordReset - Erreur: " . $e->getMessage());
             Response::error('Erreur lors de la demande de réinitialisation: ' . $e->getMessage(), 500);
         }
@@ -225,7 +225,7 @@ class AuthController {
             
             Response::success(null, 'Mot de passe réinitialisé avec succès');
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             error_log("ResetPassword - Erreur: " . $e->getMessage());
             Response::error('Erreur lors de la réinitialisation: ' . $e->getMessage(), 500);
         }

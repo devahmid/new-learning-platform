@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Utils\Response;
+use App\Utils\JWT;
 use App\Services\SumUpService;
 use App\Models\Payment;
 
@@ -505,6 +506,306 @@ class PaymentController {
         }
     }
     
+    /**
+     * Récupérer tous les paiements avec les utilisateurs (pour l'admin)
+     * GET /api/admin/payments
+     */
+    public function getAllPaymentsWithUsers() {
+        try {
+            // Vérifier l'authentification admin
+            JWT::requireRole(['admin']);
+            
+            // Récupérer les paramètres de requête
+            $status = $_GET['status'] ?? '';
+            $method = $_GET['method'] ?? '';
+            $userId = $_GET['userId'] ?? '';
+            $from = $_GET['from'] ?? '';
+            $to = $_GET['to'] ?? '';
+            $page = intval($_GET['page'] ?? 1);
+            $limit = intval($_GET['limit'] ?? 25);
+            
+            // Construire la requête SQL
+            $db = \DatabaseConfig::getInstance()->getConnection();
+            
+            $whereConditions = [];
+            $params = [];
+            
+            if ($status) {
+                $whereConditions[] = "p.status = ?";
+                $params[] = $status;
+            }
+            
+            if ($method) {
+                $whereConditions[] = "p.paymentMethod = ?";
+                $params[] = $method;
+            }
+            
+            if ($userId) {
+                $whereConditions[] = "p.userId = ?";
+                $params[] = intval($userId);
+            }
+            
+            if ($from) {
+                $whereConditions[] = "DATE(p.createdAt) >= ?";
+                $params[] = $from;
+            }
+            
+            if ($to) {
+                $whereConditions[] = "DATE(p.createdAt) <= ?";
+                $params[] = $to;
+            }
+            
+            $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
+            
+            // Requête pour compter le total
+            $countSql = "SELECT COUNT(*) as total FROM payments p $whereClause";
+            $countStmt = $db->prepare($countSql);
+            $countStmt->execute($params);
+            $total = $countStmt->fetch(\PDO::FETCH_ASSOC)['total'];
+            
+            // Requête pour récupérer les paiements avec les utilisateurs
+            $offset = ($page - 1) * $limit;
+            $sql = "
+                SELECT 
+                    p.*,
+                    u.id as user_id,
+                    u.email as user_email,
+                    u.firstName as user_firstName,
+                    u.lastName as user_lastName,
+                    u.phoneNumber as user_phoneNumber,
+                    u.type as user_type,
+                    u.role as user_role,
+                    u.status as user_status,
+                    u.approved_at as user_approved_at,
+                    u.rejection_reason as user_rejection_reason,
+                    u.parentId as user_parentId,
+                    u.classeId as user_classeId,
+                    u.createdAt as user_createdAt,
+                    u.updatedAt as user_updatedAt
+                FROM payments p
+                LEFT JOIN users u ON p.userId = u.id
+                $whereClause
+                ORDER BY p.createdAt DESC
+                LIMIT ? OFFSET ?
+            ";
+            
+            $params[] = $limit;
+            $params[] = $offset;
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            $payments = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Formater les données
+            $formattedPayments = [];
+            foreach ($payments as $payment) {
+                $formattedPayment = [
+                    'id' => intval($payment['id']),
+                    'userId' => intval($payment['userId']),
+                    'courseId' => $payment['courseId'] ? intval($payment['courseId']) : null,
+                    'amount' => floatval($payment['amount']),
+                    'currency' => $payment['currency'],
+                    'status' => $payment['status'],
+                    'paymentMethod' => $payment['paymentMethod'],
+                    'transactionId' => $payment['transactionId'],
+                    'description' => $payment['description'],
+                    'metadata' => $payment['metadata'],
+                    'paidAt' => $payment['paidAt'],
+                    'createdAt' => $payment['createdAt'],
+                    'updatedAt' => $payment['updatedAt']
+                ];
+                
+                // Ajouter les informations utilisateur si disponibles
+                if ($payment['user_id']) {
+                    $formattedPayment['user'] = [
+                        'id' => intval($payment['user_id']),
+                        'email' => $payment['user_email'],
+                        'phoneNumber' => $payment['user_phoneNumber'],
+                        'firstName' => $payment['user_firstName'],
+                        'lastName' => $payment['user_lastName'],
+                        'type' => $payment['user_type'],
+                        'role' => $payment['user_role'],
+                        'status' => $payment['user_status'],
+                        'approved_at' => $payment['user_approved_at'],
+                        'rejection_reason' => $payment['user_rejection_reason'],
+                        'parentId' => $payment['user_parentId'] ? intval($payment['user_parentId']) : null,
+                        'classeId' => $payment['user_classeId'] ? intval($payment['user_classeId']) : null,
+                        'createdAt' => $payment['user_createdAt'],
+                        'updatedAt' => $payment['user_updatedAt']
+                    ];
+                }
+                
+                $formattedPayments[] = $formattedPayment;
+            }
+            
+            $pages = ceil($total / $limit);
+            
+            return Response::success([
+                'items' => $formattedPayments,
+                'pagination' => [
+                    'total' => intval($total),
+                    'page' => $page,
+                    'limit' => $limit,
+                    'pages' => $pages
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log('PaymentController Error (getAllPaymentsWithUsers): ' . $e->getMessage());
+            return Response::error('Erreur lors de la récupération des paiements: ' . $e->getMessage(), 500);
+        }
+    }
+    
+    /**
+     * Mettre à jour le statut d'un paiement (pour l'admin)
+     * PATCH /api/admin/payments/{id}/status
+     */
+    public function updatePaymentStatus($paymentId) {
+        try {
+            // Vérifier l'authentification admin
+            JWT::requireRole(['admin']);
+            
+            $input = json_decode(file_get_contents('php://input'), true);
+            
+            if (!isset($input['status'])) {
+                return Response::error('Statut manquant', 400);
+            }
+            
+            $newStatus = $input['status'];
+            $validStatuses = ['pending', 'completed', 'failed', 'cancelled', 'expired', 'refunded'];
+            
+            if (!in_array($newStatus, $validStatuses)) {
+                return Response::error('Statut invalide', 400);
+            }
+            
+            // Récupérer le paiement
+            $payment = Payment::find($paymentId);
+            
+            if (!$payment) {
+                return Response::error('Paiement non trouvé', 404);
+            }
+            
+            // Mettre à jour le statut
+            $payment->status = $newStatus;
+            $payment->updatedAt = date('Y-m-d H:i:s');
+            
+            // Si le statut devient 'completed', mettre à jour paidAt
+            if ($newStatus === 'completed' && !$payment->paidAt) {
+                $payment->paidAt = date('Y-m-d H:i:s');
+            }
+            
+            $payment->save();
+            
+            return Response::success([
+                'message' => 'Statut du paiement mis à jour avec succès',
+                'payment' => $payment->toArray()
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log('PaymentController Error (updatePaymentStatus): ' . $e->getMessage());
+            return Response::error('Erreur lors de la mise à jour du statut: ' . $e->getMessage(), 500);
+        }
+    }
+    
+    /**
+     * Récupérer les statistiques des paiements (pour l'admin)
+     * GET /api/admin/payments/stats
+     */
+    public function getPaymentStats() {
+        try {
+            // Vérifier l'authentification admin
+            JWT::requireRole(['admin']);
+            
+            $from = $_GET['from'] ?? '';
+            $to = $_GET['to'] ?? '';
+            
+            $db = \DatabaseConfig::getInstance()->getConnection();
+            
+            // Construire les conditions de date
+            $dateConditions = [];
+            $params = [];
+            
+            if ($from) {
+                $dateConditions[] = "DATE(createdAt) >= ?";
+                $params[] = $from;
+            }
+            
+            if ($to) {
+                $dateConditions[] = "DATE(createdAt) <= ?";
+                $params[] = $to;
+            }
+            
+            $whereClause = !empty($dateConditions) ? 'WHERE ' . implode(' AND ', $dateConditions) : '';
+            
+            // Statistiques par statut
+            $statusSql = "
+                SELECT 
+                    status,
+                    COUNT(*) as count,
+                    SUM(amount) as total_amount
+                FROM payments 
+                $whereClause
+                GROUP BY status
+            ";
+            
+            $statusStmt = $db->prepare($statusSql);
+            $statusStmt->execute($params);
+            $statusStats = $statusStmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Statistiques par méthode de paiement
+            $methodSql = "
+                SELECT 
+                    paymentMethod,
+                    COUNT(*) as count,
+                    SUM(amount) as total_amount
+                FROM payments 
+                $whereClause
+                GROUP BY paymentMethod
+            ";
+            
+            $methodStmt = $db->prepare($methodSql);
+            $methodStmt->execute($params);
+            $methodStats = $methodStmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Totaux généraux
+            $totalSql = "
+                SELECT 
+                    COUNT(*) as total_count,
+                    SUM(amount) as total_revenue,
+                    SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as completed_revenue,
+                    SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) as pending_revenue,
+                    SUM(CASE WHEN status = 'failed' THEN amount ELSE 0 END) as failed_revenue
+                FROM payments 
+                $whereClause
+            ";
+            
+            $totalStmt = $db->prepare($totalSql);
+            $totalStmt->execute($params);
+            $totals = $totalStmt->fetch(\PDO::FETCH_ASSOC);
+            
+            return Response::success([
+                'counts' => [
+                    'total' => intval($totals['total_count']),
+                    'completed' => intval(array_sum(array_column(array_filter($statusStats, fn($s) => $s['status'] === 'completed'), 'count'))),
+                    'pending' => intval(array_sum(array_column(array_filter($statusStats, fn($s) => $s['status'] === 'pending'), 'count'))),
+                    'failed' => intval(array_sum(array_column(array_filter($statusStats, fn($s) => $s['status'] === 'failed'), 'count')))
+                ],
+                'revenue' => [
+                    'total' => floatval($totals['total_revenue']),
+                    'completed' => floatval($totals['completed_revenue']),
+                    'pending' => floatval($totals['pending_revenue']),
+                    'failed' => floatval($totals['failed_revenue'])
+                ],
+                'byStatus' => $statusStats,
+                'byMethod' => $methodStats
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log('PaymentController Error (getPaymentStats): ' . $e->getMessage());
+            return Response::error('Erreur lors de la récupération des statistiques: ' . $e->getMessage(), 500);
+        }
+    }
+
     /**
      * Afficher la page de paiement SumUp
      * GET /payment/sumup-pay?id=checkout_id

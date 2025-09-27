@@ -203,7 +203,7 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <button *ngFor="let action of mainActions" (click)="onMainActionClick(action)"
-            [disabled]="!hasPermission(action.permission)"
+            [disabled]="action.route !== '/admin/payments' && !hasPermission(action.permission)"
             class="group flex flex-col items-center justify-center p-6 border border-gray-200 rounded-2xl hover:border-emerald-300 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 transition-all duration-300 hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
             <div
               class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center group-hover:from-emerald-600 group-hover:to-emerald-700 transition-all duration-300 shadow-lg mb-4">
@@ -284,11 +284,11 @@
                   <div class="flex items-center">
                     <div
                       class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-bold mr-3">
-                      {{ user.name.charAt(0) || '?' }}
+                      {{ (user?.name ? user.name.charAt(0) : (user?.email ? user.email.charAt(0) : '?')) }}
                     </div>
                     <span
                       class="text-sm font-semibold text-gray-900 group-hover:text-emerald-800 transition-colors duration-200">
-                      {{ user.name }}
+                      {{ user?.name || user?.email || 'Utilisateur' }}
                     </span>
                   </div>
                 </td>

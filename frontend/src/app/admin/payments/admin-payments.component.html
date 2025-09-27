@@ -1,0 +1,118 @@
+<div class="p-4 space-y-6">
+  <h1 class="text-2xl font-semibold">Gestion des paiements</h1>
+
+  <!-- Filtres -->
+  <div class="bg-white dark:bg-gray-800 p-4 rounded shadow space-y-4">
+    <div class="grid md:grid-cols-6 sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-medium mb-1">Statut</label>
+        <select class="w-full p-2 border rounded" [(ngModel)]="status" (change)="page=1;fetchPayments();">
+          <option value="">Tous</option>
+          <option *ngFor="let s of statuses" [value]="s">{{s}}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1">Méthode</label>
+        <select class="w-full p-2 border rounded" [(ngModel)]="method" (change)="page=1;fetchPayments();">
+          <option value="">Toutes</option>
+          <option *ngFor="let m of methods" [value]="m">{{m}}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1">User ID</label>
+        <input type="text" class="w-full p-2 border rounded" [(ngModel)]="userId" (keyup.enter)="page=1;fetchPayments();" placeholder="ID utilisateur" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1">Du</label>
+        <input type="date" class="w-full p-2 border rounded" [(ngModel)]="from" (change)="page=1;fetchPayments();fetchStats();" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1">Au</label>
+        <input type="date" class="w-full p-2 border rounded" [(ngModel)]="to" (change)="page=1;fetchPayments();fetchStats();" />
+      </div>
+      <div class="flex items-end gap-2">
+        <button class="px-3 py-2 bg-blue-600 text-white rounded" (click)="fetchPayments()">Filtrer</button>
+        <button class="px-3 py-2 bg-gray-200 rounded" (click)="resetFilters()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div *ngIf="stats" class="grid md:grid-cols-4 sm:grid-cols-2 gap-4">
+    <div class="p-4 rounded bg-white dark:bg-gray-800 shadow">
+      <p class="text-xs uppercase text-gray-500">Total</p>
+      <p class="text-xl font-semibold">{{stats.counts.total}}</p>
+    </div>
+    <div class="p-4 rounded bg-white dark:bg-gray-800 shadow">
+      <p class="text-xs uppercase text-gray-500">Terminés</p>
+      <p class="text-xl font-semibold text-green-600">{{stats.counts.completed}}</p>
+    </div>
+    <div class="p-4 rounded bg-white dark:bg-gray-800 shadow">
+      <p class="text-xs uppercase text-gray-500">En attente</p>
+      <p class="text-xl font-semibold text-orange-500">{{stats.counts.pending}}</p>
+    </div>
+    <div class="p-4 rounded bg-white dark:bg-gray-800 shadow">
+      <p class="text-xs uppercase text-gray-500">Revenu (terminés)</p>
+      <p class="text-xl font-semibold">{{stats.revenue.completed | number:'1.2-2'}} €</p>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="bg-white dark:bg-gray-800 rounded shadow overflow-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-100 dark:bg-gray-700 text-left">
+        <tr>
+          <th class="p-2">ID</th>
+          <th class="p-2">Utilisateur</th>
+            <th class="p-2">Montant</th>
+          <th class="p-2">Méthode</th>
+          <th class="p-2">Statut</th>
+          <th class="p-2">Créé</th>
+          <th class="p-2">Payé</th>
+          <th class="p-2">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="loading">
+          <td colspan="8" class="p-4 text-center">Chargement...</td>
+        </tr>
+        <tr *ngIf="!loading && payments.length===0">
+          <td colspan="8" class="p-4 text-center text-gray-500">Aucun paiement</td>
+        </tr>
+        <tr *ngFor="let p of payments" class="border-b last:border-0">
+          <td class="p-2 font-mono">{{p.id}}</td>
+          <td class="p-2">
+            <div *ngIf="p.user; else noUser">
+              <div class="font-medium">{{p.user.firstName}} {{p.user.lastName}}</div>
+              <div class="text-xs text-gray-500">{{p.user.email}}</div>
+            </div>
+            <ng-template #noUser><span class="text-gray-400 italic">—</span></ng-template>
+          </td>
+          <td class="p-2">{{formatAmount(p.amount)}}</td>
+          <td class="p-2 uppercase">{{p.paymentMethod}}</td>
+          <td class="p-2">
+            <span class="px-2 py-1 text-xs rounded bg-gray-100 dark:bg-gray-700" [ngClass]="{
+              'bg-green-100 text-green-700': p.status==='completed',
+              'bg-orange-100 text-orange-700': p.status==='pending',
+              'bg-red-100 text-red-700': p.status==='failed'
+            }">{{p.status}}</span>
+          </td>
+          <td class="p-2">{{formatDate(p.createdAt)}}</td>
+          <td class="p-2">{{formatDate(p.paidAt)}}</td>
+          <td class="p-2">
+            <select [disabled]="updatingStatus[p.id]" class="p-1 border rounded text-xs" (change)="updateStatus(p, $any($event.target).value)">
+              <option [selected]="p.status===s" *ngFor="let s of statuses" [value]="s">{{s}}</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex items-center gap-2 flex-wrap" *ngIf="pages>1">
+    <button class="px-2 py-1 border rounded" (click)="changePage(page-1)" [disabled]="page===1">Précédent</button>
+    <span>Page {{page}} / {{pages}}</span>
+    <button class="px-2 py-1 border rounded" (click)="changePage(page+1)" [disabled]="page===pages">Suivant</button>
+  </div>
+</div>

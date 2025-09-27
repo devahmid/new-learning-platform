@@ -16,7 +16,7 @@ import { AppLayoutComponent } from './pages/home/app-layout/app-layout.component
 import { LoaderComponent } from './shared/loader/loader.component';
 import { LoaderService } from './shared/loader.service';
 import { SubjectGridComponent } from './subject-grid/subject-grid.component';
-import { AutoLogoutService } from './core/services/auto-logout.service';
+// import { AutoLogoutService } from './core/services/auto-logout.service'; // Désactivé pour éviter les déconnexions intempestives
 
 import { ChildSelectionModalComponent } from './shared/child-selection-modal/child-selection-modal.component';
 import { SupportButtonComponent } from './components/support-button/support-button.component';
@@ -58,8 +58,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private authService: AuthService,
-    private autoLogoutService: AutoLogoutService
+    private authService: AuthService
+    // private autoLogoutService: AutoLogoutService // Désactivé pour éviter les déconnexions intempestives
   ) {
     effect(() => {
       this.isLoggedIn = this.authService.isLoggedIn();

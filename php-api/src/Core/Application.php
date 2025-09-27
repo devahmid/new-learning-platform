@@ -299,6 +299,11 @@ class Application {
         $this->routes['GET']['/api/payment/success'] = ['App\Controllers\PaymentController', 'paymentSuccess'];
         $this->routes['GET']['/api/payment/callback'] = ['App\Controllers\PaymentController', 'paymentCallback'];
         $this->routes['GET']['/api/payment/test'] = ['App\Controllers\PaymentController', 'test'];
+        
+        // Routes admin pour les paiements
+        $this->routes['GET']['/api/admin/payments'] = ['App\Controllers\PaymentController', 'getAllPaymentsWithUsers'];
+        $this->routes['PATCH']['/api/admin/payments/{id}/status'] = ['App\Controllers\PaymentController', 'updatePaymentStatus'];
+        $this->routes['GET']['/api/admin/payments/stats'] = ['App\Controllers\PaymentController', 'getPaymentStats'];
     }
     
     /**

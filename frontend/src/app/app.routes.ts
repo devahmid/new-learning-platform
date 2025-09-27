@@ -494,6 +494,13 @@ export const routes: Routes = [
             (m) => m.RolesComponent
           ),
       },
+      {
+        path: 'payments',
+        loadComponent: () =>
+          import('./admin/payments/admin-payments.component').then(
+            (m) => m.AdminPaymentsComponent
+          ),
+      },
     ],
   },
 

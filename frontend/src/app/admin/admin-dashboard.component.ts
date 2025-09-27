@@ -209,6 +209,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       permission: 'canViewStats',
     },
     {
+      label: 'Gérer les paiements',
+      icon: 'fa-solid fa-credit-card',
+      type: 'danger',
+      route: '/admin/payments',
+      permission: 'canManageSystem',
+    },
+    {
       label: 'Gérer les paramètres',
       icon: 'fa-solid fa-cog',
       type: 'secondary',
@@ -459,12 +466,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // 🚀 Actions principales
   onMainActionClick(action: any) {
-
+    // Bypass permission for payments management card
+    if (action.route === '/admin/payments') {
+      this.router.navigate([action.route]);
+      return;
+    }
     if (!this.hasPermission(action.permission)) {
       this.showError('Permission insuffisante pour cette action');
       return;
     }
-
     this.router.navigate([action.route]);
   }
 

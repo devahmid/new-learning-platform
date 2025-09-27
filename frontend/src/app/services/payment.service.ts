@@ -67,4 +67,22 @@ export class PaymentService {
       data: any;
     }>(`${API_URL}/sumup-status/${checkoutId}`);
   }
+
+  // ---- Admin methods (temporary role query param) ----
+  adminListPayments(params: { status?: string; userId?: number; method?: string; from?: string; to?: string; page?: number; limit?: number } = {}) {
+    const q: string[] = [];
+    Object.entries(params).forEach(([k,v]) => { if (v!==undefined && v!==null && v!=='') q.push(`${k}=${encodeURIComponent(String(v))}`); });
+    return this.http.get<{ success: boolean; message: string; data: { items: Payment[]; pagination: { total: number; page: number; limit: number; pages: number } } }>(`https://centre-culturel-olivier.fr/api/admin/payments?${q.join('&')}`);
+  }
+
+  adminUpdatePaymentStatus(id: number, status: string) {
+    return this.http.patch<{ success: boolean; message: string; data: Payment }>(`https://centre-culturel-olivier.fr/api/admin/payments/${id}/status`, { status });
+  }
+
+  adminPaymentStats(range?: { from?: string; to?: string }) {
+    const q: string[] = [];
+    if (range?.from) q.push(`from=${encodeURIComponent(range.from)}`);
+    if (range?.to) q.push(`to=${encodeURIComponent(range.to)}`);
+    return this.http.get<{ success: boolean; message: string; data: { counts: any; revenue: any; byMethod: any[] } }>(`https://centre-culturel-olivier.fr/api/admin/payments/stats?${q.join('&')}`);
+  }
 }
