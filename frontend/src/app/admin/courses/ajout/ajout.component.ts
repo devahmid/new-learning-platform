@@ -27,6 +27,7 @@ interface CourseForm {
   pdfUrl?: string;
   instructorId?: number;
   status: 'draft' | 'published';
+  order?: number; // Ordre d'affichage des cours
   lessons: LessonForm[];
   quizzes: QuizForm[];
   exercises: ExerciseForm[];
@@ -162,6 +163,7 @@ export class AjoutComponent implements OnInit {
       pdfUrl: [''],
       instructorId: [null],
       status: ['draft'],
+      order: [null], // Ordre d'affichage des cours (optionnel)
       lessons: this.fb.array([]),
       quizzes: this.fb.array([]),
       exercises: this.fb.array([]),
@@ -375,7 +377,8 @@ export class AjoutComponent implements OnInit {
         videoUrl: course.videoUrl || course.video_url || course.video || '',
         pdfUrl: course.pdfUrl || course.fileUrl || course.pdf_url || course.file_url || course.file || '',
         instructorId: course.instructor?.id || course.instructorId,
-        status: course.status || 'draft'
+        status: course.status || 'draft',
+        order: course.order || null // Ordre d'affichage des cours
       });
 
       console.log('Formulaire rempli avec:', this.courseForm.value);
@@ -601,6 +604,7 @@ export class AjoutComponent implements OnInit {
           videoUrl: courseData.videoUrl || null,
           pdfUrl: courseData.pdfUrl || null,
           status: courseData.status,
+          order: courseData.order || null, // Ordre d'affichage des cours
           // Convertir les leçons au format attendu par l'API
           lessons: courseData.lessons?.map((lesson: any) => ({
             title: lesson.title,

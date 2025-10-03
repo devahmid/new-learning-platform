@@ -210,6 +210,9 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
           );
           this.courses = courses;
 
+          // Trier les cours par ordre d'affichage
+          this.sortCoursesByOrder();
+
           // Toujours traiter les leçons, même si certaines sont vides
           this.processLessons();
           this.calculateProgress();
@@ -243,6 +246,9 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
           
           // Utiliser les vraies données de l'API
           this.courses = courses;
+
+          // Trier les cours par ordre d'affichage
+          this.sortCoursesByOrder();
 
           // Traiter les leçons
           this.processLessons();
@@ -438,5 +444,33 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     
     // Fallback : utiliser la classe de l'enfant sélectionné
     return 'Classe ' + this.classe;
+  }
+
+  // Méthode pour trier les cours par ordre d'affichage
+  private sortCoursesByOrder() {
+    this.courses.sort((a, b) => {
+      // Si les deux cours ont un ordre défini
+      if (a.order && b.order) {
+        return a.order - b.order;
+      }
+      
+      // Si seul le cours A a un ordre défini, il vient en premier
+      if (a.order && !b.order) {
+        return -1;
+      }
+      
+      // Si seul le cours B a un ordre défini, il vient en premier
+      if (!a.order && b.order) {
+        return 1;
+      }
+      
+      // Si aucun des deux n'a d'ordre défini, trier par titre
+      return (a.title || '').localeCompare(b.title || '');
+    });
+    
+    console.log('Cours triés par ordre d\'affichage:', this.courses.map(c => ({ 
+      title: c.title, 
+      order: c.order 
+    })));
   }
 }

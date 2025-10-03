@@ -33,6 +33,7 @@ interface CourseForm {
   classeIds: number[]; // Nouvelle propriété pour sélection multiple
   videoUrl?: string;
   pdfUrl?: string;
+  order?: number; // Ordre d'affichage des cours
   lessons: LessonForm[];
   quizzes: QuizForm[];
   exercises: ExerciseForm[];
@@ -124,6 +125,7 @@ export class CourseBuilderComponent implements OnInit {
       classeIds: [[], Validators.required], // Nouvelle sélection multiple
       videoUrl: [''],
       pdfUrl: [''],
+      order: [null], // Ordre d'affichage des cours (optionnel)
       lessons: this.fb.array([]),
       quizzes: this.fb.array([]),
       exercises: this.fb.array([]),
