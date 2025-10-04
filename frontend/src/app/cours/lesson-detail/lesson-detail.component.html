@@ -156,6 +156,17 @@
                   <i class="fa-solid fa-chart-line text-green-400"></i>
                   <span>{{ videoProgress | number:'1.0-1' }}%</span>
                 </div>
+                
+                <!-- Indicateur de reprise automatique -->
+                <div *ngIf="hasSavedPosition()" class="flex items-center gap-2 text-xs bg-blue-500/30 px-2 py-1 rounded">
+                  <i class="fa-solid fa-play-circle text-blue-400"></i>
+                  <span>Reprise à {{ getSavedPositionFormatted() }}</span>
+                  <button (click)="forceResumeFromSavedPosition()" 
+                          class="ml-1 hover:bg-blue-600/50 px-1 py-0.5 rounded text-xs"
+                          title="Reprendre maintenant">
+                    <i class="fa-solid fa-play text-blue-300"></i>
+                  </button>
+                </div>
                 <!-- Contrôle de vitesse -->
                 <div class="relative" *ngIf="isSpeedControlAvailable()">
                   <button (click)="toggleSpeedMenu()" 

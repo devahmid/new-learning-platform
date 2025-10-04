@@ -88,6 +88,14 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   currentVolume = 1;
   isFullscreen = false;
   
+  // Auto-resume properties
+  private autoResumeKey = '';
+  private lastSavedPosition = 0;
+  private positionSaveInterval: any;
+  private readonly POSITION_SAVE_INTERVAL = 5000; // 5 secondes
+  private readonly MIN_POSITION_TO_SAVE = 10; // Ne pas sauvegarder si < 10s
+  private hasResumedFromSavedPosition = false; // Éviter de reprendre plusieurs fois
+  
   // Vimeo player instance
   private vimeoPlayer: any = null;
   showFlashcardAnswer = false; // Nouveau: pour gérer l'affichage de la réponse des flashcards
@@ -164,6 +172,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       next: (apiLesson: ApiLesson) => {
         // Convertir l'API lesson vers le format local
         this.lesson = this.convertApiLessonToLocal(apiLesson);
+        
+        // Initialiser la reprise automatique maintenant que la leçon est chargée
+        this.initializeAutoResumeKey();
+        
         // Récupérer le courseId pour charger les quiz
         this.courseId = apiLesson.courseId;
         // Charger les données du cours pour avoir accès au titre
@@ -598,6 +610,159 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     this.keyboardEventListeners = [];
   }
 
+  // ===== MÉTHODES DE REPRISE AUTOMATIQUE =====
+
+  /**
+   * Initialiser la clé de reprise automatique
+   */
+  private initializeAutoResumeKey() {
+    if (this.lesson?.id) {
+      this.autoResumeKey = `video_position_${this.lesson.id}`;
+      this.loadSavedPosition();
+      this.hasResumedFromSavedPosition = false; // Reset à chaque nouvelle leçon
+    }
+  }
+
+  /**
+   * Charger la position sauvegardée
+   */
+  private loadSavedPosition() {
+    try {
+      const savedPosition = localStorage.getItem(this.autoResumeKey);
+      
+      if (savedPosition) {
+        this.lastSavedPosition = parseFloat(savedPosition);
+        console.log(`Position sauvegardée chargée: ${this.lastSavedPosition}s`);
+      } else {
+        this.lastSavedPosition = 0;
+      }
+    } catch (error) {
+      console.warn('Erreur lors du chargement de la position:', error);
+      this.lastSavedPosition = 0;
+    }
+  }
+
+  /**
+   * Sauvegarder la position actuelle
+   */
+  private saveCurrentPosition(position: number) {
+    if (position >= this.MIN_POSITION_TO_SAVE) {
+      try {
+        localStorage.setItem(this.autoResumeKey, position.toString());
+        this.lastSavedPosition = position;
+      } catch (error) {
+        console.warn('Erreur lors de la sauvegarde de la position:', error);
+      }
+    }
+  }
+
+  /**
+   * Démarrer la sauvegarde automatique de position
+   */
+  private startPositionSaving() {
+    this.stopPositionSaving(); // S'assurer qu'il n'y a pas de doublon
+    
+    this.positionSaveInterval = setInterval(() => {
+      this.saveCurrentVideoPosition();
+    }, this.POSITION_SAVE_INTERVAL);
+  }
+
+  /**
+   * Arrêter la sauvegarde automatique de position
+   */
+  private stopPositionSaving() {
+    if (this.positionSaveInterval) {
+      clearInterval(this.positionSaveInterval);
+      this.positionSaveInterval = null;
+    }
+  }
+
+  /**
+   * Sauvegarder la position de la vidéo actuelle
+   */
+  private saveCurrentVideoPosition() {
+    if (this.isDirect()) {
+      const video = this.videoPlayer?.nativeElement;
+      if (video && !video.paused) {
+        this.saveCurrentPosition(video.currentTime);
+      }
+    } else if (this.isVimeo() && this.vimeoPlayer) {
+      this.vimeoPlayer.getCurrentTime().then((currentTime: number) => {
+        this.vimeoPlayer.getPaused().then((paused: boolean) => {
+          if (!paused) {
+            this.saveCurrentPosition(currentTime);
+          }
+        });
+      }).catch((error: any) => {
+        console.warn('Erreur lors de la récupération de la position Vimeo:', error);
+      });
+    }
+  }
+
+  /**
+   * Reprendre la lecture à la position sauvegardée
+   */
+  private resumeFromSavedPosition() {
+    if (this.lastSavedPosition > 0 && !this.hasResumedFromSavedPosition) {
+      console.log(`Reprise à la position: ${this.lastSavedPosition}s`);
+      this.hasResumedFromSavedPosition = true; // Marquer comme déjà repris
+      
+      if (this.isDirect()) {
+        const video = this.videoPlayer?.nativeElement;
+        if (video) {
+          video.currentTime = this.lastSavedPosition;
+        }
+      } else if (this.isVimeo() && this.vimeoPlayer) {
+        this.vimeoPlayer.setCurrentTime(this.lastSavedPosition).then(() => {
+          console.log('Position Vimeo restaurée');
+        }).catch((error: any) => {
+          console.warn('Erreur lors de la restauration de la position Vimeo:', error);
+        });
+      }
+    }
+  }
+
+  /**
+   * Effacer la position sauvegardée (quand la vidéo est terminée)
+   */
+  private clearSavedPosition() {
+    try {
+      localStorage.removeItem(this.autoResumeKey);
+      this.lastSavedPosition = 0;
+      console.log('Position sauvegardée effacée');
+    } catch (error) {
+      console.warn('Erreur lors de l\'effacement de la position:', error);
+    }
+  }
+
+  /**
+   * Vérifier si une position est disponible pour la reprise
+   */
+  hasSavedPosition(): boolean {
+    return this.lastSavedPosition > 0;
+  }
+
+  /**
+   * Obtenir la position sauvegardée formatée
+   */
+  getSavedPositionFormatted(): string {
+    if (this.lastSavedPosition <= 0) return '';
+    
+    const minutes = Math.floor(this.lastSavedPosition / 60);
+    const seconds = Math.floor(this.lastSavedPosition % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  /**
+   * Forcer la reprise manuelle (pour debug ou bouton)
+   */
+  forceResumeFromSavedPosition() {
+    if (this.hasSavedPosition()) {
+      this.hasResumedFromSavedPosition = false; // Reset le flag
+      this.resumeFromSavedPosition();
+    }
+  }
+
   // Gestion d'erreurs pour vidéos directes
   onVideoError(event: Event) {
     console.error('Erreur vidéo:', event);
@@ -642,6 +807,14 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   onVideoPlay() {
     console.log('Vidéo démarrée');
     this.startVideoTracking();
+    this.startPositionSaving();
+    
+    // Reprendre à la position sauvegardée si c'est la première lecture
+    if (this.hasSavedPosition() && !this.hasResumedFromSavedPosition) {
+      setTimeout(() => {
+        this.resumeFromSavedPosition();
+      }, 1000);
+    }
   }
 
   onVideoPause() {
@@ -652,6 +825,8 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   onVideoEnd() {
     console.log('Vidéo terminée');
     this.endVideoTracking();
+    this.stopPositionSaving();
+    this.clearSavedPosition();
   }
 
   // Events pour Vimeo
@@ -669,12 +844,25 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       this.vimeoPlayer = new (window as any).Vimeo.Player(iframe);
       this.setupVimeoTracking();
       console.log('Player Vimeo initialisé');
+      
+      // Reprendre à la position sauvegardée après l'initialisation
+      setTimeout(() => {
+        this.resumeFromSavedPosition();
+      }, 1000);
     }
   }
 
   onVimeoPlay() {
     console.log('Vimeo démarré');
     this.startVideoTracking();
+    this.startPositionSaving();
+    
+    // Reprendre à la position sauvegardée si c'est la première lecture
+    if (this.hasSavedPosition() && !this.hasResumedFromSavedPosition) {
+      setTimeout(() => {
+        this.resumeFromSavedPosition();
+      }, 1000);
+    }
   }
 
   onVimeoPause() {
@@ -685,6 +873,8 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   onVimeoEnd() {
     console.log('Vimeo terminé');
     this.endVideoTracking();
+    this.stopPositionSaving();
+    this.clearSavedPosition();
   }
 
   onVideoSeek(event: any) {
@@ -1735,5 +1925,8 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     
     // Nettoyer les raccourcis clavier
     this.cleanupKeyboardShortcuts();
+    
+    // Arrêter la sauvegarde de position
+    this.stopPositionSaving();
   }
 }
