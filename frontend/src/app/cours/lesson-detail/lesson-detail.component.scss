@@ -54,6 +54,42 @@
   }
 }
 
+// Styles pour le mode plein écran
+:host-context(.fullscreen) {
+  .video-container {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: #000;
+  }
+  
+  .video-controls-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 1rem;
+  }
+}
+
+// Animation pour le bouton plein écran
+.fullscreen-button {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+  
+  &.active {
+    color: #10b981 !important;
+    transform: scale(1.05);
+  }
+}
+
 .video-controls {
   .btn {
     transition: all 0.2s ease;

@@ -88,6 +88,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   currentVolume = 1;
   isFullscreen = false;
   
+  // Fullscreen properties
+  private fullscreenChangeListeners: (() => void)[] = [];
+  private fullscreenSupportAvailable = false;
+  
   // Auto-resume properties
   private autoResumeKey = '';
   private lastSavedPosition = 0;
@@ -121,6 +125,9 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     
     // Initialiser les raccourcis clavier
     this.initializeKeyboardShortcuts();
+    
+    // Initialiser la gestion du plein écran
+    this.initializeFullscreenSupport();
 
     this.lessonId = this.route.snapshot.paramMap.get('id') || '';
     const subjectName = this.route.snapshot.paramMap.get('subject');
@@ -409,7 +416,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       }
 
       // Empêcher le comportement par défaut pour nos raccourcis
-      const handledKeys = [' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'm', 'M', 'f', 'F', 'j', 'J', 'l', 'L'];
+      const handledKeys = [' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'm', 'M', 'f', 'F', 'j', 'J', 'l', 'L', 'Escape'];
       if (handledKeys.includes(event.key)) {
         event.preventDefault();
       }
@@ -441,6 +448,9 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         case 'f':
         case 'F':
           this.handleFullscreenToggle();
+          break;
+        case 'Escape':
+          this.handleEscapeKey();
           break;
       }
     };
@@ -572,19 +582,37 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Gérer la touche Échap (sortir du plein écran)
+   */
+  private handleEscapeKey() {
+    if (this.isFullscreen) {
+      this.exitFullscreen();
+    }
+  }
+
+  /**
    * Entrer en mode plein écran
    */
   private enterFullscreen() {
+    if (!this.fullscreenSupportAvailable) {
+      console.warn('Plein écran non supporté par ce navigateur');
+      return;
+    }
+
     const videoContainer = document.querySelector('.video-container');
     if (videoContainer) {
-      if (videoContainer.requestFullscreen) {
-        videoContainer.requestFullscreen();
-      } else if ((videoContainer as any).webkitRequestFullscreen) {
-        (videoContainer as any).webkitRequestFullscreen();
-      } else if ((videoContainer as any).msRequestFullscreen) {
-        (videoContainer as any).msRequestFullscreen();
+      const requestFullscreen = videoContainer.requestFullscreen ||
+        (videoContainer as any).webkitRequestFullscreen ||
+        (videoContainer as any).mozRequestFullScreen ||
+        (videoContainer as any).msRequestFullscreen;
+
+      if (requestFullscreen) {
+        requestFullscreen.call(videoContainer).then(() => {
+          console.log('Plein écran activé');
+        }).catch((error: any) => {
+          console.warn('Erreur lors de l\'activation du plein écran:', error);
+        });
       }
-      this.isFullscreen = true;
     }
   }
 
@@ -592,14 +620,22 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
    * Sortir du mode plein écran
    */
   private exitFullscreen() {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if ((document as any).webkitExitFullscreen) {
-      (document as any).webkitExitFullscreen();
-    } else if ((document as any).msExitFullscreen) {
-      (document as any).msExitFullscreen();
+    if (!this.isFullscreen) {
+      return;
     }
-    this.isFullscreen = false;
+
+    const exitFullscreen = document.exitFullscreen ||
+      (document as any).webkitExitFullscreen ||
+      (document as any).mozCancelFullScreen ||
+      (document as any).msExitFullscreen;
+
+    if (exitFullscreen) {
+      exitFullscreen.call(document).then(() => {
+        console.log('Plein écran désactivé');
+      }).catch((error: any) => {
+        console.warn('Erreur lors de la désactivation du plein écran:', error);
+      });
+    }
   }
 
   /**
@@ -608,6 +644,86 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   private cleanupKeyboardShortcuts() {
     this.keyboardEventListeners.forEach(cleanup => cleanup());
     this.keyboardEventListeners = [];
+  }
+
+  /**
+   * Nettoyer les écouteurs de plein écran
+   */
+  private cleanupFullscreenListeners() {
+    this.fullscreenChangeListeners.forEach(cleanup => cleanup());
+    this.fullscreenChangeListeners = [];
+  }
+
+  // ===== MÉTHODES DE GESTION DU PLEIN ÉCRAN =====
+
+  /**
+   * Initialiser la gestion du plein écran
+   */
+  private initializeFullscreenSupport() {
+    // Vérifier le support du plein écran
+    this.fullscreenSupportAvailable = !!(
+      document.fullscreenEnabled ||
+      (document as any).webkitFullscreenEnabled ||
+      (document as any).mozFullScreenEnabled ||
+      (document as any).msFullscreenEnabled
+    );
+
+    if (this.fullscreenSupportAvailable) {
+      this.setupFullscreenEventListeners();
+    }
+  }
+
+  /**
+   * Configurer les écouteurs d'événements de plein écran
+   */
+  private setupFullscreenEventListeners() {
+    const handleFullscreenChange = () => {
+      this.updateFullscreenState();
+    };
+
+    // Écouter les différents événements de changement de plein écran
+    const events = [
+      'fullscreenchange',
+      'webkitfullscreenchange',
+      'mozfullscreenchange',
+      'MSFullscreenChange'
+    ];
+
+    events.forEach(event => {
+      document.addEventListener(event, handleFullscreenChange);
+      this.fullscreenChangeListeners.push(() => {
+        document.removeEventListener(event, handleFullscreenChange);
+      });
+    });
+  }
+
+  /**
+   * Mettre à jour l'état du plein écran
+   */
+  private updateFullscreenState() {
+    const isCurrentlyFullscreen = !!(
+      document.fullscreenElement ||
+      (document as any).webkitFullscreenElement ||
+      (document as any).mozFullScreenElement ||
+      (document as any).msFullscreenElement
+    );
+
+    this.isFullscreen = isCurrentlyFullscreen;
+    console.log('État du plein écran:', this.isFullscreen);
+  }
+
+  /**
+   * Vérifier si le plein écran est supporté
+   */
+  isFullscreenSupported(): boolean {
+    return this.fullscreenSupportAvailable;
+  }
+
+  /**
+   * Vérifier si on est actuellement en plein écran
+   */
+  isCurrentlyFullscreen(): boolean {
+    return this.isFullscreen;
   }
 
   // ===== MÉTHODES DE REPRISE AUTOMATIQUE =====
@@ -1925,6 +2041,9 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     
     // Nettoyer les raccourcis clavier
     this.cleanupKeyboardShortcuts();
+    
+    // Nettoyer les écouteurs de plein écran
+    this.cleanupFullscreenListeners();
     
     // Arrêter la sauvegarde de position
     this.stopPositionSaving();
