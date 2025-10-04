@@ -268,7 +268,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   // VIMEO - Génère l'URL d'embed (version avec API)
   // getVimeoEmbedUrl est définie plus bas avec l'API Vimeo
 
-  // Contrôles pour vidéo directe
+  // Contrôles pour vidéo directe (simplifiés)
   toggleVideo() {
     if (this.getVideoType(this.lesson?.videoUrl || '') !== 'direct') {
       console.warn('Toggle video ne fonctionne que pour les vidéos directes');
@@ -285,6 +285,13 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       });
     } else {
       video.pause();
+    }
+  }
+
+  // Méthode pour démarrer la vidéo (remplace l'overlay)
+  startVideo() {
+    if (this.isDirect()) {
+      this.toggleVideo();
     }
   }
 

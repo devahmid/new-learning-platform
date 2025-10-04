@@ -86,7 +86,7 @@
         </div>
 
         <!-- Container principal de la vidéo -->
-        <div class="relative w-full aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-lg mb-12"
+        <div class="video-container relative w-full aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-lg mb-12"
           *ngIf="lesson?.videoUrl">
 
           <!-- YOUTUBE -->
@@ -143,29 +143,24 @@
             </div>
           </div>
 
-          <!-- Overlay avec bouton play/pause pour vidéos directes -->
-          <div *ngIf="isDirect()" class="absolute inset-0 flex items-center justify-center bg-black/30">
-            <button (click)="toggleVideo()"
-              class="text-white hover:text-green-400 transition-all duration-300 transform hover:scale-110">
-              <i class="fa-solid fa-circle-play text-6xl"></i>
-            </button>
-          </div>
+          <!-- Overlay supprimé pour permettre l'accès aux contrôles natifs -->
 
-          <!-- Contrôles vidéo -->
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 p-4">
-            <div class="flex items-center justify-between text-white">
-              <span>{{ lesson.title }}</span>
-              <div class="flex items-center gap-4">
+          <!-- Contrôles vidéo améliorés -->
+          <div class="video-controls-overlay bg-gradient-to-t from-black/50 p-2">
+            <div class="video-controls flex items-center justify-between text-white">
+              <span class="text-sm font-medium truncate mr-4">{{ lesson.title }}</span>
+              <div class="flex items-center gap-3">
                 <!-- Indicateur de progression vidéo -->
-                <div *ngIf="isVideoTracking" class="flex items-center gap-2 text-sm">
+                <div *ngIf="isVideoTracking" class="flex items-center gap-2 text-xs bg-black/30 px-2 py-1 rounded">
                   <i class="fa-solid fa-chart-line text-green-400"></i>
-                  <span>{{ videoProgress | number:'1.0-1' }}% regardé</span>
+                  <span>{{ videoProgress | number:'1.0-1' }}%</span>
                 </div>
-                <button class="hover:text-green-400 transition-colors">
-                  <i class="fa-solid fa-closed-captioning"></i>
+                <!-- Boutons de contrôle (non fonctionnels pour l'instant) -->
+                <button class="hover:text-green-400 transition-colors p-1 rounded" title="Sous-titres">
+                  <i class="fa-solid fa-closed-captioning text-sm"></i>
                 </button>
-                <button class="hover:text-green-400 transition-colors">
-                  <i class="fa-solid fa-expand"></i>
+                <button class="hover:text-green-400 transition-colors p-1 rounded" title="Plein écran">
+                  <i class="fa-solid fa-expand text-sm"></i>
                 </button>
               </div>
             </div>

@@ -1,11 +1,28 @@
 // Styles pour le composant lesson-detail
 .video-container {
   position: relative;
+  z-index: 1;
 
   iframe,
   video {
     border: none;
     outline: none;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Contrôles vidéo avec gestion des couches
+.video-controls-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none; // Permet de cliquer à travers vers les contrôles natifs
+  
+  .video-controls {
+    pointer-events: auto; // Permet d'interagir avec les contrôles custom
   }
 }
 
