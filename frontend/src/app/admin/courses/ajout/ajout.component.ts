@@ -39,6 +39,7 @@ interface LessonForm {
   duration: number;
   videoUrl?: string;
   fileUrl?: string;
+  mindMapUrl?: string; // ← NOUVEAU: Carte mentale
   order: number;
   subcategoryId?: number;
 }
@@ -240,12 +241,49 @@ export class AjoutComponent implements OnInit {
   }
 
   // 📁 Gérer l'upload de fichiers pour les leçons
-  onLessonFileSelected(event: any, lessonIndex: number, field: 'videoUrl' | 'fileUrl') {
+  onLessonFileSelected(event: any, lessonIndex: number, field: 'videoUrl' | 'fileUrl' | 'mindMapUrl') {
     const file = event.target.files[0];
     if (file) {
       const control = this.lessonsArray.at(lessonIndex).get(field)!;
-      this.uploadFile(file, control, field === 'videoUrl' ? 'Vidéo de leçon' : 'Fichier de leçon');
+      
+      // Validation spécifique pour les cartes mentales (images uniquement)
+      if (field === 'mindMapUrl') {
+        if (!this.validateImageFile(file)) {
+          return;
+        }
+      }
+      
+      this.uploadFile(file, control, field === 'videoUrl' ? 'Vidéo de leçon' : 
+                     field === 'fileUrl' ? 'Fichier de leçon' : 'Carte mentale');
     }
+  }
+
+  /**
+   * Validation spécifique pour les fichiers image (cartes mentales)
+   */
+  private validateImageFile(file: File): boolean {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    if (!allowedTypes.includes(file.type)) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Format non autorisé',
+        detail: 'Seules les images (JPEG, PNG, GIF, WebP) sont autorisées pour les cartes mentales'
+      });
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Fichier trop volumineux',
+        detail: 'La carte mentale ne doit pas dépasser 10MB'
+      });
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -397,6 +435,7 @@ export class AjoutComponent implements OnInit {
             duration: lesson.duration || 0,
             videoUrl: lesson.videoUrl || lesson.video_url || lesson.video || '',
             fileUrl: lesson.fileUrl || lesson.file_url || lesson.file || '',
+            mindMapUrl: lesson.mindMapUrl || lesson.mindmap_url || lesson.mindmap || '', // ← NOUVEAU
             order: lesson.order || lastIndex + 1,
             subcategoryId: lesson.subcategoryId || lesson.subcategory?.id || null
           });
@@ -492,6 +531,7 @@ export class AjoutComponent implements OnInit {
       ],
       videoUrl: [''],
       fileUrl: [''],
+      mindMapUrl: [''], // ← NOUVEAU: Carte mentale
       order: [this.lessonsArray.length + 1],
       subcategoryId: [null],
     });
@@ -612,6 +652,7 @@ export class AjoutComponent implements OnInit {
             duration: lesson.duration || 0,
             videoUrl: lesson.videoUrl || null,
             fileUrl: lesson.fileUrl || null,
+            mindMapUrl: lesson.mindMapUrl || null, // ← NOUVEAU: Carte mentale
             order: lesson.order || 0,
             subcategoryId: lesson.subcategoryId || null
           })) || [],

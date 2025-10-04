@@ -322,6 +322,26 @@
                   </label>
                 </div>
               </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <i class="fa-solid fa-brain mr-1 text-purple-600"></i>
+                  Carte mentale
+                </label>
+                <div class="flex gap-2">
+                  <input type="url" formControlName="mindMapUrl"
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="URL de la carte mentale">
+                  <label class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-800 cursor-pointer transition-colors duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-brain"></i>
+                    <span class="text-sm">Carte</span>
+                    <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" (change)="onLessonFileSelected($event, i, 'mindMapUrl')" class="hidden">
+                  </label>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Formats acceptés: JPEG, PNG, GIF, WebP (max 10MB)
+                </p>
+              </div>
             </div>
           </div>
         </div>

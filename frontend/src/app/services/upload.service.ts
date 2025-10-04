@@ -60,7 +60,7 @@ export class UploadService {
    * Upload vers l'API PHP réelle
    */
   private uploadToPHPReal(formData: FormData): Observable<UploadResponse> {
-    return this.http.post<any>('https://centre-culturel-olivier.fr/api/upload/multiple', formData)
+    return this.http.post<any>(this.apiUrl+'/upload/multiple', formData)
       .pipe(
         map(response => {
           // Adapter la réponse de l'API PHP au format attendu

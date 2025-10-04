@@ -44,6 +44,7 @@ interface LessonForm {
   content: string;
   videoUrl?: string;
   fileUrl?: string;
+  mindMapUrl?: string; // ← NOUVEAU: Carte mentale
   order: number;
   duration: number; // en minutes
   subcategoryId?: number; // sous-catégorie de la leçon
@@ -318,6 +319,7 @@ export class CourseBuilderComponent implements OnInit {
       content: ['', Validators.required],
       videoUrl: [''],
       fileUrl: [''],
+      mindMapUrl: [''], // ← NOUVEAU: Carte mentale
       order: [this.lessonsArray.length + 1],
       duration: [30, [Validators.required, Validators.min(1)]],
       subcategoryId: [null], // sous-catégorie de la leçon
@@ -557,12 +559,49 @@ export class CourseBuilderComponent implements OnInit {
   /**
    * Upload pour une leçon spécifique
    */
-  onLessonFileUpload(event: any, lessonIndex: number, field: 'videoUrl' | 'fileUrl'): void {
+  onLessonFileUpload(event: any, lessonIndex: number, field: 'videoUrl' | 'fileUrl' | 'mindMapUrl'): void {
     const file = event.target.files?.[0];
     if (!file) return;
 
     const control = this.getLessonControl(lessonIndex, field);
-    this.uploadFile(file, control, field === 'videoUrl' ? 'Vidéo de leçon' : 'Fichier de leçon');
+    
+    // Validation spécifique pour les cartes mentales (images uniquement)
+    if (field === 'mindMapUrl') {
+      if (!this.validateImageFile(file)) {
+        return;
+      }
+    }
+    
+    this.uploadFile(file, control, field === 'videoUrl' ? 'Vidéo de leçon' : 
+                   field === 'fileUrl' ? 'Fichier de leçon' : 'Carte mentale');
+  }
+
+  /**
+   * Validation spécifique pour les fichiers image (cartes mentales)
+   */
+  private validateImageFile(file: File): boolean {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    if (!allowedTypes.includes(file.type)) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Format non autorisé',
+        detail: 'Seules les images (JPEG, PNG, GIF, WebP) sont autorisées pour les cartes mentales'
+      });
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Fichier trop volumineux',
+        detail: 'La carte mentale ne doit pas dépasser 10MB'
+      });
+      return false;
+    }
+
+    return true;
   }
 
   /**

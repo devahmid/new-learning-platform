@@ -322,6 +322,7 @@ class AdminCourseController {
                 'content' => $lessonData['content'] ?? '',
                 'videoUrl' => $lessonData['videoUrl'] ?? null,
                 'fileUrl' => $lessonData['fileUrl'] ?? null,
+                'mindMapUrl' => $lessonData['mindMapUrl'] ?? null, // ← NOUVEAU: Carte mentale
                 'duration' => $lessonData['duration'] ?? null,
                 'order' => $lessonData['order'] ?? 0,
                 'courseId' => $courseId,
