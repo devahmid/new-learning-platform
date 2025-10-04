@@ -183,9 +183,22 @@
                 <button class="hover:text-green-400 transition-colors p-1 rounded" title="Sous-titres">
                   <i class="fa-solid fa-closed-captioning text-sm"></i>
                 </button>
-                <button class="hover:text-green-400 transition-colors p-1 rounded" title="Plein écran">
+                <button (click)="handleFullscreenToggle()" 
+                        class="hover:text-green-400 transition-colors p-1 rounded" 
+                        title="Plein écran (F)">
                   <i class="fa-solid fa-expand text-sm"></i>
                 </button>
+                
+                <!-- Indicateur de raccourcis clavier -->
+                <div class="hidden md:flex items-center gap-1 text-xs text-gray-400">
+                  <span class="px-1 py-0.5 bg-black/30 rounded text-xs">Espace</span>
+                  <span class="text-gray-500">|</span>
+                  <span class="px-1 py-0.5 bg-black/30 rounded text-xs">←→</span>
+                  <span class="text-gray-500">|</span>
+                  <span class="px-1 py-0.5 bg-black/30 rounded text-xs">M</span>
+                  <span class="text-gray-500">|</span>
+                  <span class="px-1 py-0.5 bg-black/30 rounded text-xs">F</span>
+                </div>
               </div>
             </div>
           </div>

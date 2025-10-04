@@ -82,6 +82,12 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
   showSpeedMenu = false;
   
+  // Keyboard shortcuts properties
+  private keyboardEventListeners: (() => void)[] = [];
+  isMuted = false;
+  currentVolume = 1;
+  isFullscreen = false;
+  
   // Vimeo player instance
   private vimeoPlayer: any = null;
   showFlashcardAnswer = false; // Nouveau: pour gérer l'affichage de la réponse des flashcards
@@ -104,6 +110,9 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         this.loadLessonData();
       }
     });
+    
+    // Initialiser les raccourcis clavier
+    this.initializeKeyboardShortcuts();
 
     this.lessonId = this.route.snapshot.paramMap.get('id') || '';
     const subjectName = this.route.snapshot.paramMap.get('subject');
@@ -373,6 +382,220 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     
     // Afficher le bouton pour les vidéos directes et Vimeo (même si player pas encore initialisé)
     return isDirect || isVimeo;
+  }
+
+  // ===== MÉTHODES DE RACCOURCIS CLAVIER =====
+
+  /**
+   * Initialiser les raccourcis clavier
+   */
+  private initializeKeyboardShortcuts() {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ignorer si on est dans un input, textarea ou si une modal est ouverte
+      if (this.isInputFocused() || this.isModalOpen()) {
+        return;
+      }
+
+      // Empêcher le comportement par défaut pour nos raccourcis
+      const handledKeys = [' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'm', 'M', 'f', 'F', 'j', 'J', 'l', 'L'];
+      if (handledKeys.includes(event.key)) {
+        event.preventDefault();
+      }
+
+      switch (event.key) {
+        case ' ':
+          this.handleSpaceKey();
+          break;
+        case 'ArrowLeft':
+        case 'j':
+        case 'J':
+          this.handleSeekBackward();
+          break;
+        case 'ArrowRight':
+        case 'l':
+        case 'L':
+          this.handleSeekForward();
+          break;
+        case 'ArrowUp':
+          this.handleVolumeUp();
+          break;
+        case 'ArrowDown':
+          this.handleVolumeDown();
+          break;
+        case 'm':
+        case 'M':
+          this.handleMuteToggle();
+          break;
+        case 'f':
+        case 'F':
+          this.handleFullscreenToggle();
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    this.keyboardEventListeners.push(() => {
+      document.removeEventListener('keydown', handleKeyDown);
+    });
+  }
+
+  /**
+   * Vérifier si un input est focalisé
+   */
+  private isInputFocused(): boolean {
+    const activeElement = document.activeElement;
+    return !!(activeElement && (
+      activeElement.tagName === 'INPUT' ||
+      activeElement.tagName === 'TEXTAREA' ||
+      (activeElement as HTMLElement).contentEditable === 'true'
+    ));
+  }
+
+  /**
+   * Vérifier si une modal est ouverte
+   */
+  private isModalOpen(): boolean {
+    return this.showSpeedMenu || this.showFlashcardAnswer;
+  }
+
+  /**
+   * Gérer la touche Espace (Play/Pause)
+   */
+  private handleSpaceKey() {
+    if (this.isDirect()) {
+      this.toggleVideo();
+    } else if (this.isVimeo() && this.vimeoPlayer) {
+      this.vimeoPlayer.getPaused().then((paused: boolean) => {
+        if (paused) {
+          this.vimeoPlayer.play();
+        } else {
+          this.vimeoPlayer.pause();
+        }
+      });
+    }
+  }
+
+  /**
+   * Gérer le recul (10 secondes)
+   */
+  private handleSeekBackward() {
+    if (this.isDirect()) {
+      const video = this.videoPlayer?.nativeElement;
+      if (video) {
+        video.currentTime = Math.max(0, video.currentTime - 10);
+      }
+    } else if (this.isVimeo() && this.vimeoPlayer) {
+      this.vimeoPlayer.getCurrentTime().then((currentTime: number) => {
+        this.vimeoPlayer.setCurrentTime(Math.max(0, currentTime - 10));
+      });
+    }
+  }
+
+  /**
+   * Gérer l'avance (10 secondes)
+   */
+  private handleSeekForward() {
+    if (this.isDirect()) {
+      const video = this.videoPlayer?.nativeElement;
+      if (video) {
+        video.currentTime = Math.min(video.duration, video.currentTime + 10);
+      }
+    } else if (this.isVimeo() && this.vimeoPlayer) {
+      this.vimeoPlayer.getCurrentTime().then((currentTime: number) => {
+        this.vimeoPlayer.getDuration().then((duration: number) => {
+          this.vimeoPlayer.setCurrentTime(Math.min(duration, currentTime + 10));
+        });
+      });
+    }
+  }
+
+  /**
+   * Gérer l'augmentation du volume
+   */
+  private handleVolumeUp() {
+    this.currentVolume = Math.min(1, this.currentVolume + 0.1);
+    this.updateVolume();
+  }
+
+  /**
+   * Gérer la diminution du volume
+   */
+  private handleVolumeDown() {
+    this.currentVolume = Math.max(0, this.currentVolume - 0.1);
+    this.updateVolume();
+  }
+
+  /**
+   * Mettre à jour le volume
+   */
+  private updateVolume() {
+    if (this.isDirect()) {
+      const video = this.videoPlayer?.nativeElement;
+      if (video) {
+        video.volume = this.currentVolume;
+        video.muted = this.isMuted;
+      }
+    } else if (this.isVimeo() && this.vimeoPlayer) {
+      this.vimeoPlayer.setVolume(this.isMuted ? 0 : this.currentVolume);
+    }
+  }
+
+  /**
+   * Gérer le basculement du muet
+   */
+  private handleMuteToggle() {
+    this.isMuted = !this.isMuted;
+    this.updateVolume();
+  }
+
+  /**
+   * Gérer le basculement du plein écran
+   */
+  handleFullscreenToggle() {
+    if (this.isFullscreen) {
+      this.exitFullscreen();
+    } else {
+      this.enterFullscreen();
+    }
+  }
+
+  /**
+   * Entrer en mode plein écran
+   */
+  private enterFullscreen() {
+    const videoContainer = document.querySelector('.video-container');
+    if (videoContainer) {
+      if (videoContainer.requestFullscreen) {
+        videoContainer.requestFullscreen();
+      } else if ((videoContainer as any).webkitRequestFullscreen) {
+        (videoContainer as any).webkitRequestFullscreen();
+      } else if ((videoContainer as any).msRequestFullscreen) {
+        (videoContainer as any).msRequestFullscreen();
+      }
+      this.isFullscreen = true;
+    }
+  }
+
+  /**
+   * Sortir du mode plein écran
+   */
+  private exitFullscreen() {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if ((document as any).webkitExitFullscreen) {
+      (document as any).webkitExitFullscreen();
+    } else if ((document as any).msExitFullscreen) {
+      (document as any).msExitFullscreen();
+    }
+    this.isFullscreen = false;
+  }
+
+  /**
+   * Nettoyer les écouteurs de raccourcis clavier
+   */
+  private cleanupKeyboardShortcuts() {
+    this.keyboardEventListeners.forEach(cleanup => cleanup());
+    this.keyboardEventListeners = [];
   }
 
   // Gestion d'erreurs pour vidéos directes
@@ -1509,5 +1732,8 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       this.vimeoPlayer.destroy();
       this.vimeoPlayer = null;
     }
+    
+    // Nettoyer les raccourcis clavier
+    this.cleanupKeyboardShortcuts();
   }
 }
