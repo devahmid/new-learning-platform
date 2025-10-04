@@ -4,6 +4,7 @@ export interface Lesson {
     content?: string;
     videoUrl?: string;
     fileUrl?: string;
+    mindMapUrl?: string;
     flashcards?:any,
     order?: number;
     quiz?:any;

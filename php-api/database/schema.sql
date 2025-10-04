@@ -192,6 +192,7 @@ CREATE TABLE lessons (
     content TEXT,
     videoUrl VARCHAR(500),
     fileUrl VARCHAR(500),
+    mindMapUrl VARCHAR(500),
     duration INT, -- en minutes
     `order` INT DEFAULT 0,
     isActive BOOLEAN DEFAULT TRUE,

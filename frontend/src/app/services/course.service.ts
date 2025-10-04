@@ -29,6 +29,7 @@ export interface Lesson {
   content?: string;
   videoUrl?: string;
   fileUrl?: string;
+  mindMapUrl?: string;
   order: number;
   courseId: number;
   createdAt: string;

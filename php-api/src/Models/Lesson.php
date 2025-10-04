@@ -14,6 +14,7 @@ class Lesson extends BaseModel {
         'content',
         'videoUrl',
         'fileUrl',
+        'mindMapUrl',
         'duration',
         'order',
         'isActive',

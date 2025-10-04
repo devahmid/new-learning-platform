@@ -227,7 +227,11 @@ class Application {
         
         // Routes d'upload
         $this->routes['POST']['/api/upload/multiple'] = ['App\Controllers\UploadController', 'uploadMultiple'];
+        $this->routes['POST']['/api/upload/mindmap'] = ['App\Controllers\UploadController', 'uploadMindMap'];
         $this->routes['GET']['/api/upload/{filename}'] = ['App\Controllers\UploadController', 'getFile'];
+        
+        // Routes d'upload de cartes mentales pour les leçons
+        $this->routes['POST']['/api/lessons/{id}/upload-mindmap'] = ['App\Controllers\LessonController', 'uploadMindMap'];
         
         // Routes de progression des quiz - CONTRÔLEURS ORIGINAUX
         $this->routes['POST']['/api/quiz/{id}/submit'] = ['App\Controllers\QuizProgressController', 'submitQuiz'];

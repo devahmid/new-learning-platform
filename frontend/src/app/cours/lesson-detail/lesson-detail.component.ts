@@ -177,8 +177,16 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     // Récupérer la leçon depuis l'API
     this.courseService.getLessonById(Number(this.lessonId)).subscribe({
       next: (apiLesson: ApiLesson) => {
+        // Debug: Vérifier les données reçues
+        console.log('🔍 Données API reçues:', apiLesson);
+        console.log('🧠 mindMapUrl:', apiLesson.mindMapUrl);
+        
         // Convertir l'API lesson vers le format local
         this.lesson = this.convertApiLessonToLocal(apiLesson);
+        
+        // Debug: Vérifier la conversion
+        console.log('✅ Leçon convertie:', this.lesson);
+        console.log('🧠 mindMapUrl après conversion:', this.lesson?.mindMapUrl);
         
         // Initialiser la reprise automatique maintenant que la leçon est chargée
         this.initializeAutoResumeKey();
@@ -223,6 +231,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       category: 'vocabulaire', // Par défaut
       videoUrl: apiLesson.videoUrl || '',
       fileUrl: apiLesson.fileUrl || '',
+      mindMapUrl: apiLesson.mindMapUrl || '', // ← AJOUT DU CHAMP MANQUANT
       flashcards: [],
       quiz: [],
       progress: 0, // Progression réelle depuis l'API

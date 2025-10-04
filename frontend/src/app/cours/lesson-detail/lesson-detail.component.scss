@@ -12,6 +12,31 @@
   }
 }
 
+// Styles pour le container de carte mentale
+.mindmap-container {
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  img {
+    border: none;
+    outline: none;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.02);
+  }
+}
+
 // Contrôles vidéo avec gestion des couches
 .video-controls-overlay {
   position: absolute;

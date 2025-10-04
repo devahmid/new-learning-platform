@@ -89,6 +89,60 @@ class UploadController {
     }
     
     /**
+     * Upload spécifique pour les cartes mentales
+     */
+    public function uploadMindMap() {
+        try {
+            // Vérifier la méthode HTTP
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                Response::methodNotAllowed('Seule la méthode POST est autorisée');
+                return;
+            }
+            
+            // Vérifier si un fichier a été uploadé
+            if (!isset($_FILES['mindmap']) || empty($_FILES['mindmap']['name'])) {
+                Response::badRequest('Aucune carte mentale fournie');
+                return;
+            }
+            
+            $file = $_FILES['mindmap'];
+            
+            // Validation du fichier (images uniquement pour les cartes mentales)
+            $validation = $this->validateImageFile($file);
+            if (!$validation['valid']) {
+                Response::badRequest($validation['message']);
+                return;
+            }
+            
+            // Générer un nom de fichier unique pour les cartes mentales
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = 'mindmap-' . time() . '-' . uniqid() . '.' . $extension;
+            $filepath = $this->uploadDir . $filename;
+            
+            // Déplacer le fichier
+            if (move_uploaded_file($file['tmp_name'], $filepath)) {
+                // Générer l'URL publique
+                $baseUrl = $this->getBaseUrl();
+                $publicUrl = $baseUrl . '/api/upload/' . $filename;
+                
+                // Format compatible avec l'API
+                Response::json([
+                    'url' => $publicUrl,
+                    'originalName' => $file['name'],
+                    'type' => $file['type'],
+                    'size' => $file['size'],
+                    'filename' => $filename
+                ], 200);
+            } else {
+                Response::error('Erreur lors de l\'upload de la carte mentale', 500);
+            }
+            
+        } catch (\Exception $e) {
+            Response::error('Erreur serveur: ' . $e->getMessage(), 500);
+        }
+    }
+    
+    /**
      * Récupérer un fichier uploadé
      */
     public function getFile($filename) {
@@ -111,6 +165,45 @@ class UploadController {
         // Lire et envoyer le fichier
         readfile($filepath);
         exit;
+    }
+    
+    /**
+     * Valider un fichier image (pour les cartes mentales)
+     */
+    private function validateImageFile($file) {
+        // Vérifier les erreurs d'upload
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return [
+                'valid' => false,
+                'message' => 'Erreur lors de l\'upload du fichier'
+            ];
+        }
+        
+        // Vérifier la taille (limite plus stricte pour les images)
+        $maxImageSize = 10 * 1024 * 1024; // 10MB pour les images
+        if ($file['size'] > $maxImageSize) {
+            return [
+                'valid' => false,
+                'message' => 'Image trop volumineuse. Maximum: ' . ($maxImageSize / 1024 / 1024) . 'MB'
+            ];
+        }
+        
+        // Vérifier le type MIME (images uniquement)
+        $allowedImageTypes = [
+            'image/jpeg',
+            'image/png', 
+            'image/gif',
+            'image/webp'
+        ];
+        
+        if (!in_array($file['type'], $allowedImageTypes)) {
+            return [
+                'valid' => false,
+                'message' => 'Type d\'image non autorisé. Formats acceptés: JPEG, PNG, GIF, WebP'
+            ];
+        }
+        
+        return ['valid' => true];
     }
     
     /**

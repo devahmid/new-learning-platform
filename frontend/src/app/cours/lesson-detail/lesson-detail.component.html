@@ -228,6 +228,29 @@
           </div>
         </div>
 
+        <!-- Container de la carte mentale -->
+        <div class="mindmap-container relative w-full aspect-video bg-white rounded-2xl overflow-hidden shadow-lg mb-12"
+             *ngIf="lesson?.mindMapUrl">
+          <img [src]="lesson.mindMapUrl" 
+               [alt]="'Carte mentale - ' + lesson.title"
+               class="w-full h-full object-contain p-4">
+          
+          <!-- Overlay avec titre -->
+          <div class="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm font-medium">
+            <i class="fa-solid fa-brain mr-2"></i>
+            Carte mentale
+          </div>
+        </div>
+
+        <!-- Message si pas de carte mentale -->
+        <div *ngIf="!lesson?.mindMapUrl && lesson?.videoUrl"
+          class="relative w-full aspect-video bg-gray-50 rounded-2xl flex items-center justify-center mb-12 border-2 border-dashed border-gray-300">
+          <div class="text-center text-gray-400">
+            <i class="fa-solid fa-brain text-4xl mb-2"></i>
+            <p class="text-sm">Aucune carte mentale disponible</p>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Support de cours - Dynamique -->
           <div *ngIf="lesson?.fileUrl" 
