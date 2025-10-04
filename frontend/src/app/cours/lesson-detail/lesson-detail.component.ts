@@ -77,6 +77,11 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   isVideoTracking = false;
   private progressUpdateInterval: any;
   
+  // Video speed control properties
+  currentPlaybackRate = 1;
+  playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
+  showSpeedMenu = false;
+  
   // Vimeo player instance
   private vimeoPlayer: any = null;
   showFlashcardAnswer = false; // Nouveau: pour gérer l'affichage de la réponse des flashcards
@@ -293,6 +298,81 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     if (this.isDirect()) {
       this.toggleVideo();
     }
+  }
+
+  // ===== MÉTHODES DE CONTRÔLE DE VITESSE =====
+
+  /**
+   * Changer la vitesse de lecture de la vidéo
+   */
+  setPlaybackRate(rate: number) {
+    this.currentPlaybackRate = rate;
+    this.showSpeedMenu = false;
+
+    if (this.isDirect()) {
+      const video = this.videoPlayer?.nativeElement;
+      if (video) {
+        video.playbackRate = rate;
+        console.log(`Vitesse de lecture changée à ${rate}x`);
+      }
+    } else if (this.isVimeo()) {
+      // Initialiser le player Vimeo si nécessaire
+      if (!this.vimeoPlayer) {
+        this.initializeVimeoPlayer();
+      }
+      
+      if (this.vimeoPlayer) {
+        this.vimeoPlayer.setPlaybackRate(rate).then(() => {
+          console.log(`Vitesse Vimeo changée à ${rate}x`);
+        }).catch((error: any) => {
+          console.error('Erreur lors du changement de vitesse Vimeo:', error);
+        });
+      } else {
+        console.warn('Player Vimeo non disponible, tentative d\'initialisation...');
+        // Retry après un court délai
+        setTimeout(() => {
+          this.initializeVimeoPlayer();
+          if (this.vimeoPlayer) {
+            this.vimeoPlayer.setPlaybackRate(rate);
+          }
+        }, 1000);
+      }
+    } else if (this.isYouTube()) {
+      // Pour YouTube, on ne peut pas contrôler la vitesse via l'API embed
+      console.warn('Contrôle de vitesse non disponible pour YouTube');
+    }
+  }
+
+  /**
+   * Basculer l'affichage du menu de vitesse
+   */
+  toggleSpeedMenu() {
+    this.showSpeedMenu = !this.showSpeedMenu;
+  }
+
+  /**
+   * Fermer le menu de vitesse
+   */
+  closeSpeedMenu() {
+    this.showSpeedMenu = false;
+  }
+
+  /**
+   * Obtenir le texte d'affichage de la vitesse actuelle
+   */
+  getSpeedDisplayText(): string {
+    return `${this.currentPlaybackRate}x`;
+  }
+
+  /**
+   * Vérifier si le contrôle de vitesse est disponible
+   */
+  isSpeedControlAvailable(): boolean {
+    const isDirect = this.isDirect();
+    const isVimeo = this.isVimeo();
+    
+    // Afficher le bouton pour les vidéos directes et Vimeo (même si player pas encore initialisé)
+    return isDirect || isVimeo;
   }
 
   // Gestion d'erreurs pour vidéos directes

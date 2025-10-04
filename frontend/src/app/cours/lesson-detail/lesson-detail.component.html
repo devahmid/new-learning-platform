@@ -87,7 +87,8 @@
 
         <!-- Container principal de la vidéo -->
         <div class="video-container relative w-full aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-lg mb-12"
-          *ngIf="lesson?.videoUrl">
+          *ngIf="lesson?.videoUrl"
+          (click)="closeSpeedMenu()">
 
           <!-- YOUTUBE -->
           <iframe *ngIf="isYouTube()" [src]="getYouTubeEmbedUrl(lesson.videoUrl || '') | safe:'resourceUrl'"
@@ -155,6 +156,29 @@
                   <i class="fa-solid fa-chart-line text-green-400"></i>
                   <span>{{ videoProgress | number:'1.0-1' }}%</span>
                 </div>
+                <!-- Contrôle de vitesse -->
+                <div class="relative" *ngIf="isSpeedControlAvailable()">
+                  <button (click)="toggleSpeedMenu()" 
+                          class="hover:text-green-400 transition-colors p-1 rounded flex items-center gap-1" 
+                          title="Vitesse de lecture">
+                    <i class="fa-solid fa-gauge text-sm"></i>
+                    <span class="text-xs font-medium">{{ getSpeedDisplayText() }}</span>
+                  </button>
+                  
+                  <!-- Menu de sélection de vitesse -->
+                  <div *ngIf="showSpeedMenu" 
+                       class="absolute bottom-full right-0 mb-2 bg-black/90 rounded-lg p-2 min-w-[120px] z-50">
+                    <div class="space-y-1">
+                      <div *ngFor="let rate of playbackRates" 
+                           (click)="setPlaybackRate(rate)"
+                           [class]="rate === currentPlaybackRate ? 'bg-green-600 text-white' : 'text-white hover:bg-white/20'"
+                           class="px-3 py-1 rounded text-sm cursor-pointer transition-colors">
+                        {{ rate }}x
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
                 <!-- Boutons de contrôle (non fonctionnels pour l'instant) -->
                 <button class="hover:text-green-400 transition-colors p-1 rounded" title="Sous-titres">
                   <i class="fa-solid fa-closed-captioning text-sm"></i>
