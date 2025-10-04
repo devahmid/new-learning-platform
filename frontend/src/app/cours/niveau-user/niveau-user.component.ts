@@ -448,6 +448,13 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
 
   // Méthode pour trier les cours par ordre d'affichage
   private sortCoursesByOrder() {
+    console.log('🔄 Tri des cours - Avant:', this.courses.map(c => ({ 
+      id: c.id,
+      title: c.title, 
+      order: c.order,
+      orderType: typeof c.order
+    })));
+    
     this.courses.sort((a, b) => {
       // Si les deux cours ont un ordre défini
       if (a.order && b.order) {
@@ -468,9 +475,11 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
       return (a.title || '').localeCompare(b.title || '');
     });
     
-    console.log('Cours triés par ordre d\'affichage:', this.courses.map(c => ({ 
+    console.log('✅ Cours triés par ordre d\'affichage - Après:', this.courses.map(c => ({ 
+      id: c.id,
       title: c.title, 
-      order: c.order 
+      order: c.order,
+      orderType: typeof c.order
     })));
   }
 }

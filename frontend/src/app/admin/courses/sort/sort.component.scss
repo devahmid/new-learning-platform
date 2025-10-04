@@ -1,0 +1,89 @@
+// Styles pour le composant de tri des cours
+
+.course-item {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+  }
+}
+
+.drag-handle {
+  cursor: grab;
+  
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.order-badge {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+// Animation pour les changements d'ordre
+.course-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Styles pour les boutons d'action
+.action-button {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+// Styles pour les indicateurs de statut
+.status-published {
+  color: #10b981;
+}
+
+.status-draft {
+  color: #f59e0b;
+}
+
+// Styles pour les filtres
+.filter-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+}
+
+// Styles pour la zone de drop
+.drop-zone {
+  border: 2px dashed #cbd5e1;
+  background-color: #f8fafc;
+  transition: all 0.2s ease-in-out;
+  
+  &.drag-over {
+    border-color: #3b82f6;
+    background-color: #dbeafe;
+  }
+}

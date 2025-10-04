@@ -506,6 +506,25 @@ export class AdminService {
       );
   }
 
+
+  // 📚 Mettre à jour l'ordre des cours en masse
+  updateCoursesOrder(orderData: { courseId: number; order: number }[]): Observable<any> {
+    return this.http
+      .put<{ success: boolean; data: any }>(`${this.apiUrl}/courses/bulk-order`, { orders: orderData })
+      .pipe(
+        map((response) => {
+          if (response.success) {
+            return response.data;
+          }
+          throw new Error('Erreur lors de la mise à jour de l\'ordre des cours');
+        }),
+        catchError((error) => {
+          console.error('Erreur API updateCoursesOrder:', error);
+          throw error;
+        })
+      );
+  }
+
   // 📚 Récupérer toutes les catégories
   getCategories(): Observable<any[]> {
     return this.http

@@ -29,6 +29,14 @@ export class CoursesComponent implements OnInit {
       count: 0, // Sera mis à jour avec les données réelles
     },
     {
+      icon: 'fa-solid fa-sort',
+      label: 'Trier les cours',
+      desc: 'Réorganiser l\'ordre d\'affichage des cours par catégorie',
+      path: 'sort',
+      color: 'bg-indigo-500',
+      count: 0, // Sera mis à jour avec les données réelles
+    },
+    {
       icon: 'fa-solid fa-star',
       label: 'Cours populaires',
       desc: 'Top des cours les plus suivis',

@@ -175,6 +175,7 @@ class Application {
         $this->routes['POST']['/api/admin/courses'] = ['App\Controllers\AdminCourseController', 'createCourse'];
         $this->routes['PUT']['/api/admin/courses/{id}'] = ['App\Controllers\AdminCourseController', 'updateCourse'];
         $this->routes['DELETE']['/api/admin/courses/{id}'] = ['App\Controllers\AdminCourseController', 'deleteCourse'];
+        $this->routes['PUT']['/api/admin/courses/bulk-order'] = ['App\Controllers\CourseController', 'bulkOrder'];
         
         // Routes cleanup
         $this->routes['POST']['/api/admin/cleanup/rebuild'] = ['App\Controllers\CleanupController', 'cleanAndRebuild'];

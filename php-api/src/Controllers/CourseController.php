@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Course;
 use App\Utils\Response;
+use Exception;
 
 /**
  * Contrôleur Course - Équivalent du CourseController NestJS
@@ -168,5 +169,75 @@ class CourseController {
         
         // Format compatible NestJS
         Response::json(['message' => 'Cours supprimé avec succès'], 200);
+    }
+    
+    /**
+     * Met à jour l'ordre de plusieurs cours en masse
+     */
+    public function bulkOrder() {
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        if (!isset($data['orders']) || !is_array($data['orders'])) {
+            Response::validationError(['orders' => 'Le champ orders est requis et doit être un tableau']);
+        }
+        
+        $orders = $data['orders'];
+        $updatedCourses = [];
+        $errors = [];
+        
+        try {
+            // Démarrer une transaction
+            $pdo = \DatabaseConfig::getInstance()->getConnection();
+            $pdo->beginTransaction();
+            
+            foreach ($orders as $orderData) {
+                if (!isset($orderData['courseId']) || !isset($orderData['order'])) {
+                    $errors[] = 'Chaque élément doit contenir courseId et order';
+                    continue;
+                }
+                
+                $courseId = (int)$orderData['courseId'];
+                $order = (int)$orderData['order'];
+                
+                // Vérifier que le cours existe
+                $course = Course::find($courseId);
+                if (!$course) {
+                    $errors[] = "Cours avec l'ID {$courseId} non trouvé";
+                    continue;
+                }
+                
+                // Mettre à jour l'ordre
+                $course->order = $order;
+                $course->save();
+                
+                $updatedCourses[] = [
+                    'id' => $course->id,
+                    'title' => $course->title,
+                    'order' => $course->order
+                ];
+            }
+            
+            if (!empty($errors)) {
+                $pdo->rollBack();
+                Response::validationError($errors);
+            }
+            
+            // Valider la transaction
+            $pdo->commit();
+            
+            // Format compatible NestJS
+            Response::json([
+                'success' => true,
+                'message' => 'Ordre des cours mis à jour avec succès',
+                'data' => $updatedCourses
+            ], 200);
+            
+        } catch (Exception $e) {
+            if (isset($pdo)) {
+                $pdo->rollBack();
+            }
+            
+            Response::serverError('Erreur lors de la mise à jour de l\'ordre des cours: ' . $e->getMessage());
+        }
     }
 }

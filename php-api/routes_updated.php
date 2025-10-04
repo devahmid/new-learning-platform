@@ -19,6 +19,7 @@ $routes = [
     'POST /courses' => 'CourseController@create',
     'PUT /courses/{id}' => 'CourseController@update',
     'DELETE /courses/{id}' => 'CourseController@delete',
+    'PUT /courses/bulk-order' => 'CourseController@bulkOrder',
     
     // Nouvelles routes basées sur les classes
     'GET /courses/classe/{classeId}' => 'CourseController@findByClasse',

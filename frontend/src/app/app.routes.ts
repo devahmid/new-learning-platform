@@ -310,6 +310,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'courses/sort',
+        loadComponent: () =>
+          import('./admin/courses/sort/sort.component').then(
+            (m) => m.SortComponent
+          ),
+      },
+      {
         path: 'courses/builder',
         loadComponent: () =>
           import('./admin/course-builder/course-builder.component').then(
