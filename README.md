@@ -26,6 +26,14 @@ arabic-learning-platform/
   - WebSockets intégrés
   - Tests automatisés
 
+### 🧠 **Nouvelle fonctionnalité : Cartes Mentales**
+
+- **Support complet** : Upload, affichage et gestion des cartes mentales
+- **Interface admin** : Création et modification de cartes mentales pour les leçons
+- **Validation d'images** : Formats JPEG, PNG, GIF, WebP (max 10MB)
+- **Affichage élégant** : Styles avec animations et effets hover
+- **API endpoints** : Upload et gestion des cartes mentales
+
 **Démarrage rapide** :
 
 ```bash
