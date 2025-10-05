@@ -33,6 +33,7 @@
     "cours-en-ligne": "file:",
     "coursen-ligne": "file:",
     "gsap": "^3.12.7",
+    "gtag": "^1.0.1",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "primeicons": "^7.0.0",

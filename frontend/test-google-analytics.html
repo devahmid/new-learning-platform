@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Google Analytics - Centre Culturel</title>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-72LB4RGGSN"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-72LB4RGGSN');
+    </script>
+</head>
+<body>
+    <h1>Test Google Analytics - Centre Culturel</h1>
+    
+    <p>Cette page teste l'intégration Google Analytics avec l'ID : <strong>G-72LB4RGGSN</strong></p>
+    
+    <button onclick="testEvent()">Tester un événement personnalisé</button>
+    <button onclick="testLogin()">Tester événement connexion</button>
+    <button onclick="testCourse()">Tester événement cours</button>
+    
+    <div id="status"></div>
+    
+    <script>
+        function testEvent() {
+            gtag('event', 'test_button_click', {
+                event_category: 'test',
+                event_label: 'button_test',
+                value: 1
+            });
+            document.getElementById('status').innerHTML = '<p style="color: green;">✅ Événement test envoyé</p>';
+        }
+        
+        function testLogin() {
+            gtag('event', 'login', {
+                method: 'email',
+                event_category: 'user_engagement'
+            });
+            document.getElementById('status').innerHTML = '<p style="color: green;">✅ Événement connexion envoyé</p>';
+        }
+        
+        function testCourse() {
+            gtag('event', 'view_item', {
+                item_id: 'course-test-123',
+                item_name: 'Cours de test',
+                item_category: 'Education',
+                event_category: 'course_engagement'
+            });
+            document.getElementById('status').innerHTML = '<p style="color: green;">✅ Événement cours envoyé</p>';
+        }
+        
+        // Test automatique au chargement
+        window.onload = function() {
+            setTimeout(() => {
+                gtag('event', 'page_loaded', {
+                    event_category: 'page_interaction',
+                    event_label: 'test_page'
+                });
+                console.log('✅ Google Analytics initialisé avec ID: G-72LB4RGGSN');
+            }, 1000);
+        };
+    </script>
+    
+    <hr>
+    <h2>Instructions de test :</h2>
+    <ol>
+        <li>Ouvrez cette page dans votre navigateur</li>
+        <li>Ouvrez les outils de développement (F12)</li>
+        <li>Allez dans l'onglet "Network" et filtrez par "collect"</li>
+        <li>Cliquez sur les boutons de test</li>
+        <li>Vous devriez voir des requêtes vers google-analytics.com</li>
+        <li>Vérifiez dans Google Analytics > Reports > Realtime</li>
+    </ol>
+    
+    <h2>Vérification dans Google Analytics :</h2>
+    <ol>
+        <li>Connectez-vous à <a href="https://analytics.google.com" target="_blank">Google Analytics</a></li>
+        <li>Sélectionnez votre propriété avec l'ID G-72LB4RGGSN</li>
+        <li>Allez dans "Reports" > "Realtime"</li>
+        <li>Vous devriez voir votre visite en temps réel</li>
+        <li>Testez les boutons et voyez les événements apparaître</li>
+    </ol>
+</body>
+</html>

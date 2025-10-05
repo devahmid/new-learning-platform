@@ -16,6 +16,8 @@ import { AppLayoutComponent } from './pages/home/app-layout/app-layout.component
 import { LoaderComponent } from './shared/loader/loader.component';
 import { LoaderService } from './shared/loader.service';
 import { SubjectGridComponent } from './subject-grid/subject-grid.component';
+import { GoogleAnalyticsService } from './services/google-analytics.service';
+import { ConsentBannerComponent } from './components/consent-banner/consent-banner.component';
 // import { AutoLogoutService } from './core/services/auto-logout.service'; // Désactivé pour éviter les déconnexions intempestives
 
 import { ChildSelectionModalComponent } from './shared/child-selection-modal/child-selection-modal.component';
@@ -32,6 +34,7 @@ import { SupportButtonComponent } from './components/support-button/support-butt
 
     ChildSelectionModalComponent,
     SupportButtonComponent,
+    ConsentBannerComponent,
     HeaderComponent,
     FooterComponent,
     FeaturesComponent,
@@ -58,7 +61,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private googleAnalytics: GoogleAnalyticsService
     // private autoLogoutService: AutoLogoutService // Désactivé pour éviter les déconnexions intempestives
   ) {
     effect(() => {
@@ -70,7 +74,8 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Initialisation
+    // Initialisation Google Analytics
+    this.googleAnalytics.trackUserInfo();
   }
 
   logClick(menuItem: string) {

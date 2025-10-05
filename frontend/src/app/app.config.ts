@@ -19,6 +19,8 @@ import { authInterceptor } from './auth.interceptor';
 import { loaderInterceptor } from './shared/loader.interceptor';
 import { validationErrorInterceptor } from './interceptors/validation-error.interceptor';
 import { authErrorInterceptor } from './interceptors/auth-error.interceptor';
+import { GoogleAnalyticsService } from './services/google-analytics.service';
+import { ConsentService } from './services/consent.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -34,6 +36,8 @@ export const appConfig: ApplicationConfig = {
       ToastModule
     ),
     MessageService,
+    GoogleAnalyticsService,
+    ConsentService,
     provideHttpClient(withInterceptors([authInterceptor, loaderInterceptor, authErrorInterceptor, validationErrorInterceptor])),
     provideAnimations(),
   ],

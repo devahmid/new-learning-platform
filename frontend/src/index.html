@@ -10,6 +10,28 @@
   <script src="https://www.paypal.com/sdk/js?client-id=AUDw-urEJbH36xVNyNfRma8eRZbQh14NdaT8RqpuHszgLufG5Q267ukJanGxo_qe-eEjCJU1mOJgneDb&currency=EUR" data-sdk-integration-source="button-factory"></script>
   <script src="https://player.vimeo.com/api/player.js"></script>
 
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-72LB4RGGSN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    
+    // Configuration du consentement par défaut (refusé jusqu'à acceptation explicite)
+    gtag('consent', 'default', {
+      'analytics_storage': 'denied',
+      'ad_storage': 'denied',
+      'functionality_storage': 'denied',
+      'personalization_storage': 'denied',
+      'security_storage': 'granted'
+    });
+    
+    gtag('config', 'G-72LB4RGGSN', {
+      'anonymize_ip': true, // Anonymisation des IP pour le RGPD
+      'allow_google_signals': false, // Désactivé par défaut
+      'allow_ad_personalization_signals': false // Désactivé par défaut
+    });
+  </script>
 
 
 </head>

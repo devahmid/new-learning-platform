@@ -9,6 +9,7 @@ import {
   CreateChildPayload,
   UserPayload,
 } from '../models/payloads';
+import { GoogleAnalyticsService } from '../services/google-analytics.service';
 
 // type UserPayload = {
 //   id: number;
@@ -30,7 +31,10 @@ export class AuthService {
   private apiUrlAuth = ApiPaths.auth;
   private userSignal = signal<UserPayload | null>(null);
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private googleAnalytics: GoogleAnalyticsService
+  ) {
     this.initUser();
   }
 
@@ -111,7 +115,11 @@ export class AuthService {
         switchMap(() => {
           return this.fetchAndMergeParentProfile();
         }),
-        tap(() => {
+        tap((userProfile) => {
+          // Tracker la connexion utilisateur
+          if (userProfile && userProfile.id) {
+            this.googleAnalytics.trackUserLogin(userProfile.id.toString(), 'email');
+          }
         }),
 
         map(() => true) // ou `of(true)` pour signaler que tout est OK
@@ -152,7 +160,12 @@ export class AuthService {
   }
 
   register(user: RegisterDto): Observable<any> {
-    return this.http.post(`${this.apiUrlUsers}`, user);
+    return this.http.post(`${this.apiUrlUsers}`, user).pipe(
+      tap((response) => {
+        // Tracker l'inscription
+        this.googleAnalytics.trackUserSignup('email');
+      })
+    );
   }
 
   updateUser(
