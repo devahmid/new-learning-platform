@@ -37,6 +37,35 @@ export class UploadService {
   }
 
   /**
+   * Upload une carte mentale vers l'API PHP
+   */
+  uploadMindMap(file: File): Observable<UploadResponse> {
+    const formData = new FormData();
+    formData.append('mindmap', file); // ← Utilise 'mindmap' au lieu de 'files'
+
+    return this.http.post<any>(this.apiUrl + '/upload/mindmap', formData)
+      .pipe(
+        map(response => {
+          // Adapter la réponse de l'API PHP au format attendu
+          if (response && response.url) {
+            return {
+              url: response.url,
+              originalName: response.originalName || file.name,
+              type: response.type || file.type,
+              size: response.size || file.size,
+              filename: response.filename || response.url.split('/').pop()
+            };
+          }
+          throw new Error('Réponse invalide du serveur');
+        }),
+        catchError(error => {
+          console.error('Erreur upload carte mentale:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
    * Upload vers l'API NestJS
    */
   private uploadToNestJS(formData: FormData): Observable<UploadResponse> {
