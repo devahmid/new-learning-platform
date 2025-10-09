@@ -537,6 +537,58 @@ export class CourseBuilderComponent implements OnInit {
   }
 
   /**
+   * Upload une carte mentale spécifiquement
+   */
+  uploadMindMap(file: File, targetControl: FormControl): void {
+    if (!file) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Aucun fichier',
+        detail: 'Veuillez sélectionner une carte mentale à uploader'
+      });
+      return;
+    }
+
+    // Validation spécifique pour les cartes mentales
+    if (!this.validateImageFile(file)) {
+      return;
+    }
+
+    this.isUploading = true;
+    this.uploadProgress = 0;
+
+    // Utiliser le service d'upload spécifique pour les cartes mentales
+    this.uploadService.uploadMindMap(file).subscribe({
+      next: (response) => {
+        console.log('✅ Carte mentale uploadée avec succès:', response.url);
+        
+        // Mettre à jour le contrôle du formulaire
+        targetControl.setValue(response.url);
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Upload réussi',
+          detail: 'Carte mentale uploadée avec succès'
+        });
+        
+        this.isUploading = false;
+        this.uploadProgress = 100;
+      },
+      error: (error) => {
+        console.error('❌ Erreur lors de l\'upload de la carte mentale:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur d\'upload',
+          detail: `Impossible d'uploader la carte mentale: ${error.message || 'Erreur inconnue'}`
+        });
+        
+        this.isUploading = false;
+        this.uploadProgress = 0;
+      }
+    });
+  }
+
+  /**
    * Obtenir l'extension d'un fichier
    */
   private getFileExtension(file: File): string {
@@ -565,15 +617,13 @@ export class CourseBuilderComponent implements OnInit {
 
     const control = this.getLessonControl(lessonIndex, field);
     
-    // Validation spécifique pour les cartes mentales (images uniquement)
+    // Utiliser l'upload spécifique pour les cartes mentales
     if (field === 'mindMapUrl') {
-      if (!this.validateImageFile(file)) {
-        return;
-      }
+      this.uploadMindMap(file, control);
+    } else {
+      // Utiliser l'upload standard pour les autres fichiers
+      this.uploadFile(file, control, field === 'videoUrl' ? 'Vidéo de leçon' : 'Fichier de leçon');
     }
-    
-    this.uploadFile(file, control, field === 'videoUrl' ? 'Vidéo de leçon' : 
-                   field === 'fileUrl' ? 'Fichier de leçon' : 'Carte mentale');
   }
 
   /**
