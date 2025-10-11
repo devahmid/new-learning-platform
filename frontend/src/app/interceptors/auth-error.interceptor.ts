@@ -5,6 +5,9 @@ import { AuthService } from '../auth/auth.service';
 import { catchError, throwError } from 'rxjs';
 
 export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
+  const router = inject(Router);
+  const authService = inject(AuthService);
+  
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       console.log('🔍 authErrorInterceptor - Erreur interceptée:', error.status, error.url);
@@ -13,37 +16,34 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
       if (error.status === 401) {
         // Ne pas intercepter les erreurs 401 qui viennent de la page de connexion
         // car ce sont des erreurs de mauvais identifiants, pas des tokens expirés
-        if (error.url && error.url.includes('/auth/login')) {
+        const isLoginRequest = error.url && (
+          error.url.includes('/auth/login') || 
+          error.url.includes('/login') ||
+          error.url.includes('login') ||
+          error.url.endsWith('/auth/login') ||
+          error.url.endsWith('/login')
+        );
+        
+        
+        if (isLoginRequest) {
           console.log('🔍 Erreur 401 de connexion détectée, laisser passer pour gestion dans le composant');
           return throwError(() => error);
         }
         
         console.warn('🚨 Token expiré ou invalide, déconnexion automatique');
         
-        try {
-          // Injecter les services dans le catchError
-          const router = inject(Router);
-          const authService = inject(AuthService);
-          
-          // Déconnecter l'utilisateur
-          authService.logout();
-          
-          // Rediriger vers la page de connexion
-          router.navigate(['/login'], { 
-            queryParams: { 
-              reason: 'token-expired',
-              message: 'Votre session a expiré. Veuillez vous reconnecter.' 
-            }
-          });
-          
-          console.log('✅ Redirection vers /login effectuée');
-        } catch (injectError) {
-          console.error('❌ Erreur lors de l\'injection des services:', injectError);
-          
-          // Fallback: redirection manuelle
-          localStorage.removeItem('token');
-          window.location.href = '/login?reason=token-expired&message=Votre session a expiré. Veuillez vous reconnecter.';
-        }
+        // Déconnecter l'utilisateur
+        authService.logout();
+        
+        // Rediriger vers la page de connexion
+        router.navigate(['/login'], { 
+          queryParams: { 
+            reason: 'token-expired',
+            message: 'Votre session a expiré. Veuillez vous reconnecter.' 
+          }
+        });
+        
+        console.log('✅ Redirection vers /login effectuée');
         
         return throwError(() => error);
       }
