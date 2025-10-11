@@ -92,6 +92,9 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   private fullscreenChangeListeners: (() => void)[] = [];
   private fullscreenSupportAvailable = false;
   
+  // Mindmap fullscreen properties
+  isMindmapFullscreen = false;
+  
   // Auto-resume properties
   private autoResumeKey = '';
   private lastSavedPosition = 0;
@@ -460,6 +463,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
           break;
         case 'Escape':
           this.handleEscapeKey();
+          this.handleMindmapEscapeKey();
           break;
       }
     };
@@ -733,6 +737,57 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
    */
   isCurrentlyFullscreen(): boolean {
     return this.isFullscreen;
+  }
+
+  // ===== MÉTHODES DE GESTION DU PLEIN ÉCRAN DE LA CARTE MENTALE =====
+
+  /**
+   * Basculer le mode plein écran de la carte mentale
+   */
+  toggleMindmapFullscreen() {
+    this.isMindmapFullscreen = !this.isMindmapFullscreen;
+    
+    if (this.isMindmapFullscreen) {
+      // Empêcher le scroll du body quand la carte mentale est en plein écran
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restaurer le scroll du body
+      document.body.style.overflow = '';
+    }
+  }
+
+  /**
+   * Entrer en mode plein écran pour la carte mentale
+   */
+  enterMindmapFullscreen() {
+    this.isMindmapFullscreen = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  /**
+   * Sortir du mode plein écran de la carte mentale
+   */
+  exitMindmapFullscreen() {
+    this.isMindmapFullscreen = false;
+    document.body.style.overflow = '';
+  }
+
+  /**
+   * Gérer le clic sur la carte mentale
+   */
+  onMindmapClick() {
+    if (this.lesson?.mindMapUrl) {
+      this.enterMindmapFullscreen();
+    }
+  }
+
+  /**
+   * Gérer la fermeture du plein écran avec la touche Échap
+   */
+  private handleMindmapEscapeKey() {
+    if (this.isMindmapFullscreen) {
+      this.exitMindmapFullscreen();
+    }
   }
 
   // ===== MÉTHODES DE REPRISE AUTOMATIQUE =====
@@ -2056,5 +2111,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     
     // Arrêter la sauvegarde de position
     this.stopPositionSaving();
+    
+    // Restaurer le scroll du body si la carte mentale était en plein écran
+    if (this.isMindmapFullscreen) {
+      document.body.style.overflow = '';
+    }
   }
 }

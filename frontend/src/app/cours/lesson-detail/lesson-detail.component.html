@@ -229,16 +229,23 @@
         </div>
 
         <!-- Container de la carte mentale -->
-        <div class="mindmap-container relative w-full aspect-video bg-white rounded-2xl overflow-hidden shadow-lg mb-12"
-             *ngIf="lesson?.mindMapUrl">
+        <div class="mindmap-container relative w-full aspect-video bg-white rounded-2xl overflow-hidden shadow-lg mb-12 cursor-pointer group hover:shadow-xl transition-all duration-300"
+             *ngIf="lesson?.mindMapUrl"
+             (click)="onMindmapClick()">
           <img [src]="lesson.mindMapUrl" 
                [alt]="'Carte mentale - ' + lesson.title"
-               class="w-full h-full object-contain p-4">
+               class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300">
           
-          <!-- Overlay avec titre -->
+          <!-- Overlay avec titre et indication de clic -->
           <div class="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm font-medium">
             <i class="fa-solid fa-brain mr-2"></i>
             Carte mentale
+          </div>
+          
+          <!-- Indication de clic pour plein écran -->
+          <div class="absolute top-4 right-4 bg-green-600/90 text-white px-3 py-1 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <i class="fa-solid fa-expand mr-1"></i>
+            Cliquer pour agrandir
           </div>
         </div>
 
@@ -730,4 +737,48 @@
       </div>
     </div>
   </section>
+
+  <!-- Modal plein écran pour la carte mentale -->
+  <div *ngIf="isMindmapFullscreen" 
+       class="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4"
+       (click)="exitMindmapFullscreen()">
+    
+    <!-- Container de la carte mentale en plein écran -->
+    <div class="relative w-full h-full max-w-7xl max-h-full bg-white rounded-2xl overflow-hidden shadow-2xl"
+         (click)="$event.stopPropagation()">
+      
+      <!-- En-tête du modal -->
+      <div class="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent z-10 p-4">
+        <div class="flex items-center justify-between">
+          <div class="text-white">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+              <i class="fa-solid fa-brain"></i>
+              {{ lesson?.title }} - Carte mentale
+            </h2>
+            <p class="text-sm text-gray-300">Cliquez en dehors ou appuyez sur Échap pour fermer</p>
+          </div>
+          
+          <!-- Bouton de fermeture -->
+          <button (click)="exitMindmapFullscreen()"
+                  class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-colors duration-200 flex items-center gap-2">
+            <i class="fa-solid fa-times"></i>
+            <span class="hidden sm:inline">Fermer</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Image de la carte mentale -->
+      <div class="w-full h-full flex items-center justify-center p-8 pt-20">
+        <img [src]="lesson?.mindMapUrl" 
+             [alt]="'Carte mentale - ' + lesson?.title"
+             class="max-w-full max-h-full object-contain">
+      </div>
+      
+      <!-- Indicateurs de navigation -->
+      <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm">
+        <i class="fa-solid fa-expand-arrows-alt mr-2"></i>
+        Mode plein écran actif
+      </div>
+    </div>
+  </div>
 </main>
