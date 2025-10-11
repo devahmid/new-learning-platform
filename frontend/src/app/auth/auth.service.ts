@@ -61,7 +61,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('token');
     this.userSignal.set(null);
-    
+
     // Nettoyer le contexte des enfants
     // Note: On ne peut pas injecter ChildContextService ici car cela créerait une dépendance circulaire
     // Le nettoyage sera fait dans les composants qui gèrent la déconnexion

@@ -6,6 +6,7 @@ import { LandingLayoutComponent } from './layouts/landing-layout/landing-layout.
 import { AppLayoutComponent } from './pages/home/app-layout/app-layout.component';
 import { childGuard } from './_children-context/_children-context/child.guard';
 import { UserStatusGuard } from './guards/user-status.guard';
+import { GdprComplianceGuard } from './guards/gdpr-compliance.guard';
 import { RegistrationComponent } from './registration/registration.component';
 import { ConfirmationComponent } from './registration/confirmation/confirmation.component';
 
@@ -72,6 +73,27 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/home/contact/contact.component').then(
             (m) => m.ContactComponent
+          ),
+      },
+      {
+        path: 'privacy-policy',
+        loadComponent: () =>
+          import('./pages/legal/privacy-policy/privacy-policy.component').then(
+            (m) => m.PrivacyPolicyComponent
+          ),
+      },
+      {
+        path: 'cookie-policy',
+        loadComponent: () =>
+          import('./pages/legal/cookie-policy/cookie-policy.component').then(
+            (m) => m.CookiePolicyComponent
+          ),
+      },
+      {
+        path: 'gdpr-compliance',
+        loadComponent: () =>
+          import('./pages/legal/gdpr-compliance/gdpr-compliance.component').then(
+            (m) => m.GdprComplianceComponent
           ),
       },
 
@@ -197,6 +219,15 @@ export const routes: Routes = [
           import('./user/user-dashboard/user-dashboard.component').then(
             (m) => m.UserDashboardComponent
           ),
+        canActivate: [authGuard, GdprComplianceGuard],
+      },
+      {
+        path: 'gdpr-compliance',
+        loadComponent: () =>
+          import('./pages/legal/gdpr-compliance/gdpr-compliance.component').then(
+            (m) => m.GdprComplianceComponent
+          ),
+        canActivate: [authGuard],
       },
       {
         path: 'devoirs',
@@ -520,6 +551,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/assignments/admin-assignments.component').then(
             (m) => m.AdminAssignmentsComponent
+          ),
+      },
+      {
+        path: 'gdpr',
+        loadComponent: () =>
+          import('./admin/gdpr/gdpr-admin.component').then(
+            (m) => m.GdprAdminComponent
           ),
       },
     ],

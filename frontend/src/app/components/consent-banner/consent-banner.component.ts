@@ -4,10 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { ConsentService } from '../../services/consent.service';
 
 @Component({
-  selector: 'app-consent-banner',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
+    selector: 'app-consent-banner',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    template: `
     <div *ngIf="showBanner" class="consent-banner fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 shadow-lg z-50">
       <div class="container mx-auto max-w-6xl">
         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -146,7 +146,7 @@ import { ConsentService } from '../../services/consent.service';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .consent-banner {
       animation: slideUp 0.3s ease-out;
     }
@@ -167,52 +167,52 @@ import { ConsentService } from '../../services/consent.service';
   `]
 })
 export class ConsentBannerComponent implements OnInit {
-  showBanner = false;
-  showCustomize = false;
-  
-  customConsent = {
-    analytics: false,
-    functionality: false,
-    personalization: false,
-    advertising: false
-  };
+    showBanner = false;
+    showCustomize = false;
 
-  constructor(private consentService: ConsentService) {}
+    customConsent = {
+        analytics: false,
+        functionality: false,
+        personalization: false,
+        advertising: false
+    };
 
-  ngOnInit() {
-    this.showBanner = this.consentService.shouldShowConsentBanner();
-  }
+    constructor(private consentService: ConsentService) { }
 
-  acceptAll() {
-    this.consentService.acceptAllCookies();
-    this.hideBanner();
-  }
+    ngOnInit() {
+        this.showBanner = this.consentService.shouldShowConsentBanner();
+    }
 
-  rejectAll() {
-    this.consentService.rejectAllCookies();
-    this.hideBanner();
-  }
+    acceptAll() {
+        this.consentService.acceptAllCookies();
+        this.hideBanner();
+    }
 
-  acceptAnalyticsOnly() {
-    this.consentService.acceptAnalyticsOnly();
-    this.hideBanner();
-  }
+    rejectAll() {
+        this.consentService.rejectAllCookies();
+        this.hideBanner();
+    }
 
-  toggleCustomize() {
-    this.showCustomize = !this.showCustomize;
-  }
+    acceptAnalyticsOnly() {
+        this.consentService.acceptAnalyticsOnly();
+        this.hideBanner();
+    }
 
-  saveCustomConsent() {
-    this.consentService.setCustomConsent({
-      analytics_storage: this.customConsent.analytics ? 'granted' : 'denied',
-      functionality_storage: this.customConsent.functionality ? 'granted' : 'denied',
-      personalization_storage: this.customConsent.personalization ? 'granted' : 'denied',
-      ad_storage: this.customConsent.advertising ? 'granted' : 'denied'
-    });
-    this.hideBanner();
-  }
+    toggleCustomize() {
+        this.showCustomize = !this.showCustomize;
+    }
 
-  private hideBanner() {
-    this.showBanner = false;
-  }
+    saveCustomConsent() {
+        this.consentService.setCustomConsent({
+            analytics_storage: this.customConsent.analytics ? 'granted' : 'denied',
+            functionality_storage: this.customConsent.functionality ? 'granted' : 'denied',
+            personalization_storage: this.customConsent.personalization ? 'granted' : 'denied',
+            ad_storage: this.customConsent.advertising ? 'granted' : 'denied'
+        });
+        this.hideBanner();
+    }
+
+    private hideBanner() {
+        this.showBanner = false;
+    }
 }

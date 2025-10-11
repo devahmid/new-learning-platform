@@ -20,8 +20,8 @@ Remplacez `G-XXXXXXXXXX` par votre véritable ID de mesure dans les fichiers sui
 export const environment = {
   // ... autres configurations
   googleAnalytics: {
-    measurementId: 'G-VOTRE-ID-MESURE'
-  }
+    measurementId: "G-VOTRE-ID-MESURE",
+  },
 };
 ```
 
@@ -39,55 +39,60 @@ export const environment = {
 Le service `GoogleAnalyticsService` inclut des méthodes spécialisées :
 
 #### Cours et leçons
+
 ```typescript
 // Voir un cours
-this.googleAnalytics.trackCourseView('course-123', 'Mathématiques niveau 1', 'Mathématiques');
+this.googleAnalytics.trackCourseView("course-123", "Mathématiques niveau 1", "Mathématiques");
 
 // Progression dans un cours
-this.googleAnalytics.trackCourseProgress('course-123', 'lesson-456', 75);
+this.googleAnalytics.trackCourseProgress("course-123", "lesson-456", 75);
 
 // Leçon terminée
-this.googleAnalytics.trackLessonCompleted('course-123', 'lesson-456');
+this.googleAnalytics.trackLessonCompleted("course-123", "lesson-456");
 ```
 
 #### Quiz
+
 ```typescript
 // Démarrer un quiz
-this.googleAnalytics.trackQuizStart('quiz-789', 'course-123');
+this.googleAnalytics.trackQuizStart("quiz-789", "course-123");
 
 // Terminer un quiz
-this.googleAnalytics.trackQuizCompleted('quiz-789', 'course-123', 85);
+this.googleAnalytics.trackQuizCompleted("quiz-789", "course-123", 85);
 ```
 
 #### Vidéos
+
 ```typescript
 // Interactions vidéo
-this.googleAnalytics.trackVideoInteraction('play', 'video-123');
-this.googleAnalytics.trackVideoInteraction('pause', 'video-123', 30);
-this.googleAnalytics.trackVideoInteraction('completed', 'video-123', 100);
+this.googleAnalytics.trackVideoInteraction("play", "video-123");
+this.googleAnalytics.trackVideoInteraction("pause", "video-123", 30);
+this.googleAnalytics.trackVideoInteraction("completed", "video-123", 100);
 ```
 
 #### Recherche
+
 ```typescript
 // Recherche dans l'application
-this.googleAnalytics.trackSearch('mathématiques', 15);
+this.googleAnalytics.trackSearch("mathématiques", 15);
 ```
 
 #### Erreurs
+
 ```typescript
 // Suivi des erreurs
-this.googleAnalytics.trackError('Erreur de connexion API', '/cours');
+this.googleAnalytics.trackError("Erreur de connexion API", "/cours");
 ```
 
 ### 🎯 Événements personnalisés
 
 ```typescript
 // Événement personnalisé
-this.googleAnalytics.trackEvent('bouton_clic', {
-  category: 'ui_interaction',
-  label: 'header_menu',
+this.googleAnalytics.trackEvent("bouton_clic", {
+  category: "ui_interaction",
+  label: "header_menu",
   value: 1,
-  custom1: 'information_supplementaire'
+  custom1: "information_supplementaire",
 });
 ```
 
@@ -96,15 +101,16 @@ this.googleAnalytics.trackEvent('bouton_clic', {
 ```typescript
 // Définir des propriétés utilisateur
 this.googleAnalytics.setUserProperties({
-  subscription_type: 'premium',
-  user_level: 'intermediate',
-  preferred_language: 'fr'
+  subscription_type: "premium",
+  user_level: "intermediate",
+  preferred_language: "fr",
 });
 ```
 
 ## Métriques collectées
 
 ### Automatiques
+
 - **Adresse IP** : Géolocalisation des utilisateurs
 - **User Agent** : Navigateur et OS utilisés
 - **Résolution d'écran** : Informations sur les appareils
@@ -113,6 +119,7 @@ this.googleAnalytics.setUserProperties({
 - **Temps passé** : Durée des sessions
 
 ### Spécifiques à l'apprentissage
+
 - **Cours consultés** : Quels cours sont les plus populaires
 - **Progression** : Taux de completion des leçons
 - **Performance quiz** : Scores et taux de réussite
@@ -169,23 +176,24 @@ refuseAnalytics() {
 Dans `google-analytics.service.ts`, ajoutez lors de l'initialisation :
 
 ```typescript
-gtag('consent', 'default', {
-  analytics_storage: 'denied',
-  ad_storage: 'denied'
+gtag("consent", "default", {
+  analytics_storage: "denied",
+  ad_storage: "denied",
 });
 ```
 
 ## Exemples d'utilisation dans les composants
 
 ### Composant de cours
+
 ```typescript
-import { GoogleAnalyticsService } from '../services/google-analytics.service';
+import { GoogleAnalyticsService } from "../services/google-analytics.service";
 
 export class CourseComponent {
   constructor(private analytics: GoogleAnalyticsService) {}
 
   onCourseStart(courseId: string, courseName: string) {
-    this.analytics.trackCourseView(courseId, courseName, 'Mathématiques');
+    this.analytics.trackCourseView(courseId, courseName, "Mathématiques");
   }
 
   onLessonComplete(courseId: string, lessonId: string) {
@@ -195,6 +203,7 @@ export class CourseComponent {
 ```
 
 ### Composant de quiz
+
 ```typescript
 export class QuizComponent {
   constructor(private analytics: GoogleAnalyticsService) {}
@@ -242,6 +251,7 @@ npm start
 ## Performance
 
 Le service est optimisé pour :
+
 - ✅ Chargement asynchrone des scripts
 - ✅ Pas d'impact sur les performances
 - ✅ Gestion des erreurs

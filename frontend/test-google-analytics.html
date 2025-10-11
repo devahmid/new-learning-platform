@@ -1,30 +1,32 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Google Analytics - Centre Culturel</title>
-    
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-72LB4RGGSN"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-72LB4RGGSN');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-72LB4RGGSN');
     </script>
 </head>
+
 <body>
     <h1>Test Google Analytics - Centre Culturel</h1>
-    
+
     <p>Cette page teste l'intégration Google Analytics avec l'ID : <strong>G-72LB4RGGSN</strong></p>
-    
+
     <button onclick="testEvent()">Tester un événement personnalisé</button>
     <button onclick="testLogin()">Tester événement connexion</button>
     <button onclick="testCourse()">Tester événement cours</button>
-    
+
     <div id="status"></div>
-    
+
     <script>
         function testEvent() {
             gtag('event', 'test_button_click', {
@@ -34,7 +36,7 @@
             });
             document.getElementById('status').innerHTML = '<p style="color: green;">✅ Événement test envoyé</p>';
         }
-        
+
         function testLogin() {
             gtag('event', 'login', {
                 method: 'email',
@@ -42,7 +44,7 @@
             });
             document.getElementById('status').innerHTML = '<p style="color: green;">✅ Événement connexion envoyé</p>';
         }
-        
+
         function testCourse() {
             gtag('event', 'view_item', {
                 item_id: 'course-test-123',
@@ -52,9 +54,9 @@
             });
             document.getElementById('status').innerHTML = '<p style="color: green;">✅ Événement cours envoyé</p>';
         }
-        
+
         // Test automatique au chargement
-        window.onload = function() {
+        window.onload = function () {
             setTimeout(() => {
                 gtag('event', 'page_loaded', {
                     event_category: 'page_interaction',
@@ -64,7 +66,7 @@
             }, 1000);
         };
     </script>
-    
+
     <hr>
     <h2>Instructions de test :</h2>
     <ol>
@@ -75,7 +77,7 @@
         <li>Vous devriez voir des requêtes vers google-analytics.com</li>
         <li>Vérifiez dans Google Analytics > Reports > Realtime</li>
     </ol>
-    
+
     <h2>Vérification dans Google Analytics :</h2>
     <ol>
         <li>Connectez-vous à <a href="https://analytics.google.com" target="_blank">Google Analytics</a></li>
@@ -85,4 +87,5 @@
         <li>Testez les boutons et voyez les événements apparaître</li>
     </ol>
 </body>
+
 </html>

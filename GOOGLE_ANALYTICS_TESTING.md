@@ -54,10 +54,10 @@ npm start
 2. Modifier temporairement le service pour activer le debug :
 
 ```typescript
-gtag('config', '${this.measurementId}', {
+gtag("config", "${this.measurementId}", {
   debug_mode: true, // Ajouter cette ligne
   page_title: document.title,
-  page_location: window.location.href
+  page_location: window.location.href,
 });
 ```
 
@@ -76,14 +76,14 @@ Une fois que vous avez des composants qui utilisent le service, testez :
 
 ```typescript
 // Exemple dans un composant de cours
-this.googleAnalytics.trackCourseView('course-1', 'Mathématiques', 'Education');
+this.googleAnalytics.trackCourseView("course-1", "Mathématiques", "Education");
 
 // Exemple dans un composant de quiz
-this.googleAnalytics.trackQuizStart('quiz-1', 'course-1');
-this.googleAnalytics.trackQuizCompleted('quiz-1', 'course-1', 85);
+this.googleAnalytics.trackQuizStart("quiz-1", "course-1");
+this.googleAnalytics.trackQuizCompleted("quiz-1", "course-1", 85);
 
 // Exemple d'erreur
-this.googleAnalytics.trackError('Erreur de chargement', '/cours');
+this.googleAnalytics.trackError("Erreur de chargement", "/cours");
 ```
 
 ## Données collectées automatiquement
@@ -93,7 +93,7 @@ this.googleAnalytics.trackError('Erreur de chargement', '/cours');
 ✅ **Géolocalisation** : Basée sur l'adresse IP  
 ✅ **Technologie** : Navigateur, OS, résolution  
 ✅ **Connexions** : Événements de login/signup  
-✅ **Informations utilisateur** : IP, langue, plateforme  
+✅ **Informations utilisateur** : IP, langue, plateforme
 
 ## Résolution de problèmes
 
@@ -120,13 +120,13 @@ this.googleAnalytics.trackError('Erreur de chargement', '/cours');
 
 ```typescript
 // Consentement par défaut (à ajouter au service)
-gtag('consent', 'default', {
-  analytics_storage: 'denied'
+gtag("consent", "default", {
+  analytics_storage: "denied",
 });
 
 // Après consentement utilisateur
-gtag('consent', 'update', {
-  analytics_storage: 'granted'
+gtag("consent", "update", {
+  analytics_storage: "granted",
 });
 ```
 
