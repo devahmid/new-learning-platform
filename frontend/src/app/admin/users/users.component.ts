@@ -73,7 +73,6 @@ export class UsersComponent implements OnInit {
       next: (stats) => {
         this.stats = stats;
         this.isLoading = false;
-        console.log('Statistiques chargées:', stats);
       },
       error: (err) => {
         this.error = 'Erreur lors du chargement des statistiques';

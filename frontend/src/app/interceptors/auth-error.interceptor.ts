@@ -1,12 +1,10 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
 import { catchError, throwError } from 'rxjs';
 
 export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const authService = inject(AuthService);
   
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -32,8 +30,10 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
         
         console.warn('🚨 Token expiré ou invalide, déconnexion automatique');
         
-        // Déconnecter l'utilisateur
-        authService.logout();
+        // Nettoyer le localStorage directement pour éviter la dépendance circulaire
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
         
         // Rediriger vers la page de connexion
         router.navigate(['/login'], { 

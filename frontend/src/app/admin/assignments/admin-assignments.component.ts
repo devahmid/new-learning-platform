@@ -167,7 +167,6 @@ export class AdminAssignmentsComponent implements OnInit {
     this.http.get<any>(`${environment.apiUrl}/classes`)
       .subscribe({
         next: (response) => {
-          console.log('response', response);
           // L'API retourne directement un tableau de classes
           if (Array.isArray(response)) {
             this.classes = response;

@@ -176,22 +176,15 @@ export class CourseBuilderComponent implements OnInit {
       classes: this.classeService.getAllClasses(),
     }).subscribe({
       next: (data) => {
-        console.log('Données brutes de l\'API:', data);
         
         // Gérer les différents formats de données de l'API
         this.categories = this.extractArrayFromApiData(data.categories);
         this.subcategories = this.extractArrayFromApiData(data.subcategories);
         this.classes = Array.isArray(data.classes) ? data.classes : [];
 
-        console.log('Données chargées:', {
-          categories: this.categories.length,
-          subcategories: this.subcategories.length,
-          classes: this.classes.length,
-        });
+     
         
-        console.log('Première catégorie:', this.categories[0]);
-        console.log('Première sous-catégorie:', this.subcategories[0]);
-        console.log('Première classe:', this.classes[0]);
+      
 
         // Maintenant que toutes les données sont chargées, configurer le listener
         this.setupCategoryListener();
@@ -451,7 +444,6 @@ export class CourseBuilderComponent implements OnInit {
           this.isEditing = true;
         }
 
-        console.log('Cours sauvegardé avec succès !');
         // Rediriger vers la liste des cours ou le dashboard
         this.router.navigate(['/admin/courses']);
       } catch (error) {
@@ -507,7 +499,6 @@ export class CourseBuilderComponent implements OnInit {
     // Utiliser le service d'upload réel
     this.uploadService.uploadFile(file).subscribe({
       next: (response) => {
-        console.log('✅ Fichier uploadé avec succès:', response.url);
         
         // Mettre à jour le contrôle du formulaire
         targetControl.setValue(response.url);

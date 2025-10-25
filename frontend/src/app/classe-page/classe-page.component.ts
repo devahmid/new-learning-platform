@@ -40,7 +40,6 @@ export class ClassePageComponent implements OnInit {
 
   ngOnInit() {
     const name = this.route.snapshot.paramMap.get('name');
-    console.log('[CLASSE-PAGE] Subject name:', name);
     
     // Gestion spéciale pour "replay"
     if (name === 'replay') {
@@ -71,7 +70,6 @@ export class ClassePageComponent implements OnInit {
     this.classeService.getAllClasses().subscribe({
       next: (classes) => {
         this.classes = classes.filter(c => c.isActive);
-        console.log('[CLASSE-PAGE] Classes chargées:', this.classes);
         this.classesLoading = false;
       },
       error: (error) => {

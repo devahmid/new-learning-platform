@@ -47,9 +47,7 @@ export class ChildContextService {
   constructor(private parentService: ParentService) {}
 
   setSelectedChild(child: User) {
-    console.log('ChildContext - setSelectedChild appelé avec:', child);
     this._selectedChild.set(child);
-    console.log('ChildContext - selectedChild mis à jour:', this._selectedChild());
     // Sauvegarder dans localStorage
     localStorage.setItem(
       'selectedChild',

@@ -414,7 +414,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.adminService.checkPermissions().subscribe({
       next: (permissions) => {
         this.permissions = permissions;
-        console.log('Permissions vérifiées:', permissions);
       },
       error: (error) => {
         console.error('Erreur lors de la vérification des permissions:', error);
@@ -430,7 +429,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // 🎯 Actions sur les utilisateurs
   onUserAction(action: any, user: User) {
-    console.log('Action utilisateur:', action, user);
 
     if (!this.hasPermission(action.permission)) {
       this.showError('Permission insuffisante pour cette action');

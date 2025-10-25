@@ -80,7 +80,6 @@ export class AdminPaymentsComponent implements OnInit {
     this.loading = true;
     this.error = null;
     
-    console.log('Récupération des paiements via le nouvel endpoint admin');
     
     this.http.get<any>(`https://centre-culturel-olivier.fr/api/admin/payments?${this.buildQuery()}`)
       .subscribe({
@@ -90,7 +89,6 @@ export class AdminPaymentsComponent implements OnInit {
             this.total = response.data.pagination?.total || 0;
             this.pages = response.data.pagination?.pages || 1;
             this.loading = false;
-            console.log(`✅ ${this.payments.length} paiements récupérés sur ${this.total} total`);
           } else {
             this.error = response.message || 'Erreur lors de la récupération des paiements';
             this.loading = false;
@@ -107,7 +105,6 @@ export class AdminPaymentsComponent implements OnInit {
   fetchStats(): void {
     this.statsLoading = true;
     
-    console.log('Récupération des statistiques via le nouvel endpoint admin');
     
     const params = [];
     if (this.from) params.push(`from=${this.from}`);
@@ -119,7 +116,6 @@ export class AdminPaymentsComponent implements OnInit {
           if (response.success && response.data) {
             this.stats = response.data;
             this.statsLoading = false;
-            console.log('✅ Statistiques récupérées:', this.stats);
           } else {
             console.error('Erreur lors de la récupération des statistiques:', response.message);
             this.statsLoading = false;

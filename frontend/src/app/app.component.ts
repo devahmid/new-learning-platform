@@ -74,7 +74,6 @@ export class AppComponent implements OnInit {
   }
 
   logClick(menuItem: string) {
-    console.log(`Menu cliqué : ${menuItem}`);
   }
 
   logout() {

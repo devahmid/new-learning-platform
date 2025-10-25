@@ -1615,10 +1615,7 @@ export class UserDashboardComponent implements OnInit {
     this.assignmentsError = null;
 
     // Debug: Vérifier les informations de l'utilisateur
-    console.log('User info:', this.user);
-    console.log('User role:', this.auth.role());
-    console.log('Is parent:', this.auth.isParent());
-    console.log('Token:', localStorage.getItem('token'));
+   
 
     this.assignmentService.getParentAssignments().subscribe({
       next: (response: ParentAssignmentsResponse) => {
@@ -1713,7 +1710,6 @@ export class UserDashboardComponent implements OnInit {
 
   // Méthode appelée quand un paiement SumUp est réussi
   onPaymentSuccess() {
-    console.log('Paiement SumUp réussi !');
     // Notification de succès
     this.messageService.add({
       severity: 'success',
@@ -1845,8 +1841,7 @@ export class UserDashboardComponent implements OnInit {
       classeId: child.classe?.id || child.classeId || '', // ✅ Changé de levelId à classeId
     };
 
-    console.log("Données de l'enfant à modifier:", child);
-    console.log('Données du formulaire:', childData);
+  
 
     this.editChildForm.patchValue(childData);
     this.showEditChildModal = true;

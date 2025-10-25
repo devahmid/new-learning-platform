@@ -73,8 +73,7 @@ export class SortComponent implements OnInit {
         this.classes = [];
       }
       
-      console.log('Catégories chargées:', this.categories);
-      console.log('Classes chargées:', this.classes);
+     
       
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
@@ -100,20 +99,15 @@ export class SortComponent implements OnInit {
       // Récupérer tous les cours depuis l'API existante
       const coursesResponse = await this.adminService.getAllCourses().toPromise();
       
-      console.log('🔍 Réponse complète de getAllCourses:', coursesResponse);
       
       // Gérer la structure de réponse de l'API
       let allCourses = Array.isArray(coursesResponse) ? coursesResponse : ((coursesResponse as any)?.data || []);
-      
-      console.log('📚 Tous les cours extraits:', allCourses);
-      console.log('📊 Type de allCourses:', typeof allCourses, 'Is Array:', Array.isArray(allCourses));
-      
+   
       // S'assurer que les cours sont bien un tableau
       if (!Array.isArray(allCourses)) {
         allCourses = [];
       }
       
-      console.log('🎯 Catégorie sélectionnée:', this.selectedCategoryId);
       
       // Filtrer les cours par catégorie côté client
       this.courses = allCourses.filter((course: any) => {
@@ -124,12 +118,9 @@ export class SortComponent implements OnInit {
         const matchesCategory = courseCategoryId === selectedCategoryIdNum || 
                                courseCategoryObjectId === selectedCategoryIdNum;
         
-        console.log(`📖 Cours "${course.title}" - categoryId: ${course.categoryId} (${typeof course.categoryId}), category?.id: ${course.category?.id} (${typeof course.category?.id}), selected: ${this.selectedCategoryId} (${typeof this.selectedCategoryId}), matches: ${matchesCategory}`);
         return matchesCategory;
       });
       
-      console.log('✅ Cours filtrés pour la catégorie:', this.courses);
-      console.log('📈 Nombre de cours trouvés:', this.courses.length);
       
       // Filtrer par classe si sélectionnée
       this.filterCourses();
@@ -151,22 +142,17 @@ export class SortComponent implements OnInit {
   }
 
   private filterCourses() {
-    console.log('🔄 Début de filterCourses()');
-    console.log('📋 selectedCategoryId:', this.selectedCategoryId);
-    console.log('📚 this.courses.length:', this.courses.length);
+  
     
     if (!this.selectedCategoryId) {
       this.filteredCourses = [];
-      console.log('❌ Pas de catégorie sélectionnée, filteredCourses vide');
       return;
     }
 
     // Les cours sont déjà filtrés par catégorie dans onCategoryChange
     this.filteredCourses = [...this.courses];
-    console.log('📝 filteredCourses après copie:', this.filteredCourses.length);
 
     if (this.selectedClasseId) {
-      console.log('🎓 Filtrage par classe:', this.selectedClasseId);
       // Filtrer par classe si sélectionnée
       this.filteredCourses = this.filteredCourses.filter((course: any) => {
         const courseClasseId = parseInt(course.classeId);
@@ -176,15 +162,12 @@ export class SortComponent implements OnInit {
         const matchesClasse = courseClasseId === selectedClasseIdNum ||
                              courseClasseObjectId === selectedClasseIdNum;
         
-        console.log(`📖 Cours "${course.title}" - classeId: ${course.classeId} (${typeof course.classeId}), classe?.id: ${course.classe?.id} (${typeof course.classe?.id}), selected: ${this.selectedClasseId} (${typeof this.selectedClasseId}), matches: ${matchesClasse}`);
         return matchesClasse;
       });
-      console.log('📝 filteredCourses après filtrage classe:', this.filteredCourses.length);
     }
 
     // Trier par ordre actuel
     this.sortCoursesByOrder();
-    console.log('✅ filterCourses terminé, filteredCourses.length:', this.filteredCourses.length);
   }
 
   private sortCoursesByOrder() {

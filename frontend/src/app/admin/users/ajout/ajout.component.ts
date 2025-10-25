@@ -131,12 +131,10 @@ export class AjoutComponent implements OnInit {
                 levelId: formData.levelId || null
             };
             
-            console.log('Données à envoyer:', userData);
             
             // Appel au service admin
             this.adminUserService.createUser(userData).subscribe({
                 next: (response) => {
-                    console.log('Utilisateur créé avec succès:', response);
                     this.showSuccessMessage = true;
                     this.successMessage = `Utilisateur ${userData.firstName} ${userData.lastName} créé avec succès !`;
                     this.isSubmitting = false;

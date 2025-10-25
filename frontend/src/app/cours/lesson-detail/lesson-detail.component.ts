@@ -47,6 +47,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   // Navigation entre sections
   currentSection: 'video' | 'quiz' | 'exercises' = 'video';
 
+
   // Quiz properties
   quizQuestions: any[] = [];
   currentQuizIndex = 0;
@@ -129,6 +130,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     // Initialiser les raccourcis clavier
     this.initializeKeyboardShortcuts();
     
+    
     // Initialiser la gestion du plein écran
     this.initializeFullscreenSupport();
 
@@ -181,15 +183,11 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     this.courseService.getLessonById(Number(this.lessonId)).subscribe({
       next: (apiLesson: ApiLesson) => {
         // Debug: Vérifier les données reçues
-        console.log('🔍 Données API reçues:', apiLesson);
-        console.log('🧠 mindMapUrl:', apiLesson.mindMapUrl);
         
         // Convertir l'API lesson vers le format local
         this.lesson = this.convertApiLessonToLocal(apiLesson);
         
         // Debug: Vérifier la conversion
-        console.log('✅ Leçon convertie:', this.lesson);
-        console.log('🧠 mindMapUrl après conversion:', this.lesson?.mindMapUrl);
         
         // Initialiser la reprise automatique maintenant que la leçon est chargée
         this.initializeAutoResumeKey();
@@ -353,7 +351,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       const video = this.videoPlayer?.nativeElement;
       if (video) {
         video.playbackRate = rate;
-        console.log(`Vitesse de lecture changée à ${rate}x`);
       }
     } else if (this.isVimeo()) {
       // Initialiser le player Vimeo si nécessaire
@@ -363,7 +360,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       
       if (this.vimeoPlayer) {
         this.vimeoPlayer.setPlaybackRate(rate).then(() => {
-          console.log(`Vitesse Vimeo changée à ${rate}x`);
         }).catch((error: any) => {
           console.error('Erreur lors du changement de vitesse Vimeo:', error);
         });
@@ -427,11 +423,12 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Empêcher le comportement par défaut pour nos raccourcis
-      const handledKeys = [' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'm', 'M', 'f', 'F', 'j', 'J', 'l', 'L', 'Escape'];
+      // Empêcher le comportement par défaut pour nos raccourcis (sauf les flèches haut/bas pour le scroll)
+      const handledKeys = [' ', 'ArrowLeft', 'ArrowRight', 'm', 'M', 'f', 'F', 'j', 'J', 'l', 'L', 'Escape'];
       if (handledKeys.includes(event.key)) {
         event.preventDefault();
       }
+
 
       switch (event.key) {
         case ' ':
@@ -446,12 +443,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         case 'l':
         case 'L':
           this.handleSeekForward();
-          break;
-        case 'ArrowUp':
-          this.handleVolumeUp();
-          break;
-        case 'ArrowDown':
-          this.handleVolumeDown();
           break;
         case 'm':
         case 'M':
@@ -621,7 +612,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
 
       if (requestFullscreen) {
         requestFullscreen.call(videoContainer).then(() => {
-          console.log('Plein écran activé');
         }).catch((error: any) => {
           console.warn('Erreur lors de l\'activation du plein écran:', error);
         });
@@ -644,7 +634,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
 
     if (exitFullscreen) {
       exitFullscreen.call(document).then(() => {
-        console.log('Plein écran désactivé');
       }).catch((error: any) => {
         console.warn('Erreur lors de la désactivation du plein écran:', error);
       });
@@ -722,7 +711,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     );
 
     this.isFullscreen = isCurrentlyFullscreen;
-    console.log('État du plein écran:', this.isFullscreen);
   }
 
   /**
@@ -812,7 +800,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       
       if (savedPosition) {
         this.lastSavedPosition = parseFloat(savedPosition);
-        console.log(`Position sauvegardée chargée: ${this.lastSavedPosition}s`);
       } else {
         this.lastSavedPosition = 0;
       }
@@ -884,7 +871,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
    */
   private resumeFromSavedPosition() {
     if (this.lastSavedPosition > 0 && !this.hasResumedFromSavedPosition) {
-      console.log(`Reprise à la position: ${this.lastSavedPosition}s`);
       this.hasResumedFromSavedPosition = true; // Marquer comme déjà repris
       
       if (this.isDirect()) {
@@ -894,7 +880,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         }
       } else if (this.isVimeo() && this.vimeoPlayer) {
         this.vimeoPlayer.setCurrentTime(this.lastSavedPosition).then(() => {
-          console.log('Position Vimeo restaurée');
         }).catch((error: any) => {
           console.warn('Erreur lors de la restauration de la position Vimeo:', error);
         });
@@ -909,7 +894,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     try {
       localStorage.removeItem(this.autoResumeKey);
       this.lastSavedPosition = 0;
-      console.log('Position sauvegardée effacée');
     } catch (error) {
       console.warn('Erreur lors de l\'effacement de la position:', error);
     }
@@ -985,7 +969,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
 
   // Events pour vidéos directes
   onVideoPlay() {
-    console.log('Vidéo démarrée');
     this.startVideoTracking();
     this.startPositionSaving();
     
@@ -998,12 +981,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   }
 
   onVideoPause() {
-    console.log('Vidéo en pause');
     this.pauseVideoTracking();
   }
 
   onVideoEnd() {
-    console.log('Vidéo terminée');
     this.endVideoTracking();
     this.stopPositionSaving();
     this.clearSavedPosition();
@@ -1011,7 +992,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
 
   // Events pour Vimeo
   onVimeoPlayerReady(event: any) {
-    console.log('Iframe Vimeo chargée');
     // Attendre que l'API Vimeo soit disponible
     setTimeout(() => {
       this.initializeVimeoPlayer();
@@ -1023,7 +1003,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     if (iframe && (window as any).Vimeo) {
       this.vimeoPlayer = new (window as any).Vimeo.Player(iframe);
       this.setupVimeoTracking();
-      console.log('Player Vimeo initialisé');
       
       // Reprendre à la position sauvegardée après l'initialisation
       setTimeout(() => {
@@ -1033,7 +1012,6 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   }
 
   onVimeoPlay() {
-    console.log('Vimeo démarré');
     this.startVideoTracking();
     this.startPositionSaving();
     
@@ -1046,19 +1024,16 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   }
 
   onVimeoPause() {
-    console.log('Vimeo en pause');
     this.pauseVideoTracking();
   }
 
   onVimeoEnd() {
-    console.log('Vimeo terminé');
     this.endVideoTracking();
     this.stopPositionSaving();
     this.clearSavedPosition();
   }
 
   onVideoSeek(event: any) {
-    console.log('Recherche dans la vidéo:', event.target.currentTime);
     this.seekVideoTracking(event.target.currentTime);
   }
 
@@ -2085,6 +2060,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   /**
    * Nettoyer les ressources au destruction du composant
    */
+
   ngOnDestroy() {
     // Nettoyer les abonnements
     this.videoTrackingSubscriptions.forEach(sub => sub.unsubscribe());

@@ -87,22 +87,18 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     // Récupérer l'enfant actuellement sélectionné
     const selectedChild = this.childContext.selectedChild();
     this.currentChildId = selectedChild?.id || null;
-    console.log('NiveauUser - Enfant initial:', selectedChild, 'ID:', this.currentChildId);
 
     // Écouter les changements d'enfant avec effect dans le contexte d'injection
     runInInjectionContext(this.injector, () => {
       effect(() => {
         const child = this.childContext.selectedChild();
-        console.log('NiveauUser Effect - Enfant actuel:', child, 'ID précédent:', this.currentChildId);
         
         // Si on a un enfant et que c'est différent du précédent
         if (child && child.id !== this.currentChildId) {
-          console.log('NiveauUser - Changement d\'enfant détecté:', child);
           this.handleChildChange(child);
         }
         // Si on n'a plus d'enfant sélectionné
         else if (!child && this.currentChildId) {
-          console.log('NiveauUser - Aucun enfant sélectionné - Redirection vers matières');
           this.router.navigate(['/matières']);
         }
       });
@@ -116,11 +112,8 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     const childClasse = newChild.classe?.id || 1; // Classe par défaut si non définie
     const currentClasse = this.classe;
     
-    console.log(`Nouvel enfant classe ${childClasse}, page classe ${currentClasse}`);
-    console.log('Enfant complet:', newChild);
     
     // Rediriger vers matières pour forcer la sélection de la bonne classe
-    console.log('Changement d\'enfant détecté - Redirection vers matières');
     // Forcer la navigation immédiatement
     window.location.href = '/matières';
   }
@@ -131,7 +124,6 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
 
     // Récupérer l'enfant sélectionné pour obtenir sa classe
     const selectedChild = this.childContext.selectedChild();
-    console.log('Enfant sélectionné:', selectedChild);
     
     if (!selectedChild) {
       console.error('Aucun enfant sélectionné');
@@ -148,7 +140,6 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
       this.isLoading = false;
       return;
     }
-    console.log('Utilisation de la classe ID', classeId, 'pour récupérer les cours');
 
     // Gestion spéciale pour les replays
     if (this.subjectData && this.subjectData.name === 'Replay') {
@@ -158,12 +149,10 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
 
     // Récupérer les cours pour cette matière et la classe spécifiée
     if (this.subjectData && this.subjectData.name) {
-      console.log('Chargement des cours pour la matière', this.subjectData.name, 'classe ID', classeId);
       
       // Récupérer d'abord l'ID réel de la catégorie depuis la base de données
       this.courseService.getCategoriesByClasse(+classeId).subscribe({
         next: (categories) => {
-          console.log('Catégories disponibles pour la classe', classeId, ':', categories);
           
           // Trouver la catégorie correspondant à la matière
           const category = categories.find(cat => 
@@ -172,7 +161,6 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
           );
           
           if (category && category.id) {
-            console.log('Catégorie trouvée:', category, 'ID réel:', category.id);
             this.loadCoursesForCategory(category.id, +classeId);
           } else {
             console.error('Catégorie non trouvée pour la matière:', this.subjectData.name);
@@ -198,16 +186,7 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
       .getCoursesByCategoryAndClasse(categoryId, classeId)
       .subscribe({
         next: (courses) => {
-          console.log(
-            "Cours récupérés depuis l'API pour",
-            this.subjectData.name,
-            'classe',
-            classeId,
-            'catégorie',
-            categoryId,
-            ':',
-            courses
-          );
+         
           this.courses = courses;
 
           // Trier les cours par ordre d'affichage
@@ -232,17 +211,11 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
   private loadReplayCourses(classeId: string) {
     // Pour les replays, on récupère tous les cours de la catégorie "Replay" (ID 14)
     // pour la classe spécifiée dans l'URL
-    console.log('Chargement des cours Replay pour la classe ID', classeId);
     this.courseService
       .getCoursesByCategoryAndClasse(14, +classeId) // ID 14 = catégorie Replay, classeId = classe de l'URL
       .subscribe({
         next: (courses) => {
-          console.log(
-            "Cours Replay récupérés depuis l'API pour la classe ID",
-            classeId,
-            ":",
-            courses
-          );
+        
           
           // Utiliser les vraies données de l'API
           this.courses = courses;
@@ -304,7 +277,6 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
   private processLessons() {
     // Plus besoin de traiter les leçons ici
     // On affiche directement les cours
-    console.log('Cours récupérés pour affichage:', this.courses);
 
     // Calculer le total des cours
     this.totalLessons = this.courses.length;
@@ -332,11 +304,7 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
     const baseProgress = Math.min(20 + this.courses.length * 5, 80);
     this.progress = baseProgress;
 
-    console.log('Progression calculée:', {
-      courses: this.courses.length,
-      lessons: totalLessons,
-      progress: this.progress,
-    });
+  
   }
 
   // Méthode supprimée - plus de données mockées
@@ -396,7 +364,6 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
 
   // Navigation vers les détails d'un cours
   goToCourse(course: any) {
-    console.log('Navigation vers le cours:', course);
     
     // Navigation simple vers le cours
     this.router.navigate(['/cours', course.id]);
@@ -414,7 +381,6 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
       : 'Les quiz d\'évaluation seront bientôt disponibles !';
     
     // Ici tu peux ajouter une popup ou un toast si tu en as un
-    console.log(message);
     alert(message);
   }
 
@@ -448,12 +414,7 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
 
   // Méthode pour trier les cours par ordre d'affichage
   private sortCoursesByOrder() {
-    console.log('🔄 Tri des cours - Avant:', this.courses.map(c => ({ 
-      id: c.id,
-      title: c.title, 
-      order: c.order,
-      orderType: typeof c.order
-    })));
+ 
     
     this.courses.sort((a, b) => {
       // Si les deux cours ont un ordre défini
@@ -475,11 +436,6 @@ export class NiveauUserComponent implements OnInit, OnDestroy {
       return (a.title || '').localeCompare(b.title || '');
     });
     
-    console.log('✅ Cours triés par ordre d\'affichage - Après:', this.courses.map(c => ({ 
-      id: c.id,
-      title: c.title, 
-      order: c.order,
-      orderType: typeof c.order
-    })));
+ 
   }
 }

@@ -27,7 +27,6 @@ export class ChildSwitcherComponent {
 
   ngOnInit(): void {
     this.parentService.getChildrenOfLoggedInParent().subscribe(children => {
-      console.log('ENFANT', children)
       this.enfants = children;
     });
   }

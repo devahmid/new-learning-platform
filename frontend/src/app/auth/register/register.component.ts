@@ -62,9 +62,7 @@ export class RegisterComponent {
 }
 
   register() {
-    console.log('je lol', this.registerForm.value)
     if (this.registerForm.invalid) {
-      console.log('je lol')
       this.errorMessage = "Veuillez remplir tous les champs correctement.";
       return;
     }

@@ -17,18 +17,15 @@ export const childGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const children = childContext.children();
   const loaded = childContext.loaded();
   
-  console.log('ChildGuard - Enfants:', children.length, 'Chargé:', loaded);
 
   // Si pas encore chargé, charger et laisser passer temporairement
   if (!loaded) {
-    console.log('Chargement des enfants en cours...');
     childContext.loadChildren();
     return true; // Laisser passer temporairement pour éviter la boucle
   }
 
   // Si chargé mais aucun enfant
   if (children.length === 0) {
-    console.log('Aucun enfant trouvé après chargement');
     if (!isRedirecting) {
       isRedirecting = true;
       router.navigate(['/no-children-info']).then(() => {
@@ -43,7 +40,6 @@ export const childGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   
   // TOUJOURS forcer la sélection d'enfant, même s'il n'y en a qu'un
   if (!selected) {
-    console.log('Aucun enfant sélectionné - Redirection vers no-children-info pour sélection');
     if (!isRedirecting) {
       isRedirecting = true;
       router.navigate(['/no-children-info']).then(() => {
@@ -53,6 +49,5 @@ export const childGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     return false;
   }
   
-  console.log('Enfant sélectionné:', selected.firstName);
   return true;
 };
