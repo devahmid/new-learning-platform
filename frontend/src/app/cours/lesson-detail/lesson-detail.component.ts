@@ -47,6 +47,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   // Navigation entre sections
   currentSection: 'video' | 'quiz' | 'exercises' = 'video';
 
+  // Popup des nouvelles fonctionnalités
+  showFeaturesPopup = false;
+  hasSeenFeaturesPopup = false;
+
 
   // Quiz properties
   quizQuestions: any[] = [];
@@ -130,6 +134,8 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     // Initialiser les raccourcis clavier
     this.initializeKeyboardShortcuts();
     
+    // Initialiser la popup des nouvelles fonctionnalités
+    this.initializeFeaturesPopup();
     
     // Initialiser la gestion du plein écran
     this.initializeFullscreenSupport();
@@ -2055,6 +2061,50 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     }
 
     window.open(this.lesson.fileUrl, '_blank');
+  }
+
+  // ===== GESTION DE LA POPUP DES NOUVELLES FONCTIONNALITÉS =====
+
+  /**
+   * Initialiser la popup des nouvelles fonctionnalités
+   */
+  private initializeFeaturesPopup() {
+    // Vérifier si l'utilisateur a déjà vu la popup
+    this.hasSeenFeaturesPopup = localStorage.getItem('hasSeenScrollFeaturesPopup') === 'true';
+    
+    // Afficher la popup après un délai si l'utilisateur ne l'a pas encore vue
+    if (!this.hasSeenFeaturesPopup) {
+      setTimeout(() => {
+        this.showFeaturesPopup = true;
+      }, 2000); // Afficher après 2 secondes
+    }
+  }
+
+  /**
+   * Fermer la popup des nouvelles fonctionnalités
+   */
+  closeFeaturesPopup() {
+    this.showFeaturesPopup = false;
+    this.hasSeenFeaturesPopup = true;
+    
+    // Sauvegarder dans le localStorage pour ne plus l'afficher
+    localStorage.setItem('hasSeenScrollFeaturesPopup', 'true');
+  }
+
+  /**
+   * Ouvrir la popup des nouvelles fonctionnalités
+   */
+  openFeaturesPopup() {
+    this.showFeaturesPopup = true;
+  }
+
+  /**
+   * Réinitialiser la popup (pour les tests)
+   */
+  resetFeaturesPopup() {
+    localStorage.removeItem('hasSeenScrollFeaturesPopup');
+    this.hasSeenFeaturesPopup = false;
+    this.showFeaturesPopup = false;
   }
 
   /**

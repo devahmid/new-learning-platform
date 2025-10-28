@@ -42,12 +42,19 @@
             <h1 class="text-2xl">{{ lesson.title }} - {{ subjectData.ar }}</h1>
           </div>
         </div>
-F        
+        
         <!-- Légende des raccourcis clavier -->
         <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 max-w-2xl mx-auto">
-          <div class="flex items-center gap-2 text-sm text-blue-700 mb-2">
-            <i class="fa-solid fa-keyboard text-blue-600"></i>
-            <span class="font-medium">Raccourcis clavier disponibles :</span>
+          <div class="flex items-center justify-between text-sm text-blue-700 mb-2">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-keyboard text-blue-600"></i>
+              <span class="font-medium">Raccourcis clavier disponibles :</span>
+            </div>
+            <button (click)="openFeaturesPopup()"
+                    class="text-xs text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1">
+              <i class="fa-solid fa-info-circle"></i>
+              Voir les nouveautés
+            </button>
           </div>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-blue-600">
             <div class="flex items-center gap-1">
@@ -820,6 +827,139 @@ F
       <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm">
         <i class="fa-solid fa-expand-arrows-alt mr-2"></i>
         Mode plein écran actif
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup des nouvelles fonctionnalités -->
+  <div *ngIf="showFeaturesPopup" 
+       class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+       (click)="closeFeaturesPopup()">
+    
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+         (click)="$event.stopPropagation()">
+      
+      <!-- En-tête de la popup -->
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-2xl">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+              <i class="fa-solid fa-keyboard text-2xl"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold">🎉 Nouvelles fonctionnalités !</h2>
+              <p class="text-blue-100 text-sm">Navigation améliorée avec les flèches</p>
+            </div>
+          </div>
+          <button (click)="closeFeaturesPopup()"
+                  class="text-white hover:text-gray-200 transition-colors">
+            <i class="fa-solid fa-times text-xl"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Contenu de la popup -->
+      <div class="p-6">
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-magic text-blue-600"></i>
+            Ce qui a été ajouté :
+          </h3>
+          
+          <div class="space-y-4">
+            <!-- Fonctionnalité 1 -->
+            <div class="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+              <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i class="fa-solid fa-arrow-up text-white text-sm"></i>
+              </div>
+              <div>
+                <h4 class="font-medium text-green-800">Scroll naturel avec les flèches</h4>
+                <p class="text-sm text-green-700 mt-1">
+                  Les flèches <span class="px-1 py-0.5 bg-green-200 rounded text-xs font-mono">↑↓</span> 
+                  font maintenant défiler la page naturellement, comme dans n'importe quelle application !
+                </p>
+              </div>
+            </div>
+            
+            <!-- Fonctionnalité 2 -->
+            <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i class="fa-solid fa-video text-white text-sm"></i>
+              </div>
+              <div>
+                <h4 class="font-medium text-blue-800">Contrôles vidéo optimisés</h4>
+                <p class="text-sm text-blue-700 mt-1">
+                  Les flèches <span class="px-1 py-0.5 bg-blue-200 rounded text-xs font-mono">←→</span> 
+                  contrôlent toujours la vidéo (reculer/avancer), et <span class="px-1 py-0.5 bg-blue-200 rounded text-xs font-mono">↑↓</span> 
+                  ajustent le volume.
+                </p>
+              </div>
+            </div>
+            
+            <!-- Fonctionnalité 3 -->
+            <div class="flex items-start gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+              <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i class="fa-solid fa-info-circle text-white text-sm"></i>
+              </div>
+              <div>
+                <h4 class="font-medium text-purple-800">Légende des raccourcis</h4>
+                <p class="text-sm text-purple-700 mt-1">
+                  Une légende complète des raccourcis clavier est maintenant visible sous le titre de la leçon.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Raccourcis disponibles -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-list text-orange-600"></i>
+            Raccourcis disponibles :
+          </h3>
+          
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Espace</span>
+              <span class="text-gray-600">Play/Pause</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">←→</span>
+              <span class="text-gray-600">Reculer/Avancer</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">↑↓</span>
+              <span class="text-gray-600">Volume</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">M</span>
+              <span class="text-gray-600">Mute</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">F</span>
+              <span class="text-gray-600">Plein écran</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Échap</span>
+              <span class="text-gray-600">Sortir plein écran</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+          <button (click)="resetFeaturesPopup()"
+                  class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+            <i class="fa-solid fa-refresh mr-1"></i>
+            Réinitialiser cette popup
+          </button>
+          
+          <button (click)="closeFeaturesPopup()"
+                  class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2">
+            <i class="fa-solid fa-check"></i>
+            Parfait, j'ai compris !
+          </button>
+        </div>
       </div>
     </div>
   </div>
