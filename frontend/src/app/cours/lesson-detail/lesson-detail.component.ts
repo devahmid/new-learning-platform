@@ -13,6 +13,7 @@ import { SafePipe } from '../../pipes/safe.pipe';
 import { Exercise } from '../../models/exercise.model';
 import { VideoTrackingService, VideoWatchSession } from '../../services/video-tracking.service';
 import { Subscription } from 'rxjs';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-lesson-detail',
@@ -111,6 +112,9 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   // Vimeo player instance
   private vimeoPlayer: any = null;
   showFlashcardAnswer = false; // Nouveau: pour gérer l'affichage de la réponse des flashcards
+  
+  // PDF viewer error state
+  pdfViewerError = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -118,7 +122,8 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     private subjectService: SubjectService,
     private courseService: CourseService,
     private location: Location,
-    private videoTrackingService: VideoTrackingService
+    private videoTrackingService: VideoTrackingService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
@@ -181,6 +186,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   private loadLessonData() {
     this.isLoading = true;
     this.error = null;
+    this.pdfViewerError = false; // Réinitialiser l'état d'erreur du PDF
     
     // Charger les leçons du cours en parallèle
     this.loadCourseLessons();
@@ -2061,6 +2067,76 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     }
 
     window.open(this.lesson.fileUrl, '_blank');
+  }
+
+  /**
+   * Vérifier si le fichier est un PDF
+   */
+  isPdfFile(fileUrl?: string): boolean {
+    if (!fileUrl) return false;
+    const extension = this.getFileExtension(fileUrl).toLowerCase();
+    return extension === 'pdf';
+  }
+
+  /**
+   * Obtenir l'URL du PDF pour l'affichage dans un iframe
+   * Utilise Google Docs Viewer pour contourner les restrictions X-Frame-Options
+   */
+  getSafePdfUrl(fileUrl?: string): string | null {
+    if (!fileUrl || !this.isPdfFile(fileUrl)) {
+      return null;
+    }
+    // Utiliser Google Docs Viewer pour contourner X-Frame-Options: deny
+    // Format: https://docs.google.com/viewer?url=ENCODED_URL&embedded=true
+    const encodedUrl = encodeURIComponent(fileUrl);
+    return `https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`;
+  }
+
+  /**
+   * Obtenir l'URL directe du PDF (pour téléchargement ou ouverture dans nouvel onglet)
+   */
+  getPdfDirectUrl(fileUrl?: string): string | null {
+    if (!fileUrl || !this.isPdfFile(fileUrl)) {
+      return null;
+    }
+    return fileUrl;
+  }
+
+  /**
+   * Ouvrir le PDF dans un nouvel onglet
+   */
+  openPdfInNewTab(fileUrl?: string): void {
+    if (!fileUrl || !this.isPdfFile(fileUrl)) {
+      console.warn('URL PDF invalide');
+      return;
+    }
+    window.open(fileUrl, '_blank');
+  }
+
+  /**
+   * Télécharger le PDF
+   */
+  downloadPdf(fileUrl?: string): void {
+    if (!fileUrl || !this.isPdfFile(fileUrl)) {
+      console.warn('URL PDF invalide');
+      return;
+    }
+    // Créer un lien de téléchargement
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = this.getFileName(fileUrl) || 'document.pdf';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  /**
+   * Gérer les erreurs du viewer PDF
+   */
+  onPdfViewerError(): void {
+    this.pdfViewerError = true;
+    console.warn('Erreur lors du chargement du PDF dans le viewer');
   }
 
   // ===== GESTION DE LA POPUP DES NOUVELLES FONCTIONNALITÉS =====

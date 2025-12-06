@@ -267,8 +267,86 @@
           </div>
         </div>
 
-        <!-- Message si pas de vidéo -->
-        <div *ngIf="!lesson?.videoUrl"
+        <!-- Container PDF si PDF disponible (affiché même s'il y a une vidéo) -->
+        <div *ngIf="isPdfFile(lesson?.fileUrl) && lesson?.fileUrl && getSafePdfUrl(lesson?.fileUrl)"
+          class="relative w-full bg-white rounded-2xl overflow-hidden shadow-lg mb-12"
+          style="min-height: 600px; height: 80vh;">
+          <!-- En-tête PDF pour différencier du lecteur vidéo -->
+          <div class="absolute top-0 left-0 right-0 bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 z-10 flex items-center justify-between shadow-md">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-file-pdf text-2xl"></i>
+              <div>
+                <h3 class="font-bold text-lg">Document PDF</h3>
+                <p class="text-sm text-red-100">{{ getFileName(lesson?.fileUrl || '') }}</p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button 
+                (click)="openPdfInNewTab(lesson?.fileUrl)"
+                class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                title="Ouvrir le PDF dans un nouvel onglet">
+                <i class="fa-solid fa-external-link-alt"></i>
+                <span class="hidden sm:inline">Ouvrir</span>
+              </button>
+              <button 
+                (click)="downloadPdf(lesson?.fileUrl)"
+                class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                title="Télécharger le PDF">
+                <i class="fa-solid fa-download"></i>
+                <span class="hidden sm:inline">Télécharger</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Boutons d'action pour le PDF (ancienne position, gardés pour compatibilité mobile) -->
+          <div class="absolute top-20 right-4 z-10 flex gap-2 sm:hidden">
+            <button 
+              (click)="openPdfInNewTab(lesson?.fileUrl)"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
+              title="Ouvrir le PDF dans un nouvel onglet">
+              <i class="fa-solid fa-external-link-alt"></i>
+              <span class="hidden sm:inline">Ouvrir</span>
+            </button>
+            <button 
+              (click)="downloadPdf(lesson?.fileUrl)"
+              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
+              title="Télécharger le PDF">
+              <i class="fa-solid fa-download"></i>
+              <span class="hidden sm:inline">Télécharger</span>
+            </button>
+          </div>
+          
+          <!-- Viewer PDF avec Google Docs Viewer -->
+          <iframe 
+            [src]="getSafePdfUrl(lesson?.fileUrl)! | safe:'resourceUrl'"
+            class="w-full h-full border-0"
+            style="min-height: 600px; margin-top: 60px;"
+            frameborder="0"
+            allowfullscreen
+            title="PDF Viewer"
+            (load)="pdfViewerError = false"
+            (error)="onPdfViewerError()">
+          </iframe>
+          
+          <!-- Message de fallback si le viewer ne charge pas -->
+          <div class="absolute inset-0 bg-gray-50 flex items-center justify-center" 
+               *ngIf="pdfViewerError">
+            <div class="text-center p-6">
+              <i class="fa-solid fa-file-pdf text-6xl text-red-500 mb-4"></i>
+              <p class="text-lg font-medium text-gray-700 mb-2">Impossible d'afficher le PDF</p>
+              <p class="text-sm text-gray-500 mb-4">Le PDF peut être ouvert dans un nouvel onglet</p>
+              <button 
+                (click)="openPdfInNewTab(lesson?.fileUrl)"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                <i class="fa-solid fa-external-link-alt mr-2"></i>
+                Ouvrir le PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message si pas de vidéo et pas de PDF -->
+        <div *ngIf="!lesson?.videoUrl && !isPdfFile(lesson?.fileUrl)"
           class="relative w-full aspect-video bg-gray-100 rounded-2xl flex items-center justify-center mb-12">
           <div class="text-center text-gray-500">
             <i class="fa-solid fa-video-slash text-6xl mb-4"></i>
