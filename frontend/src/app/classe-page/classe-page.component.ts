@@ -69,7 +69,9 @@ export class ClassePageComponent implements OnInit {
     this.classesLoading = true;
     this.classeService.getAllClasses().subscribe({
       next: (classes) => {
-        this.classes = classes.filter(c => c.isActive);
+        this.classes = classes
+          .filter(c => c.isActive)
+          .sort((a, b) => a.name.localeCompare(b.name));
         this.classesLoading = false;
       },
       error: (error) => {
@@ -79,7 +81,7 @@ export class ClassePageComponent implements OnInit {
           { id: 1, name: 'Classe 1', isActive: true },
           { id: 2, name: 'Classe 2', isActive: true },
           { id: 3, name: 'Classe 3', isActive: true }
-        ];
+        ].sort((a, b) => a.name.localeCompare(b.name));
         this.classesLoading = false;
       }
     });

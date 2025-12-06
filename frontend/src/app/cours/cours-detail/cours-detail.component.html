@@ -74,8 +74,6 @@
               <i class="fa-regular fa-circle-play" 
                  [ngClass]="getLessonIconClass(subcategoryName)" 
                  *ngIf="!lesson.completed && lessonIndex === 0"></i>
-              <i class="fa-solid fa-lock text-gray-400" 
-                 *ngIf="!lesson.completed && lessonIndex > 0"></i>
             </button>
           </div>
           </div>
@@ -99,7 +97,6 @@
               <span class="text-gray-700">{{ lesson.title }}</span>
               <i class="fa-solid fa-check text-gray-600" *ngIf="lesson.completed"></i>
               <i class="fa-regular fa-circle-play text-gray-600" *ngIf="!lesson.completed && lessonIndex === 0"></i>
-              <i class="fa-solid fa-lock text-gray-400" *ngIf="!lesson.completed && lessonIndex > 0"></i>
             </button>
           </div>
         </div>
