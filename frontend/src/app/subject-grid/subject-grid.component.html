@@ -35,6 +35,35 @@
     <h2 class="text-4xl font-bold text-center mb-12">Page d’accueil</h2>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 justify-items-center">
+        <!-- Card Évaluations générales -->
+        <div class="w-full max-w-sm relative group flex flex-col cursor-pointer" (click)="onEvaluationsClick($event)">    
+            <!-- Carte Évaluations avec style distinctif -->
+            <div class="relative z-10 flex-1 flex flex-col justify-between px-2 pt-10 pb-4 rounded-2xl shadow-lg 
+            transition-transform duration-300 hover:scale-105 bg-gradient-to-br from-orange-500 via-orange-600 to-red-600">
+                <i class="fa-solid fa-clipboard-check absolute -top-10 left-1/2 -translate-x-1/2 text-3xl bg-white p-4 rounded-full shadow-lg z-10 text-orange-600"></i>
+
+                <!-- Bloc contenu avec bordure blanche -->
+                <div class="rounded-xl bg-white p-1">
+                    <div class="rounded-lg px-6 py-5 flex justify-between items-center text-white bg-gradient-to-r from-orange-600 to-red-600">
+                        <span class="text-lg font-semibold">Évaluations</span>
+                        <span class="text-xl">📋</span>
+                    </div>
+                </div>
+
+                <!-- Description Évaluations -->
+                <div class="text-white text-sm italic text-center mt-2 transition-all duration-300
+                   group-hover:opacity-100 group-hover:translate-y-1">
+                    Tests de fin de période
+                </div>
+
+                <!-- Badge avec nombre d'évaluations -->
+                <div *ngIf="generalEvaluations.length > 0" class="text-white text-xs text-center mt-2 bg-white bg-opacity-30 rounded-lg px-2 py-1">
+                    <i class="fa-solid fa-list-check mr-1"></i>
+                    {{ generalEvaluations.length }} évaluation(s) disponible(s)
+                </div>
+            </div>
+        </div>
+
         <!-- Card Replay spéciale -->
         <div class="w-full max-w-sm relative group flex flex-col cursor-pointer" (click)="onReplayClick($event)">    
             <!-- Carte Replay avec style distinctif -->

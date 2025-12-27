@@ -7,7 +7,9 @@
 const ALLOWED_ORIGINS = [
     'http://localhost:4200',    // Développement local
     'https://centre-culturel-olivier.fr',      // Production
-    'https://www.centre-culturel-olivier.fr'   // Production avec www
+    'https://www.centre-culturel-olivier.fr',   // Production avec www
+    'https://centre-culturel-olivier.com',      // Production (domaine alternatif)
+    'https://www.centre-culturel-olivier.com'   // Production avec www (domaine alternatif)
 ];
 
 /**

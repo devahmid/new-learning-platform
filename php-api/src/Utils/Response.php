@@ -19,7 +19,9 @@ class Response {
             $allowedOrigins = [
                 'http://localhost:4200',
                 'https://centre-culturel-olivier.fr',
-                'https://www.centre-culturel-olivier.fr'
+                'https://www.centre-culturel-olivier.fr',
+                'https://centre-culturel-olivier.com',
+                'https://www.centre-culturel-olivier.com'
             ];
             
             $origin = $_SERVER['HTTP_ORIGIN'] ?? '';

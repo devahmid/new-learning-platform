@@ -223,6 +223,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       permission: 'canManageCourses',
     },
     {
+      label: 'Gérer les évaluations',
+      icon: 'fa-solid fa-clipboard-check',
+      type: 'info',
+      route: '/admin/evaluations',
+      permission: 'canManageCourses',
+    },
+    {
       label: 'Gérer les paramètres',
       icon: 'fa-solid fa-cog',
       type: 'secondary',

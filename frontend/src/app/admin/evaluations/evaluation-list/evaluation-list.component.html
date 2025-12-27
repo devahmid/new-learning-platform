@@ -1,0 +1,89 @@
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">Gestion des évaluations</h1>
+    <button
+      (click)="createEvaluation()"
+      class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2">
+      <i class="pi pi-plus"></i>
+      Créer une évaluation
+    </button>
+  </div>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <div *ngIf="isLoading" class="text-center py-12">
+    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    <p class="mt-4 text-gray-600">Chargement des évaluations...</p>
+  </div>
+
+  <div *ngIf="!isLoading && evaluations.length === 0" class="text-center py-12">
+    <p class="text-gray-600 mb-4">Aucune évaluation créée pour le moment.</p>
+    <button
+      (click)="createEvaluation()"
+      class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+      Créer votre première évaluation
+    </button>
+  </div>
+
+  <div *ngIf="!isLoading && evaluations.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let evaluation of evaluations" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+      <div class="flex justify-between items-start mb-4">
+        <h3 class="text-xl font-semibold text-gray-800">{{ evaluation.title }}</h3>
+        <p-tag [value]="getStatusLabel(evaluation.isActive)" [severity]="getStatusSeverity(evaluation.isActive)"></p-tag>
+      </div>
+
+      <p class="text-gray-600 mb-4 line-clamp-2" *ngIf="evaluation.description">
+        {{ evaluation.description }}
+      </p>
+
+      <div class="text-sm text-gray-500 mb-4">
+        <div *ngIf="evaluation.questions?.length">
+          <i class="pi pi-question-circle mr-2"></i>
+          {{ evaluation.questions.length }} question(s)
+        </div>
+        <div *ngIf="evaluation.sections && evaluation.sections.length > 0" class="mt-1">
+          <i class="pi pi-list mr-2"></i>
+          {{ evaluation.sections.length }} section(s)
+        </div>
+        
+        <!-- Relations -->
+        <div class="mt-2 pt-2 border-t border-gray-200">
+          <div *ngIf="evaluation.courseId" class="text-xs text-blue-600">
+            <i class="pi pi-book mr-1"></i>
+            Cours ID: {{ evaluation.courseId }}
+          </div>
+          <div *ngIf="evaluation.lessonId" class="text-xs text-green-600 mt-1">
+            <i class="pi pi-file mr-1"></i>
+            Leçon ID: {{ evaluation.lessonId }}
+          </div>
+          <div *ngIf="!evaluation.courseId && !evaluation.lessonId" class="text-xs text-gray-400 italic">
+            <i class="pi pi-globe mr-1"></i>
+            Évaluation indépendante
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-4">
+        <button
+          (click)="viewResults(evaluation.id!)"
+          class="flex-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm">
+          <i class="pi pi-chart-bar mr-2"></i>
+          Résultats
+        </button>
+        <button
+          (click)="editEvaluation(evaluation.id!)"
+          class="flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">
+          <i class="pi pi-pencil mr-2"></i>
+          Modifier
+        </button>
+        <button
+          (click)="deleteEvaluation(evaluation.id!)"
+          class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm">
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

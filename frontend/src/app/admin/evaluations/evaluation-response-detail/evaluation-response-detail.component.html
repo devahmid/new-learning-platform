@@ -1,0 +1,192 @@
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold">Détails de la réponse</h1>
+      <p class="text-gray-600 mt-1" *ngIf="evaluation">{{ evaluation.title }}</p>
+    </div>
+    <button
+      (click)="goBack()"
+      class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 flex items-center gap-2">
+      <i class="fa-solid fa-arrow-left"></i>
+      Retour
+    </button>
+  </div>
+
+  <p-toast></p-toast>
+
+  <!-- Chargement -->
+  <div *ngIf="isLoading" class="text-center py-12">
+    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    <p class="mt-4 text-gray-600">Chargement des détails...</p>
+  </div>
+
+  <!-- Informations de l'enfant -->
+  <div *ngIf="!isLoading && response" class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <h2 class="text-xl font-bold mb-4">Informations de l'enfant</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <div class="text-sm text-gray-600 mb-1">Nom</div>
+        <div class="text-lg font-semibold">{{ response.childName || 'N/A' }}</div>
+      </div>
+      <div>
+        <div class="text-sm text-gray-600 mb-1">Classe</div>
+        <div class="text-lg font-semibold">
+          <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">
+            {{ response.classeName || 'N/A' }}
+          </span>
+        </div>
+      </div>
+      <div>
+        <div class="text-sm text-gray-600 mb-1">Date de soumission</div>
+        <div class="text-lg">{{ formatDate(response.submittedAt) }}</div>
+      </div>
+      <div>
+        <div class="text-sm text-gray-600 mb-1">Score</div>
+        <div class="text-lg font-bold" [ngClass]="{
+          'text-green-600': (response.percentage || 0) >= 70,
+          'text-yellow-600': (response.percentage || 0) >= 50 && (response.percentage || 0) < 70,
+          'text-red-600': (response.percentage || 0) < 50
+        }">
+          {{ response.percentage || 0 }}%
+          <span class="text-sm text-gray-500 ml-2">
+            ({{ response.correctAnswers || 0 }}/{{ response.totalQuestions || 0 }} bonnes réponses)
+          </span>
+        </div>
+        <p-tag 
+          [value]="getScoreSeverity(response.percentage) === 'success' ? 'Réussi' : getScoreSeverity(response.percentage) === 'warning' ? 'Moyen' : 'À améliorer'" 
+          [severity]="getScoreSeverity(response.percentage)"
+          class="mt-2"></p-tag>
+      </div>
+    </div>
+  </div>
+
+  <!-- Questions et réponses en tableau -->
+  <div *ngIf="!isLoading && evaluation && response" class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-bold">Questions et réponses</h2>
+    </div>
+    
+    <!-- Tableau des questions -->
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Question</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Réponse de l'enfant</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bonne(s) réponse(s)</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Résultat</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let question of evaluation.questions; let i = index" 
+              [ngClass]="{
+                'bg-green-50': getQuestionResponse(question.id!) && isAnswerCorrect(question, getQuestionResponse(question.id!)) === true,
+                'bg-red-50': getQuestionResponse(question.id!) && isAnswerCorrect(question, getQuestionResponse(question.id!)) === false,
+                'bg-gray-50': !getQuestionResponse(question.id!)
+              }">
+            <!-- Question -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                  {{ i + 1 }}
+                </span>
+                <div>
+                  <div class="text-sm font-medium text-gray-900">{{ question.text }}</div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    <span class="px-2 py-1 bg-gray-100 rounded">{{ question.type }}</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            
+            <!-- Réponse de l'enfant -->
+            <td class="px-6 py-4">
+              <div *ngIf="getQuestionResponse(question.id!)" 
+                   [ngClass]="{
+                     'text-green-700 font-semibold': isAnswerCorrect(question, getQuestionResponse(question.id!)) === true,
+                     'text-red-700 font-semibold': isAnswerCorrect(question, getQuestionResponse(question.id!)) === false,
+                     'text-gray-700': isAnswerCorrect(question, getQuestionResponse(question.id!)) === null
+                   }">
+                <div *ngIf="question.type === 'radio' || question.type === 'text' || question.type === 'textarea'">
+                  {{ formatAnswer(getQuestionResponse(question.id!)?.value) || 'Aucune réponse' }}
+                </div>
+                <div *ngIf="question.type === 'checkbox' || question.type === 'multiple_choice'" class="flex flex-wrap gap-1">
+                  <span *ngFor="let answer of getAnswerArray(getQuestionResponse(question.id!)?.value)" 
+                        class="px-2 py-1 rounded text-sm"
+                        [ngClass]="{
+                          'bg-green-200 text-green-800': isAnswerCorrect(question, getQuestionResponse(question.id!)) === true,
+                          'bg-red-200 text-red-800': isAnswerCorrect(question, getQuestionResponse(question.id!)) === false,
+                          'bg-blue-200 text-blue-800': isAnswerCorrect(question, getQuestionResponse(question.id!)) === null
+                        }">
+                    {{ answer }}
+                  </span>
+                </div>
+                <div *ngIf="question.type === 'rating'" class="flex items-center gap-1">
+                  <span *ngFor="let star of [].constructor(getQuestionResponse(question.id!)?.value || 0)" 
+                        class="text-yellow-400 text-lg">★</span>
+                  <span class="text-sm text-gray-600 ml-2">({{ getQuestionResponse(question.id!)?.value || 0 }})</span>
+                </div>
+              </div>
+              <div *ngIf="!getQuestionResponse(question.id!)" class="text-sm text-gray-400 italic">
+                Aucune réponse
+              </div>
+            </td>
+            
+            <!-- Bonne(s) réponse(s) -->
+            <td class="px-6 py-4">
+              <div *ngIf="question.type === 'radio' || question.type === 'checkbox' || question.type === 'multiple_choice'">
+                <div *ngIf="getCorrectAnswers(question).length > 0" class="flex flex-wrap gap-1">
+                  <span *ngFor="let correctAnswer of getCorrectAnswers(question)" 
+                        class="px-2 py-1 bg-green-200 text-green-800 rounded text-sm font-medium">
+                    {{ correctAnswer }}
+                  </span>
+                </div>
+                <div *ngIf="getCorrectAnswers(question).length === 0" class="text-sm text-gray-400 italic">
+                  Pas de bonne réponse définie
+                </div>
+              </div>
+              <div *ngIf="question.type === 'text' || question.type === 'textarea'" class="text-sm text-gray-400 italic">
+                Évaluation manuelle
+              </div>
+              <div *ngIf="question.type === 'rating'" class="text-sm text-gray-400 italic">
+                Évaluation subjective
+              </div>
+            </td>
+            
+            <!-- Résultat -->
+            <td class="px-6 py-4 text-center">
+              <div *ngIf="getQuestionResponse(question.id!)">
+                <ng-container *ngIf="isAnswerCorrect(question, getQuestionResponse(question.id!)) !== null">
+                  <p-tag 
+                    *ngIf="isAnswerCorrect(question, getQuestionResponse(question.id!))"
+                    value="✓ Correcte" 
+                    severity="success"
+                    [style]="{'font-size': '0.875rem'}"></p-tag>
+                  <p-tag 
+                    *ngIf="!isAnswerCorrect(question, getQuestionResponse(question.id!))"
+                    value="✗ Incorrecte" 
+                    severity="danger"
+                    [style]="{'font-size': '0.875rem'}"></p-tag>
+                </ng-container>
+                <span *ngIf="isAnswerCorrect(question, getQuestionResponse(question.id!)) === null" 
+                      class="text-sm text-gray-400 italic">
+                  Non évaluable
+                </span>
+              </div>
+              <div *ngIf="!getQuestionResponse(question.id!)" class="text-sm text-gray-400 italic">
+                -
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Aucune donnée -->
+  <div *ngIf="!isLoading && !response" class="text-center py-12 bg-white rounded-lg shadow-md">
+    <i class="fa-solid fa-exclamation-triangle text-6xl text-gray-300 mb-4"></i>
+    <p class="text-gray-600 text-lg">Réponse non trouvée.</p>
+  </div>
+</div>
+

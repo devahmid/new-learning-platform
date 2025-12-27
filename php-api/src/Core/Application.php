@@ -217,6 +217,22 @@ class Application {
         $this->routes['GET']['/api/quiz/{id}'] = ['App\Controllers\QuizController', 'findById'];
         $this->routes['POST']['/api/quiz'] = ['App\Controllers\QuizController', 'create'];
         
+        // Routes évaluations
+        $this->routes['GET']['/api/evaluations'] = ['App\Controllers\EvaluationController', 'findAll'];
+        $this->routes['GET']['/api/evaluations/{id}'] = ['App\Controllers\EvaluationController', 'findById'];
+        $this->routes['GET']['/api/evaluations/course/{courseId}'] = ['App\Controllers\EvaluationController', 'findByCourse'];
+        $this->routes['GET']['/api/evaluations/lesson/{lessonId}'] = ['App\Controllers\EvaluationController', 'findByLesson'];
+        $this->routes['POST']['/api/evaluations'] = ['App\Controllers\EvaluationController', 'create'];
+        $this->routes['PUT']['/api/evaluations/{id}'] = ['App\Controllers\EvaluationController', 'update'];
+        $this->routes['DELETE']['/api/evaluations/{id}'] = ['App\Controllers\EvaluationController', 'delete'];
+        $this->routes['POST']['/api/evaluations/{id}/submit'] = ['App\Controllers\EvaluationController', 'submitResponse'];
+        // Route spécifique pour une réponse individuelle (doit être avant les routes avec {id})
+        $this->routes['GET']['/api/evaluations/responses/{responseId}'] = ['App\Controllers\EvaluationController', 'getResponseById'];
+        $this->routes['GET']['/api/evaluations/{id}/responses'] = ['App\Controllers\EvaluationController', 'getResponses'];
+        $this->routes['GET']['/api/evaluations/{id}/responses/user'] = ['App\Controllers\EvaluationController', 'getUserResponse'];
+        $this->routes['GET']['/api/evaluations/{id}/responses/user/{userId}'] = ['App\Controllers\EvaluationController', 'getUserResponse'];
+        $this->routes['GET']['/api/users/{parentId}/evaluations/responses'] = ['App\Controllers\EvaluationController', 'getChildrenResponses'];
+        
         // Routes migrations
         $this->routes['POST']['/api/migrations/add-course-id-to-exercises'] = ['App\Controllers\MigrationController', 'addCourseIdToExercises'];
         $this->routes['GET']['/api/migrations/check-exercises-structure'] = ['App\Controllers\MigrationController', 'checkExercisesStructure'];
@@ -357,8 +373,38 @@ class Application {
             return;
         }
         
-        // Appeler la méthode du contrôleur avec les paramètres
-        call_user_func_array([$controller, $methodName], $params);
+        // Appeler la méthode du contrôleur avec les paramètres dans un try-catch global
+        try {
+            call_user_func_array([$controller, $methodName], $params);
+        } catch (\Throwable $e) {
+            // Capturer toutes les erreurs (Exception et Error)
+            $errorDetails = [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'type' => get_class($e),
+                'trace' => explode("\n", $e->getTraceAsString())
+            ];
+            error_log("Erreur globale dans Application::handleRequest: " . json_encode($errorDetails));
+            
+            try {
+                Response::json([
+                    'success' => false,
+                    'error' => 'Erreur lors du traitement de la requête',
+                    'details' => $errorDetails
+                ], 500);
+            } catch (\Exception $responseError) {
+                // Si même la réponse d'erreur échoue, essayer une réponse basique
+                http_response_code(500);
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Erreur serveur',
+                    'message' => $e->getMessage()
+                ]);
+                exit;
+            }
+        }
     }
     
     /**
@@ -381,7 +427,24 @@ class Application {
         
         // Ensuite, chercher une correspondance avec paramètres
         // Utiliser array_keys pour maintenir l'ordre d'insertion
-        foreach (array_keys($this->routes[$method]) as $pattern) {
+        // Trier les patterns pour que les routes plus spécifiques soient vérifiées en premier
+        $patterns = array_keys($this->routes[$method]);
+        // Trier par longueur décroissante (routes plus spécifiques en premier)
+        usort($patterns, function($a, $b) {
+            $aCount = substr_count($a, '/');
+            $bCount = substr_count($b, '/');
+            if ($aCount === $bCount) {
+                // Si même nombre de segments, prioriser celles sans paramètres
+                $aHasParams = strpos($a, '{') !== false;
+                $bHasParams = strpos($b, '{') !== false;
+                if ($aHasParams && !$bHasParams) return 1;
+                if (!$aHasParams && $bHasParams) return -1;
+                return 0;
+            }
+            return $bCount - $aCount;
+        });
+        
+        foreach ($patterns as $pattern) {
             if ($this->matchRoute($pattern, $uri)) {
                 $handler = $this->routes[$method][$pattern];
                 return [

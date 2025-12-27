@@ -1,0 +1,383 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="container mx-auto px-4 max-w-4xl">
+    <!-- En-tête -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6" *ngIf="evaluation">
+      <!-- Rappel de l'enfant sélectionné -->
+      <div *ngIf="childContext.selectedChild()" class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-child text-blue-600"></i>
+          <div>
+            <p class="font-semibold text-blue-800">Enfant sélectionné :</p>
+            <p class="text-blue-700">
+              {{ childContext.selectedChild()?.firstName }} {{ childContext.selectedChild()?.lastName }}
+              <span *ngIf="childContext.selectedChild()?.classe?.name" class="text-sm">
+                ({{ childContext.selectedChild()?.classe?.name }})
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ evaluation.title }}</h1>
+      <p class="text-gray-600 mb-4" *ngIf="evaluation.description">{{ evaluation.description }}</p>
+      
+      <!-- Instructions détaillées -->
+      <div *ngIf="evaluation.instructions" class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded">
+        <div class="prose max-w-none" [innerHTML]="safeInstructions"></div>
+      </div>
+      
+      <!-- Instructions spéciales -->
+      <div *ngIf="evaluation.specialInstructions" class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4 rounded">
+        <div class="font-semibold text-yellow-800 mb-2">📝 Instructions spéciales :</div>
+        <div class="text-yellow-700 whitespace-pre-line">{{ evaluation.specialInstructions }}</div>
+      </div>
+      
+      <!-- Barre de progression -->
+      <div class="mt-4" *ngIf="showProgress">
+        <div class="flex justify-between text-sm text-gray-600 mb-2">
+          <span>Progression</span>
+          <span>{{ getProgress() }}%</span>
+        </div>
+        <p-progressBar [value]="getProgress()"></p-progressBar>
+      </div>
+    </div>
+
+    <!-- Chargement -->
+    <div *ngIf="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <p class="mt-4 text-gray-600">Chargement de l'évaluation...</p>
+    </div>
+
+    <!-- Formulaire d'évaluation -->
+    <form [formGroup]="evaluationForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading && evaluation && !isSubmitted">
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <!-- Navigation des questions -->
+        <div class="mb-6" *ngIf="evaluation.questions.length > 1">
+          <div class="flex flex-wrap gap-2">
+            <button
+              *ngFor="let question of evaluation.questions; let i = index"
+              type="button"
+              (click)="goToQuestion(i)"
+              [class.bg-blue-500]="i === currentQuestionIndex"
+              [class.bg-green-500]="i !== currentQuestionIndex && isQuestionAnswered(i)"
+              [class.bg-gray-200]="i !== currentQuestionIndex && !isQuestionAnswered(i)"
+              class="w-10 h-10 rounded-full text-white font-semibold hover:opacity-80 transition">
+              {{ i + 1 }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Affichage par sections - Mode question par question -->
+        <div *ngIf="sections.length > 0">
+          <!-- Afficher la section de la question actuelle -->
+          <div *ngIf="currentQuestion as question">
+            <!-- Trouver la section de la question actuelle -->
+            <div *ngIf="getSectionForQuestion(question)" class="mb-6">
+              <div class="bg-purple-50 border-l-4 border-purple-500 p-4 mb-4 rounded">
+                <h3 class="text-xl font-bold text-purple-800 mb-2">{{ getSectionForQuestion(question)?.title }}</h3>
+                <div *ngIf="getSectionForQuestion(question)?.description" class="text-purple-700 whitespace-pre-line">{{ getSectionForQuestion(question)?.description }}</div>
+              </div>
+            </div>
+            
+            <!-- Question actuelle -->
+            <div class="mb-6 pb-6">
+              <label class="block text-lg font-semibold text-gray-800 mb-4">
+                {{ currentQuestionIndex + 1 }}. {{ question.text }}
+                <span class="text-red-500" *ngIf="question.required">*</span>
+              </label>
+              
+              <!-- Rendu de la question selon son type -->
+              <ng-container [ngSwitch]="question.type">
+                <!-- Question à choix multiple / Radio -->
+                <div *ngSwitchCase="'radio'" [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <div *ngFor="let option of question.options; let i = index" class="mb-3">
+                    <label class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <p-radioButton
+                        [inputId]="'option-' + currentQuestionIndex + '-' + i"
+                        formControlName="value"
+                        [value]="option.text"></p-radioButton>
+                      <span class="flex-1">{{ option.text }}</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <!-- Question à choix multiple (multiple_choice) -->
+                <div *ngSwitchCase="'multiple_choice'" [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <div *ngFor="let option of question.options; let i = index" class="mb-3">
+                    <label class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <p-radioButton
+                        [inputId]="'option-' + currentQuestionIndex + '-' + i"
+                        formControlName="value"
+                        [value]="option.text"></p-radioButton>
+                      <span class="flex-1">{{ option.text }}</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <!-- Question à cases à cocher -->
+                <div *ngSwitchCase="'checkbox'" [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <div [formGroupName]="'value'">
+                    <div *ngFor="let option of question.options; let i = index" class="mb-3">
+                      <label class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <p-checkbox
+                          [inputId]="'checkbox-' + currentQuestionIndex + '-' + i"
+                          [formControlName]="'option_' + i"
+                          [binary]="true"></p-checkbox>
+                        <span class="flex-1">{{ option.text }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Question texte court -->
+                <div *ngSwitchCase="'text'" [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <input
+                    type="text"
+                    formControlName="textValue"
+                    [placeholder]="question.placeholder || 'Votre réponse'"
+                    [minlength]="question.minLength ?? null"
+                    [maxlength]="question.maxLength ?? null"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <!-- Question texte long -->
+                <div *ngSwitchCase="'textarea'" [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <textarea
+                    formControlName="textValue"
+                    [placeholder]="question.placeholder || 'Votre réponse'"
+                    [minlength]="question.minLength ?? null"
+                    [maxlength]="question.maxLength ?? null"
+                    rows="5"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                
+                <!-- Question de notation -->
+                <div *ngSwitchCase="'rating'" [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <p-rating
+                    formControlName="value"
+                    [stars]="question.maxRating || 5"
+                    [cancel]="false"></p-rating>
+                  <p class="text-sm text-gray-600 mt-2">
+                    Note de {{ question.minRating || 1 }} à {{ question.maxRating || 5 }}
+                  </p>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+          
+          <!-- Questions sans section -->
+          <div *ngIf="questionsWithoutSection.length > 0" class="mt-8">
+            <div *ngFor="let question of questionsWithoutSection; let qIndex = index" 
+              class="mb-6 pb-6 border-b last:border-b-0">
+              <label class="block text-lg font-semibold text-gray-800 mb-4">
+                {{ qIndex + 1 }}. {{ question.text }}
+                <span class="text-red-500" *ngIf="question.required">*</span>
+              </label>
+              
+              <!-- Rendu de la question selon son type -->
+              <ng-container [ngSwitch]="question.type">
+                <!-- Question à choix multiple / Radio -->
+                <div *ngSwitchCase="'radio'" [formGroup]="getQuestionFormGroup(getQuestionIndex(question.id!))">
+                  <div *ngFor="let option of question.options; let i = index" class="mb-3">
+                    <label class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <p-radioButton
+                        [inputId]="'option-' + question.id + '-' + i"
+                        formControlName="value"
+                        [value]="option.text"></p-radioButton>
+                      <span class="flex-1">{{ option.text }}</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <!-- Question à cases à cocher -->
+                <div *ngSwitchCase="'checkbox'" [formGroup]="getQuestionFormGroup(getQuestionIndex(question.id!))">
+                  <div [formGroupName]="'value'">
+                    <div *ngFor="let option of question.options; let i = index" class="mb-3">
+                      <label class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <p-checkbox
+                          [inputId]="'checkbox-' + question.id + '-' + i"
+                          [formControlName]="'option_' + i"
+                          [binary]="true"></p-checkbox>
+                        <span class="flex-1">{{ option.text }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Question texte court -->
+                <div *ngSwitchCase="'text'" [formGroup]="getQuestionFormGroup(getQuestionIndex(question.id!))">
+                  <input
+                    type="text"
+                    formControlName="textValue"
+                    [placeholder]="question.placeholder || 'Votre réponse'"
+                    [minlength]="question.minLength ?? null"
+                    [maxlength]="question.maxLength ?? null"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <!-- Question texte long -->
+                <div *ngSwitchCase="'textarea'" [formGroup]="getQuestionFormGroup(getQuestionIndex(question.id!))">
+                  <textarea
+                    formControlName="textValue"
+                    [placeholder]="question.placeholder || 'Votre réponse'"
+                    [minlength]="question.minLength ?? null"
+                    [maxlength]="question.maxLength ?? null"
+                    rows="5"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                
+                <!-- Question de notation -->
+                <div *ngSwitchCase="'rating'" [formGroup]="getQuestionFormGroup(getQuestionIndex(question.id!))">
+                  <p-rating
+                    formControlName="value"
+                    [stars]="question.maxRating || 5"
+                    [cancel]="false"></p-rating>
+                  <p class="text-sm text-gray-600 mt-2">
+                    Note de {{ question.minRating || 1 }} à {{ question.maxRating || 5 }}
+                  </p>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Affichage simple si pas de sections -->
+        <div *ngIf="sections.length === 0">
+          <!-- Question actuelle -->
+          <div *ngIf="currentQuestion as question">
+            <div class="mb-6">
+              <label class="block text-lg font-semibold text-gray-800 mb-4">
+                {{ currentQuestionIndex + 1 }}. {{ question.text }}
+                <span class="text-red-500" *ngIf="question.required">*</span>
+              </label>
+
+              <!-- Question à choix multiple -->
+              <div *ngIf="(question.type === 'multiple_choice' || question.type === 'radio') && question.options && question.options.length > 0">
+                <div [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <div *ngFor="let option of question.options; let i = index" class="mb-3">
+                    <label class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <p-radioButton
+                        [inputId]="'option-' + currentQuestionIndex + '-' + i"
+                        formControlName="value"
+                        [value]="option.text"></p-radioButton>
+                      <span class="flex-1">{{ option.text }}</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Question à cases à cocher -->
+              <div *ngIf="question.type === 'checkbox' && question.options && question.options.length > 0">
+                <div [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <div [formGroupName]="'value'">
+                    <div *ngFor="let option of question.options; let i = index" class="mb-3">
+                      <label class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <p-checkbox
+                          [inputId]="'checkbox-' + currentQuestionIndex + '-' + i"
+                          [formControlName]="'option_' + i"
+                          [binary]="true"></p-checkbox>
+                        <span class="flex-1">{{ option.text }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Question texte court -->
+              <div *ngIf="question.type === 'text'">
+                <div [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <input
+                    type="text"
+                    formControlName="textValue"
+                    [placeholder]="question.placeholder || 'Votre réponse'"
+                    [minlength]="question.minLength ?? null"
+                    [maxlength]="question.maxLength ?? null"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+              </div>
+
+              <!-- Question texte long -->
+              <div *ngIf="question.type === 'textarea'">
+                <div [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <textarea
+                    formControlName="textValue"
+                    [placeholder]="question.placeholder || 'Votre réponse'"
+                    [minlength]="question.minLength ?? null"
+                    [maxlength]="question.maxLength ?? null"
+                    rows="5"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+              </div>
+
+              <!-- Question de notation -->
+              <div *ngIf="question.type === 'rating'">
+                <div [formGroup]="getQuestionFormGroup(currentQuestionIndex)">
+                  <p-rating
+                    formControlName="value"
+                    [stars]="question.maxRating || 5"
+                    [cancel]="false"></p-rating>
+                  <p class="text-sm text-gray-600 mt-2">
+                    Note de {{ question.minRating || 1 }} à {{ question.maxRating || 5 }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex justify-between mt-6 pt-6 border-t">
+          <button
+            type="button"
+            (click)="previousQuestion()"
+            [disabled]="currentQuestionIndex === 0"
+            class="px-6 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            ← Précédent
+          </button>
+
+          <div class="text-gray-600">
+            Question {{ currentQuestionIndex + 1 }} sur {{ evaluation.questions.length }}
+          </div>
+
+          <button
+            type="button"
+            (click)="nextQuestion()"
+            [disabled]="currentQuestionIndex === evaluation.questions.length - 1"
+            class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+            Suivant →
+          </button>
+        </div>
+      </div>
+
+      <!-- Bouton de soumission -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center">
+          <p class="text-gray-600">
+            <span class="text-red-500">*</span> Questions obligatoires
+          </p>
+          <button
+            type="submit"
+            [disabled]="isSubmitting || evaluationForm.invalid"
+            class="px-8 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold">
+            {{ isSubmitting ? 'Envoi en cours...' : 'Soumettre l\'évaluation' }}
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Message de confirmation -->
+    <div *ngIf="isSubmitted" class="bg-white rounded-lg shadow-md p-8 text-center">
+      <div class="text-6xl mb-4">✅</div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">Merci !</h2>
+      <p class="text-gray-600 mb-6">Votre évaluation a été soumise avec succès.</p>
+      <button
+        (click)="router.navigate(['/'])"
+        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+        Retour à l'accueil
+      </button>
+    </div>
+  </div>
+</div>
+
+<p-toast></p-toast>
+

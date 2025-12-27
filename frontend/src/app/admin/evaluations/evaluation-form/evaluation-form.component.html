@@ -1,0 +1,384 @@
+<div class="container mx-auto p-6 max-w-5xl">
+  <h1 class="text-3xl font-bold mb-6">
+    {{ isEditMode ? 'Modifier l\'évaluation' : 'Créer une nouvelle évaluation' }}
+  </h1>
+
+  <form [formGroup]="evaluationForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Informations générales -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-semibold mb-4">Informations générales</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-2">Titre *</label>
+          <input 
+            type="text" 
+            formControlName="title"
+            class="w-full p-2 border rounded-md"
+            placeholder="Titre de l'évaluation">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-2">Description</label>
+          <textarea 
+            formControlName="description"
+            class="w-full p-2 border rounded-md"
+            rows="3"
+            placeholder="Description de l'évaluation"></textarea>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-2">Instructions détaillées</label>
+          <p class="text-xs text-gray-500 mb-2">Instructions affichées au début de l'évaluation (supporte le formatage HTML)</p>
+          <textarea 
+            formControlName="instructions"
+            class="w-full p-2 border rounded-md font-mono text-sm"
+            rows="8"
+            placeholder="Exemple:&#10;Assalāmou ʿalaykoum wa raḥmatou Llāh,&#10;Bienvenue dans ce formulaire d'évaluation..."></textarea>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-2">Instructions spéciales</label>
+          <p class="text-xs text-gray-500 mb-2">Instructions particulières (ex: email pour envoyer les devoirs)</p>
+          <textarea 
+            formControlName="specialInstructions"
+            class="w-full p-2 border rounded-md"
+            rows="3"
+            placeholder="Exemple: Les questions avec rédaction doivent être faites sur feuille. Envoyez à: arabedevoirs@gmail.com"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Cours (optionnel)</label>
+          <select formControlName="courseId" (change)="onCourseChange($any($event.target).value)" 
+            class="w-full p-2 border rounded-md">
+            <option [value]="null">Aucun cours</option>
+            <option *ngFor="let course of courses" [value]="course.id">{{ course.title }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Leçon (optionnel)</label>
+          <select formControlName="lessonId" class="w-full p-2 border rounded-md" [disabled]="!lessons.length">
+            <option [value]="null">Aucune leçon</option>
+            <option *ngFor="let lesson of lessons" [value]="lesson.id">{{ lesson.title }}</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2" *ngIf="!evaluationForm.get('courseId')?.value && !evaluationForm.get('lessonId')?.value">
+          <label class="block text-sm font-medium mb-2">Classes (pour évaluation générale)</label>
+          <p class="text-xs text-gray-500 mb-2">Sélectionnez une ou plusieurs classes pour cette évaluation générale</p>
+          <p-multiSelect 
+            formControlName="classeIds"
+            [options]="classes"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            placeholder="Sélectionnez les classes"
+            [showClear]="true"
+            styleClass="w-full">
+          </p-multiSelect>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Date de début</label>
+          <p-calendar formControlName="startDate" [showTime]="true" dateFormat="dd/mm/yy" 
+            inputStyleClass="w-full"></p-calendar>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Date de fin</label>
+          <p-calendar formControlName="endDate" [showTime]="true" dateFormat="dd/mm/yy" 
+            inputStyleClass="w-full"></p-calendar>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <p-checkbox formControlName="isActive" inputId="isActive" 
+            [binary]="true"></p-checkbox>
+          <label for="isActive" class="cursor-pointer">Évaluation active</label>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <p-checkbox formControlName="allowMultipleSubmissions" inputId="allowMultiple" 
+            [binary]="true"></p-checkbox>
+          <label for="allowMultiple" class="cursor-pointer">Autoriser plusieurs soumissions</label>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <p-checkbox formControlName="showResults" inputId="showResults" 
+            [binary]="true"></p-checkbox>
+          <label for="showResults" class="cursor-pointer">Afficher les résultats</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sections -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Sections</h2>
+        <button 
+          type="button"
+          (click)="addSection()"
+          class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600">
+          + Ajouter une section
+        </button>
+      </div>
+
+      <div formArrayName="sections" class="space-y-4 mb-6">
+        <div 
+          *ngFor="let section of sectionsFormArray.controls; let i = index"
+          [formGroupName]="i"
+          class="border rounded-lg p-4 bg-purple-50">
+          
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-semibold text-purple-800">Section {{ i + 1 }}</h3>
+            <div class="flex space-x-2">
+              <button 
+                type="button"
+                (click)="moveSectionUp(i)"
+                [disabled]="i === 0"
+                class="text-purple-500 hover:text-purple-700 disabled:text-gray-400">
+                ↑
+              </button>
+              <button 
+                type="button"
+                (click)="moveSectionDown(i)"
+                [disabled]="i === sectionsFormArray.length - 1"
+                class="text-purple-500 hover:text-purple-700 disabled:text-gray-400">
+                ↓
+              </button>
+              <button 
+                type="button"
+                (click)="removeSection(i)"
+                class="text-red-500 hover:text-red-700">
+                Supprimer
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">Titre de la section *</label>
+              <input 
+                type="text" 
+                formControlName="title"
+                class="w-full p-2 border rounded-md"
+                placeholder="Ex: Section CROYANCE (ʿAQĪDA)">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Description de la section</label>
+              <textarea 
+                formControlName="description"
+                class="w-full p-2 border rounded-md"
+                rows="2"
+                placeholder="Description de la section (optionnel)"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="sectionsFormArray.length === 0" class="text-center py-4 text-gray-500 text-sm">
+        Les sections sont optionnelles. Vous pouvez créer des sections pour organiser vos questions par thème.
+      </div>
+    </div>
+
+    <!-- Questions -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Questions</h2>
+        <button 
+          type="button"
+          (click)="addQuestion()"
+          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+          + Ajouter une question
+        </button>
+      </div>
+
+      <div formArrayName="questions" class="space-y-4">
+        <div 
+          *ngFor="let question of questionsFormArray.controls; let i = index"
+          [formGroupName]="i"
+          class="border rounded-lg p-4 bg-gray-50">
+          
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-semibold">Question {{ i + 1 }}</h3>
+            <div class="flex space-x-2">
+              <button 
+                type="button"
+                (click)="moveQuestionUp(i)"
+                [disabled]="i === 0"
+                class="text-blue-500 hover:text-blue-700 disabled:text-gray-400">
+                ↑
+              </button>
+              <button 
+                type="button"
+                (click)="moveQuestionDown(i)"
+                [disabled]="i === questionsFormArray.length - 1"
+                class="text-blue-500 hover:text-blue-700 disabled:text-gray-400">
+                ↓
+              </button>
+              <button 
+                type="button"
+                (click)="removeQuestion(i)"
+                class="text-red-500 hover:text-red-700">
+                Supprimer
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-2">Texte de la question *</label>
+              <input 
+                type="text" 
+                formControlName="text"
+                class="w-full p-2 border rounded-md"
+                placeholder="Entrez votre question">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2">Type de question *</label>
+              <p-dropdown 
+                formControlName="type"
+                [options]="questionTypes"
+                optionLabel="label"
+                optionValue="value"
+                (onChange)="onQuestionTypeChange(i)"
+                styleClass="w-full"></p-dropdown>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2">Section (optionnel)</label>
+              <select formControlName="sectionId" class="w-full p-2 border rounded-md">
+                <option [value]="null">Aucune section</option>
+                <option *ngFor="let section of sectionsFormArray.controls; let j = index" 
+                  [value]="j">
+                  {{ section.get('title')?.value || 'Section ' + (j + 1) }}
+                </option>
+              </select>
+            </div>
+
+            <div class="flex items-center">
+              <p-checkbox formControlName="required" inputId="required{{i}}" 
+                [binary]="true"></p-checkbox>
+              <label [for]="'required' + i" class="ml-2 cursor-pointer">Question obligatoire</label>
+            </div>
+          </div>
+
+          <!-- Options pour les questions à choix multiples -->
+          <div *ngIf="needsOptions(question.get('type')?.value)" class="mt-4">
+            <div class="flex justify-between items-center mb-2">
+              <label class="text-sm font-medium">Options de réponse</label>
+              <button 
+                type="button"
+                (click)="addOption(i)"
+                class="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
+                + Ajouter une option
+              </button>
+            </div>
+            
+            <div formArrayName="options" class="space-y-2">
+              <div 
+                *ngFor="let option of getQuestionOptions(i).controls; let j = index"
+                [formGroupName]="j"
+                class="flex items-center gap-3 bg-gray-50 p-3 rounded-md border border-gray-200">
+                <input 
+                  type="text" 
+                  formControlName="text"
+                  class="flex-1 p-2 border rounded-md"
+                  placeholder="Texte de l'option">
+                
+                <!-- Case à cocher pour bonne réponse -->
+                <div class="flex items-center gap-2 bg-white px-3 py-2 rounded border border-green-300">
+                  <input 
+                    type="checkbox" 
+                    formControlName="isCorrect" 
+                    [id]="'correct' + i + '_' + j"
+                    class="w-5 h-5 text-green-600 border-2 border-gray-400 rounded cursor-pointer checked:bg-green-600 checked:border-green-600 focus:ring-2 focus:ring-green-500">
+                  <label [for]="'correct' + i + '_' + j" 
+                    class="text-sm text-green-700 font-semibold cursor-pointer select-none">
+                    ✓ Bonne réponse
+                  </label>
+                </div>
+                
+                <button 
+                  type="button"
+                  (click)="removeOption(i, j)"
+                  class="text-red-500 hover:text-red-700 px-3 py-2 hover:bg-red-50 rounded transition">
+                  ✕ Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paramètres pour les questions texte -->
+          <div *ngIf="question.get('type')?.value === 'text' || question.get('type')?.value === 'textarea'" 
+            class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">Placeholder</label>
+              <input 
+                type="text" 
+                formControlName="placeholder"
+                class="w-full p-2 border rounded-md">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Longueur min</label>
+              <input 
+                type="number" 
+                formControlName="minLength"
+                class="w-full p-2 border rounded-md">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Longueur max</label>
+              <input 
+                type="number" 
+                formControlName="maxLength"
+                class="w-full p-2 border rounded-md">
+            </div>
+          </div>
+
+          <!-- Paramètres pour les questions de notation -->
+          <div *ngIf="question.get('type')?.value === 'rating'" 
+            class="mt-4 grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">Note minimale</label>
+              <input 
+                type="number" 
+                formControlName="minRating"
+                class="w-full p-2 border rounded-md">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Note maximale</label>
+              <input 
+                type="number" 
+                formControlName="maxRating"
+                class="w-full p-2 border rounded-md">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="questionsFormArray.length === 0" class="text-center py-8 text-gray-500">
+        Aucune question ajoutée. Cliquez sur "Ajouter une question" pour commencer.
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end space-x-4">
+      <button 
+        type="button"
+        (click)="cancel()"
+        class="px-6 py-2 border rounded-md hover:bg-gray-50">
+        Annuler
+      </button>
+      <button 
+        type="submit"
+        [disabled]="isLoading || evaluationForm.invalid"
+        class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400">
+        {{ isLoading ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Créer') }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<p-toast></p-toast>
+

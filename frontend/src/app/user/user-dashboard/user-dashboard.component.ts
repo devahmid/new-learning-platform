@@ -44,6 +44,8 @@ import { ApiPaths } from '../../shared/api-paths';
 import { CourseService } from '../../services/course.service';
 import { PaymentService } from '../../services/payment.service';
 import { AssignmentService, Assignment, ParentAssignmentsResponse } from '../../services/assignment.service';
+import { EvaluationService } from '../../services/evaluation.service';
+import { EvaluationResponse } from '../../models/evaluation.model';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -114,6 +116,10 @@ export class UserDashboardComponent implements OnInit {
   assignments: any[] = [];
   assignmentsLoading = false;
   assignmentsError: string | null = null;
+
+  // Données pour les évaluations
+  evaluationResponses: EvaluationResponse[] = [];
+  isLoadingEvaluations = false;
 
   // Type pour les sections du dashboard
   private readonly sectionTypes = [
@@ -391,7 +397,8 @@ export class UserDashboardComponent implements OnInit {
     private classeService: ClasseService,
     private http: HttpClient,
     private courseService: CourseService,
-    private assignmentService: AssignmentService
+    private assignmentService: AssignmentService,
+    private evaluationService: EvaluationService
   ) {
     effect(() => {
       const user = this.auth.user();
@@ -440,6 +447,7 @@ export class UserDashboardComponent implements OnInit {
     this.loadClasses(); // ✅ Ajouter le chargement des classes
     this.loadPaymentHistory(); // ✅ Charger l'historique des paiements
     this.loadUpcomingSessions(); // ✅ Charger les sessions Zoom depuis le planning
+    this.loadEvaluationResponses(); // ✅ Charger les résultats d'évaluations des enfants
     this.setupKeyboardShortcuts();
     this.initTheme();
     this.setupPushNotifications();
@@ -1508,6 +1516,12 @@ export class UserDashboardComponent implements OnInit {
       badge: null,
     },
     {
+      id: 'evaluations',
+      label: 'Évaluations',
+      icon: 'fa-solid fa-clipboard-check',
+      badge: null,
+    },
+    {
       id: 'courses',
       label: 'Mes Cours',
       icon: 'fa-solid fa-book',
@@ -1587,6 +1601,11 @@ export class UserDashboardComponent implements OnInit {
     // Charger les devoirs quand on accède à la section assignments
     if (sectionId === 'assignments' && this.assignments.length === 0) {
       this.fetchAssignments();
+    }
+    
+    // Charger les évaluations quand on accède à la section evaluations
+    if (sectionId === 'evaluations' && this.evaluationResponses.length === 0) {
+      this.loadEvaluationResponses();
     }
   }
 
@@ -2311,6 +2330,86 @@ export class UserDashboardComponent implements OnInit {
       day: 'numeric',
       month: 'long'
     });
+  }
+
+  /**
+   * Charger les résultats d'évaluations des enfants
+   */
+  loadEvaluationResponses(): void {
+    if (!this.id) return;
+    
+    this.isLoadingEvaluations = true;
+    this.evaluationService.getChildrenResponses(this.id).subscribe({
+      next: (responses: EvaluationResponse[]) => {
+        this.evaluationResponses = responses;
+        this.isLoadingEvaluations = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des résultats d\'évaluations:', error);
+        this.isLoadingEvaluations = false;
+        this.evaluationResponses = [];
+      }
+    });
+  }
+
+  /**
+   * Formater la date pour l'affichage
+   */
+  formatEvaluationDate(date: string | Date | undefined): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  /**
+   * Obtenir la couleur du score
+   */
+  getScoreColor(percentage?: number): string {
+    if (!percentage) return 'text-gray-600';
+    if (percentage >= 70) return 'text-green-600';
+    if (percentage >= 50) return 'text-yellow-600';
+    return 'text-red-600';
+  }
+
+  /**
+   * Obtenir le label du score
+   */
+  getScoreLabel(percentage?: number): string {
+    if (!percentage) return 'N/A';
+    if (percentage >= 70) return 'Réussi';
+    if (percentage >= 50) return 'Moyen';
+    return 'À améliorer';
+  }
+
+  /**
+   * Voir les détails d'une évaluation
+   */
+  viewEvaluationDetails(evaluationId: number | undefined, responseId: number | undefined): void {
+    console.log('viewEvaluationDetails appelé avec:', { evaluationId, responseId });
+    if (evaluationId && responseId) {
+      const route = ['/evaluations', evaluationId, 'response', responseId];
+      console.log('Navigation vers:', route);
+      this.router.navigate(route).catch(err => {
+        console.error('Erreur de navigation:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de naviguer vers les détails de l\'évaluation'
+        });
+      });
+    } else {
+      console.error('IDs manquants:', { evaluationId, responseId });
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Impossible d\'afficher les détails de l\'évaluation. IDs manquants.'
+      });
+    }
   }
 
   /**

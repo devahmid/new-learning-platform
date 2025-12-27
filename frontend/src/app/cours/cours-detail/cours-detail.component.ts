@@ -84,12 +84,14 @@
 import { Component, OnInit, OnDestroy, inject, effect, runInInjectionContext, Injector } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CourseService } from '../../services/course.service';
+import { EvaluationService } from '../../services/evaluation.service';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FileUploadModule } from 'primeng/fileupload';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Course } from '../../models/course.model';
+import { Evaluation } from '../../models/evaluation.model';
 import { environment } from '../../../environments/environment';
 import { NgClass } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -131,6 +133,10 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
   lessonsBySubcategory: { [key: string]: any[] } = {};
   subcategoryNames: string[] = [];
 
+  // Évaluations du cours
+  evaluations: Evaluation[] = [];
+  isLoadingEvaluations = false;
+
   // Navigation de retour
   
   // Navigation properties (simplified)
@@ -144,6 +150,7 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private courseService: CourseService,
+    private evaluationService: EvaluationService,
     private sanitizer: DomSanitizer
   ) {}
 
@@ -188,7 +195,30 @@ export class CoursDetailComponent implements OnInit, OnDestroy {
 
       // Organiser les leçons par sous-catégories
       this.organizeLessonsBySubcategory();
+
+      // Charger les évaluations du cours
+      this.loadCourseEvaluations(id);
     });
+  }
+
+  loadCourseEvaluations(courseId: number) {
+    this.isLoadingEvaluations = true;
+    this.evaluationService.getEvaluationsByCourse(courseId).subscribe({
+      next: (evaluations: Evaluation[]) => {
+        // Filtrer uniquement les évaluations actives
+        this.evaluations = evaluations.filter(evaluation => evaluation.isActive);
+        this.isLoadingEvaluations = false;
+      },
+      error: (err: any) => {
+        console.error('Erreur lors du chargement des évaluations:', err);
+        this.evaluations = [];
+        this.isLoadingEvaluations = false;
+      }
+    });
+  }
+
+  takeEvaluation(evaluationId: number) {
+    this.router.navigate(['/evaluations', evaluationId]);
   }
 
   private organizeLessonsBySubcategory() {

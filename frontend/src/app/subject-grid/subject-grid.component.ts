@@ -3,6 +3,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { SubjectService } from '../services/subject.service';
 import { RouterModule, Router } from '@angular/router';
 import { ChildContextService } from '../_children-context/_children-context/child-context.service';
+import { EvaluationService } from '../services/evaluation.service';
+import { Evaluation } from '../models/evaluation.model';
 
 @Component({
   selector: 'app-subject-grid',
@@ -21,14 +23,48 @@ export class SubjectGridComponent implements OnInit {
   showPopup = false;
   popupMessage = '';
   
+  // Évaluations générales (sans cours/leçon)
+  generalEvaluations: Evaluation[] = [];
+  isLoadingEvaluations = false;
+  
   private childContext = inject(ChildContextService);
   private router = inject(Router);
   selectedChild = this.childContext.selectedChild;
   
-  constructor(private subjetcService: SubjectService) { }
+  constructor(
+    private subjetcService: SubjectService,
+    private evaluationService: EvaluationService
+  ) { }
 
   ngOnInit(): void {
-  this.subjects  =  this.subjetcService.getSubjects()
+    this.subjects = this.subjetcService.getSubjects();
+    this.loadGeneralEvaluations();
+  }
+
+  loadGeneralEvaluations() {
+    this.isLoadingEvaluations = true;
+    this.evaluationService.getAllEvaluations().subscribe({
+      next: (evaluations: Evaluation[]) => {
+        // Filtrer uniquement les évaluations générales (sans cours ni leçon) et actives
+        this.generalEvaluations = evaluations.filter(evaluation => 
+          evaluation.isActive && 
+          !evaluation.courseId && 
+          !evaluation.lessonId
+        );
+        this.isLoadingEvaluations = false;
+      },
+      error: (err: any) => {
+        console.error('Erreur lors du chargement des évaluations:', err);
+        this.generalEvaluations = [];
+        this.isLoadingEvaluations = false;
+      }
+    });
+  }
+
+  onEvaluationsClick(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.router.navigate(['/evaluations-general']);
   }
   
 

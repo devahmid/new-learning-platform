@@ -1,0 +1,64 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="container mx-auto px-4 max-w-6xl">
+    <!-- En-tête -->
+    <div class="mb-8">
+      <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-4">
+        <a routerLink="/matières" class="hover:text-green-600 transition-colors">
+          <i class="fa-solid fa-home mr-1"></i>Matières
+        </a>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+        <span class="text-green-600 font-medium">Évaluations générales</span>
+      </nav>
+      
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">📋 Évaluations générales</h1>
+      <p class="text-gray-600">Tests de fin de période et évaluations générales</p>
+    </div>
+
+    <!-- Chargement -->
+    <div *ngIf="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <p class="mt-4 text-gray-600">Chargement des évaluations...</p>
+    </div>
+
+    <!-- Aucune évaluation -->
+    <div *ngIf="!isLoading && evaluations.length === 0" class="text-center py-12 bg-white rounded-lg shadow-md">
+      <i class="fa-solid fa-clipboard-question text-6xl text-gray-300 mb-4"></i>
+      <p class="text-gray-600 text-lg mb-2">Aucune évaluation générale disponible pour le moment.</p>
+      <p class="text-gray-500 text-sm">Les évaluations générales apparaîtront ici lorsqu'elles seront créées par les administrateurs.</p>
+    </div>
+
+    <!-- Liste des évaluations -->
+    <div *ngIf="!isLoading && evaluations.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let evaluation of evaluations" 
+           class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all duration-200 border border-gray-200">
+        <div class="flex justify-between items-start mb-4">
+          <h3 class="text-xl font-semibold text-gray-800 flex-1">{{ evaluation.title }}</h3>
+          <p-tag value="Active" severity="success" styleClass="ml-2"></p-tag>
+        </div>
+
+        <p class="text-gray-600 mb-4 line-clamp-2" *ngIf="evaluation.description">
+          {{ evaluation.description }}
+        </p>
+
+        <div class="text-sm text-gray-500 mb-4">
+          <div *ngIf="evaluation.questions?.length">
+            <i class="fa-solid fa-question-circle mr-2"></i>
+            {{ evaluation.questions.length }} question(s)
+          </div>
+          <div *ngIf="evaluation.sections && evaluation.sections.length > 0" class="mt-1">
+            <i class="fa-solid fa-list mr-2"></i>
+            {{ evaluation.sections.length }} section(s)
+          </div>
+        </div>
+
+        <button 
+          (click)="takeEvaluation(evaluation.id!)"
+          class="w-full mt-4 py-2.5 px-4 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-play mr-1"></i>
+          Commencer l'évaluation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

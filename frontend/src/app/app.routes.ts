@@ -215,6 +215,30 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./components/messaging/messaging.component').then((m) => m.MessagingComponent),
       },
+      {
+        path: 'evaluations-general',
+        loadComponent: () =>
+          import('./evaluations/evaluation-general-list/evaluation-general-list.component').then(
+            (m) => m.EvaluationGeneralListComponent
+          ),
+        canActivate: [childGuard],
+      },
+      {
+        path: 'evaluations/:evaluationId/response/:responseId',
+        loadComponent: () =>
+          import('./admin/evaluations/evaluation-response-detail/evaluation-response-detail.component').then(
+            (m) => m.EvaluationResponseDetailComponent
+          ),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'evaluations/:id',
+        loadComponent: () =>
+          import('./evaluations/evaluation-take/evaluation-take.component').then(
+            (m) => m.EvaluationTakeComponent
+          ),
+        canActivate: [childGuard],
+      },
     ],
   },
 
@@ -520,6 +544,43 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/assignments/admin-assignments.component').then(
             (m) => m.AdminAssignmentsComponent
+          ),
+      },
+
+      // 📋 Evaluations management
+      {
+        path: 'evaluations',
+        loadComponent: () =>
+          import('./admin/evaluations/evaluation-list/evaluation-list.component').then(
+            (m) => m.EvaluationListComponent
+          ),
+      },
+      {
+        path: 'evaluations/create',
+        loadComponent: () =>
+          import('./admin/evaluations/evaluation-form/evaluation-form.component').then(
+            (m) => m.EvaluationFormComponent
+          ),
+      },
+      {
+        path: 'evaluations/edit/:id',
+        loadComponent: () =>
+          import('./admin/evaluations/evaluation-form/evaluation-form.component').then(
+            (m) => m.EvaluationFormComponent
+          ),
+      },
+      {
+        path: 'evaluations/results/:evaluationId/response/:responseId',
+        loadComponent: () =>
+          import('./admin/evaluations/evaluation-response-detail/evaluation-response-detail.component').then(
+            (m) => m.EvaluationResponseDetailComponent
+          ),
+      },
+      {
+        path: 'evaluations/results/:id',
+        loadComponent: () =>
+          import('./admin/evaluations/evaluation-results/evaluation-results.component').then(
+            (m) => m.EvaluationResultsComponent
           ),
       },
     ],

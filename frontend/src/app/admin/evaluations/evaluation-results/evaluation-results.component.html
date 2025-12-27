@@ -1,0 +1,113 @@
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold">Résultats de l'évaluation</h1>
+      <p class="text-gray-600 mt-1" *ngIf="evaluation">{{ evaluation.title }}</p>
+    </div>
+    <button
+      (click)="router.navigate(['/admin/evaluations'])"
+      class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 flex items-center gap-2">
+      <i class="fa-solid fa-arrow-left"></i>
+      Retour
+    </button>
+  </div>
+
+  <p-toast></p-toast>
+
+  <!-- Chargement -->
+  <div *ngIf="isLoading" class="text-center py-12">
+    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    <p class="mt-4 text-gray-600">Chargement des résultats...</p>
+  </div>
+
+  <!-- Statistiques générales -->
+  <div *ngIf="!isLoading && evaluation" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow-md p-4">
+      <div class="text-sm text-gray-600 mb-1">Total de réponses</div>
+      <div class="text-2xl font-bold text-gray-800">{{ responses.length }}</div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-4">
+      <div class="text-sm text-gray-600 mb-1">Score moyen</div>
+      <div class="text-2xl font-bold text-blue-600">
+        {{ getAverageScore() }}%
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-4">
+      <div class="text-sm text-gray-600 mb-1">Taux de réussite</div>
+      <div class="text-2xl font-bold text-green-600">
+        {{ getSuccessRate() }}%
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-4">
+      <div class="text-sm text-gray-600 mb-1">Questions</div>
+      <div class="text-2xl font-bold text-gray-800">
+        {{ evaluation.questions?.length || 0 }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des réponses -->
+  <div *ngIf="!isLoading && responses.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
+    <p-table [value]="responses" [paginator]="true" [rows]="10" styleClass="p-datatable-striped">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Enfant</th>
+          <th>Classe</th>
+          <th>Score</th>
+          <th>Résultat</th>
+          <th>Date/Heure</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-response>
+        <tr (click)="$event.stopPropagation()">
+          <td>
+            <div class="font-semibold">{{ response.childName || 'N/A' }}</div>
+            <div class="text-xs text-gray-500" *ngIf="response.childId">ID: {{ response.childId }}</div>
+          </td>
+          <td>
+            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm">
+              {{ response.classeName || 'N/A' }}
+            </span>
+          </td>
+          <td>
+            <div class="font-bold text-lg" [ngClass]="{
+              'text-green-600': (response.percentage || 0) >= 70,
+              'text-yellow-600': (response.percentage || 0) >= 50 && (response.percentage || 0) < 70,
+              'text-red-600': (response.percentage || 0) < 50
+            }">
+              {{ response.percentage || 0 }}%
+            </div>
+            <div class="text-xs text-gray-500">
+              {{ response.correctAnswers || 0 }}/{{ response.totalQuestions || 0 }} bonnes réponses
+            </div>
+          </td>
+          <td>
+            <p-tag 
+              [value]="getScoreLabel(response.percentage || 0)" 
+              [severity]="getScoreSeverity(response.percentage)"></p-tag>
+          </td>
+          <td>
+            <div class="text-sm">{{ formatDate(response.submittedAt) }}</div>
+          </td>
+          <td>
+            <button
+              type="button"
+              (click)="viewDetails(response); $event.stopPropagation()"
+              class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
+              <i class="fa-solid fa-eye mr-1"></i>
+              Détails
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Aucune réponse -->
+  <div *ngIf="!isLoading && responses.length === 0" class="text-center py-12 bg-white rounded-lg shadow-md">
+    <i class="fa-solid fa-inbox text-6xl text-gray-300 mb-4"></i>
+    <p class="text-gray-600 text-lg">Aucune réponse soumise pour cette évaluation.</p>
+  </div>
+</div>
+

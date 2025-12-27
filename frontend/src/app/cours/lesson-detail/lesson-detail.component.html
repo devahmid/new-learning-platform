@@ -136,7 +136,7 @@
 
         <!-- Container principal de la vidéo -->
         <div class="video-container relative w-full aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-lg mb-12"
-          *ngIf="lesson?.videoUrl"
+          *ngIf="lesson.videoUrl"
           (click)="closeSpeedMenu()">
 
           <!-- YOUTUBE -->
@@ -268,7 +268,7 @@
         </div>
 
         <!-- Container PDF si PDF disponible (affiché même s'il y a une vidéo) -->
-        <div *ngIf="isPdfFile(lesson?.fileUrl) && lesson?.fileUrl && getSafePdfUrl(lesson?.fileUrl)"
+        <div *ngIf="isPdfFile(lesson.fileUrl) && lesson.fileUrl && getSafePdfUrl(lesson.fileUrl)"
           class="relative w-full bg-white rounded-2xl overflow-hidden shadow-lg mb-12"
           style="min-height: 600px; height: 80vh;">
           <!-- En-tête PDF pour différencier du lecteur vidéo -->
@@ -277,19 +277,19 @@
               <i class="fa-solid fa-file-pdf text-2xl"></i>
               <div>
                 <h3 class="font-bold text-lg">Document PDF</h3>
-                <p class="text-sm text-red-100">{{ getFileName(lesson?.fileUrl || '') }}</p>
+                <p class="text-sm text-red-100">{{ getFileName(lesson.fileUrl || '') }}</p>
               </div>
             </div>
             <div class="flex gap-2">
               <button 
-                (click)="openPdfInNewTab(lesson?.fileUrl)"
+                (click)="openPdfInNewTab(lesson.fileUrl)"
                 class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 text-sm"
                 title="Ouvrir le PDF dans un nouvel onglet">
                 <i class="fa-solid fa-external-link-alt"></i>
                 <span class="hidden sm:inline">Ouvrir</span>
               </button>
               <button 
-                (click)="downloadPdf(lesson?.fileUrl)"
+                (click)="downloadPdf(lesson.fileUrl)"
                 class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 text-sm"
                 title="Télécharger le PDF">
                 <i class="fa-solid fa-download"></i>
@@ -301,14 +301,14 @@
           <!-- Boutons d'action pour le PDF (ancienne position, gardés pour compatibilité mobile) -->
           <div class="absolute top-20 right-4 z-10 flex gap-2 sm:hidden">
             <button 
-              (click)="openPdfInNewTab(lesson?.fileUrl)"
+              (click)="openPdfInNewTab(lesson.fileUrl)"
               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
               title="Ouvrir le PDF dans un nouvel onglet">
               <i class="fa-solid fa-external-link-alt"></i>
               <span class="hidden sm:inline">Ouvrir</span>
             </button>
             <button 
-              (click)="downloadPdf(lesson?.fileUrl)"
+              (click)="downloadPdf(lesson.fileUrl)"
               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
               title="Télécharger le PDF">
               <i class="fa-solid fa-download"></i>
@@ -318,7 +318,7 @@
           
           <!-- Viewer PDF avec Google Docs Viewer -->
           <iframe 
-            [src]="getSafePdfUrl(lesson?.fileUrl)! | safe:'resourceUrl'"
+            [src]="getSafePdfUrl(lesson.fileUrl)! | safe:'resourceUrl'"
             class="w-full h-full border-0"
             style="min-height: 600px; margin-top: 60px;"
             frameborder="0"
@@ -336,7 +336,7 @@
               <p class="text-lg font-medium text-gray-700 mb-2">Impossible d'afficher le PDF</p>
               <p class="text-sm text-gray-500 mb-4">Le PDF peut être ouvert dans un nouvel onglet</p>
               <button 
-                (click)="openPdfInNewTab(lesson?.fileUrl)"
+                (click)="openPdfInNewTab(lesson.fileUrl)"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
                 <i class="fa-solid fa-external-link-alt mr-2"></i>
                 Ouvrir le PDF
@@ -346,7 +346,7 @@
         </div>
 
         <!-- Message si pas de vidéo et pas de PDF -->
-        <div *ngIf="!lesson?.videoUrl && !isPdfFile(lesson?.fileUrl)"
+        <div *ngIf="!lesson.videoUrl && !isPdfFile(lesson.fileUrl)"
           class="relative w-full aspect-video bg-gray-100 rounded-2xl flex items-center justify-center mb-12">
           <div class="text-center text-gray-500">
             <i class="fa-solid fa-video-slash text-6xl mb-4"></i>
@@ -357,7 +357,7 @@
 
         <!-- Container de la carte mentale -->
         <div class="mindmap-container relative w-full aspect-video bg-white rounded-2xl overflow-hidden shadow-lg mb-12 cursor-pointer group hover:shadow-xl transition-all duration-300"
-             *ngIf="lesson?.mindMapUrl"
+             *ngIf="lesson.mindMapUrl"
              (click)="onMindmapClick()">
           <img [src]="lesson.mindMapUrl" 
                [alt]="'Carte mentale - ' + lesson.title"
@@ -377,7 +377,7 @@
         </div>
 
         <!-- Message si pas de carte mentale -->
-        <div *ngIf="!lesson?.mindMapUrl && lesson?.videoUrl"
+        <div *ngIf="!lesson.mindMapUrl && lesson.videoUrl"
           class="relative w-full aspect-video bg-gray-50 rounded-2xl flex items-center justify-center mb-12 border-2 border-dashed border-gray-300">
           <div class="text-center text-gray-400">
             <i class="fa-solid fa-brain text-4xl mb-2"></i>
@@ -387,7 +387,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Support de cours - Dynamique -->
-          <div *ngIf="lesson?.fileUrl" 
+          <div *ngIf="lesson.fileUrl" 
                class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
                (click)="downloadSupportFile()">
             <div class="flex items-center gap-4">
@@ -403,7 +403,7 @@
           </div>
           
           <!-- Message si pas de support -->
-          <div *ngIf="!lesson?.fileUrl" 
+          <div *ngIf="!lesson.fileUrl" 
                class="bg-gray-50 rounded-xl p-6 shadow-sm border-2 border-dashed border-gray-300">
             <div class="flex items-center gap-4">
               <i class="fa-solid fa-file-slash text-4xl text-gray-400"></i>
@@ -428,6 +428,49 @@
               <div>
                 <h3 class="font-bold text-gray-500">Quiz</h3>
                 <p class="text-sm text-gray-400">Bientôt disponible</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Évaluations -->
+        <div id="evaluations-section" class="mt-8" *ngIf="evaluations && evaluations.length > 0">
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <i class="fa-solid fa-clipboard-check text-purple-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800">Évaluations</h3>
+            </div>
+
+            <!-- Liste des évaluations -->
+            <div class="space-y-4">
+              <div *ngFor="let evaluation of evaluations" 
+                   class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-5 border border-purple-200 hover:shadow-lg transition-all duration-200">
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex-1">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-1">{{ evaluation.title }}</h4>
+                    <p class="text-sm text-gray-600 mb-2" *ngIf="evaluation.description">
+                      {{ evaluation.description }}
+                    </p>
+                    <div class="flex items-center gap-4 text-xs text-gray-500">
+                      <span *ngIf="evaluation.questions?.length">
+                        <i class="fa-solid fa-question-circle mr-1"></i>
+                        {{ evaluation.questions.length }} question(s)
+                      </span>
+                    </div>
+                  </div>
+                  <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                    Active
+                  </span>
+                </div>
+                <button 
+                  (click)="takeEvaluation(evaluation.id!)"
+                  [disabled]="!evaluation.id"
+                  class="w-full mt-3 py-2.5 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <i class="fa-solid fa-play mr-1"></i>
+                  Commencer l'évaluation
+                </button>
               </div>
             </div>
           </div>
@@ -880,7 +923,7 @@
           <div class="text-white">
             <h2 class="text-xl font-bold flex items-center gap-2">
               <i class="fa-solid fa-brain"></i>
-              {{ lesson?.title }} - Carte mentale
+              {{ lesson.title }} - Carte mentale
             </h2>
             <p class="text-sm text-gray-300">Cliquez en dehors ou appuyez sur Échap pour fermer</p>
           </div>
@@ -896,8 +939,8 @@
       
       <!-- Image de la carte mentale -->
       <div class="w-full h-full flex items-center justify-center p-8 pt-20">
-        <img [src]="lesson?.mindMapUrl" 
-             [alt]="'Carte mentale - ' + lesson?.title"
+        <img [src]="lesson.mindMapUrl" 
+             [alt]="'Carte mentale - ' + lesson.title"
              class="max-w-full max-h-full object-contain">
       </div>
       

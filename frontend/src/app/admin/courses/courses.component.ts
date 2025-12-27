@@ -126,6 +126,14 @@ export class CoursesComponent implements OnInit {
       color: 'bg-emerald-500',
       count: 0, // Sera mis à jour avec les données réelles
     },
+    {
+      icon: 'fa-solid fa-clipboard-check',
+      label: 'Évaluations',
+      desc: 'Créer et gérer les évaluations',
+      path: '/admin/evaluations',
+      color: 'bg-violet-500',
+      count: 0, // Sera mis à jour avec les données réelles
+    },
   ];
 
   stats = {
@@ -144,7 +152,12 @@ export class CoursesComponent implements OnInit {
   }
 
   goTo(path: string) {
-    this.router.navigate(['/admin/courses', path]);
+    // Si le chemin commence par /admin, naviguer directement
+    if (path.startsWith('/admin')) {
+      this.router.navigate([path]);
+    } else {
+      this.router.navigate(['/admin/courses', path]);
+    }
   }
 
   private async loadStats() {

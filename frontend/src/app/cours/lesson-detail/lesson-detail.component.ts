@@ -14,6 +14,8 @@ import { Exercise } from '../../models/exercise.model';
 import { VideoTrackingService, VideoWatchSession } from '../../services/video-tracking.service';
 import { Subscription } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { EvaluationService } from '../../services/evaluation.service';
+import { Evaluation } from '../../models/evaluation.model';
 
 @Component({
   selector: 'app-lesson-detail',
@@ -116,6 +118,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   // PDF viewer error state
   pdfViewerError = false;
 
+  // Évaluations de la leçon
+  evaluations: Evaluation[] = [];
+  isLoadingEvaluations = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -123,7 +129,8 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     private courseService: CourseService,
     private location: Location,
     private videoTrackingService: VideoTrackingService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private evaluationService: EvaluationService
   ) {}
 
   ngOnInit() {
@@ -211,6 +218,9 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         // Charger les données du quiz et des exercices maintenant qu'on a le courseId
         this.loadQuizData();
         this.loadExerciseData();
+        
+        // Charger les évaluations de la leçon
+        this.loadLessonEvaluations(apiLesson.id);
         
         // Charger toutes les leçons du cours pour la navigation
         this.loadCourseLessons();
@@ -1447,6 +1457,39 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   }
 
   // Exercise methods
+  loadLessonEvaluations(lessonId: number) {
+    console.log('Chargement des évaluations pour la leçon ID:', lessonId);
+    this.isLoadingEvaluations = true;
+    this.evaluationService.getEvaluationsByLesson(lessonId).subscribe({
+      next: (evaluations: Evaluation[]) => {
+        console.log('Évaluations reçues de l\'API:', evaluations);
+        // Filtrer uniquement les évaluations actives
+        this.evaluations = evaluations.filter(evaluation => {
+          console.log('Évaluation:', evaluation, 'ID:', evaluation.id, 'isActive:', evaluation.isActive);
+          return evaluation.isActive;
+        });
+        console.log('Évaluations actives filtrées:', this.evaluations);
+        this.isLoadingEvaluations = false;
+      },
+      error: (err: any) => {
+        console.error('Erreur lors du chargement des évaluations:', err);
+        this.evaluations = [];
+        this.isLoadingEvaluations = false;
+      }
+    });
+  }
+
+  takeEvaluation(evaluationId: number | undefined) {
+    if (!evaluationId) {
+      console.error('ID d\'évaluation manquant');
+      console.error('Évaluations disponibles:', this.evaluations);
+      return;
+    }
+    console.log('Navigation vers l\'évaluation ID:', evaluationId);
+    console.log('Évaluation complète:', this.evaluations.find(e => e.id === evaluationId));
+    this.router.navigate(['/evaluations', evaluationId]);
+  }
+
   loadExerciseData() {
     if (!this.lessonId) {
       console.warn('No lesson ID available for loading exercise data');
