@@ -23,6 +23,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   errorMessage: string = '';
   sessionMessage: string = '';
+  returnUrl = '/no-children-info';
 
   constructor(
     private fb: FormBuilder,
@@ -41,6 +42,7 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     // Vérifier s'il y a des paramètres de redirection (token expiré, etc.)
     this.route.queryParams.subscribe(params => {
+      this.returnUrl = params['returnUrl'] || '/no-children-info';
       if (params['reason'] === 'token-expired') {
         this.sessionMessage = params['message'] || 'Votre session a expiré. Veuillez vous reconnecter.';
         this.messageService.add({ 
@@ -110,6 +112,8 @@ export class LoginComponent implements OnInit {
           } else if (userData?.status === 'rejected') {
             // Rediriger vers la page de compte rejeté
             this.router.navigate(['/account-rejected']);
+          } else if (this.returnUrl && this.returnUrl !== '/no-children-info') {
+            this.router.navigateByUrl(this.returnUrl, { skipLocationChange: false });
           } else {
             // Utilisateur approuvé, rediriger vers la sélection des enfants
             setTimeout(() => this.router.navigate(['/no-children-info']), 500);

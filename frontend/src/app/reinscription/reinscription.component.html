@@ -1,0 +1,302 @@
+<div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(29,158,117,.16),_rgba(255,255,255,1)_48%),linear-gradient(180deg,_#f7faf8_0%,_#ffffff_100%)] px-4 py-10">
+  <div class="mx-auto flex max-w-7xl flex-col gap-8">
+    <section class="overflow-hidden rounded-[28px] border border-[#d9eadf] bg-white/90 shadow-[0_30px_90px_rgba(15,23,42,.10)]">
+      <div class="grid gap-8 p-6 md:p-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+        <div>
+          <div class="mb-4 inline-flex rounded-full bg-[#e6f9f2] px-4 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#0F6E56]">
+            Réinscription cours 2026/2027
+          </div>
+          <h1 class="max-w-2xl text-3xl font-black leading-tight text-[#10312a] md:text-5xl">
+            Réinscription aux cours pour l'année prochaine
+          </h1>
+          <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
+            Ce formulaire sert uniquement à valider ou déposer la réinscription de vos enfants aux cours. Si vous êtes déjà inscrit et connecté, vos informations parent et celles de vos enfants connus sont reprises automatiquement.
+            Si vous n'êtes pas connecté, utilisez le bouton de connexion pour récupérer vos données et celles de vos enfants.
+          </p>
+
+          <p class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            Attention : il s'agit d'une pré-inscription, pas d'une confirmation définitive. Après validation, une caution de 50 € sera demandée afin d'éviter les réservations de places non suivies.
+          </p>
+
+          <div class="mt-6 flex flex-wrap gap-3">
+            <div class="rounded-2xl border border-[#d9eadf] bg-[#f5fdf8] px-4 py-3 text-sm text-[#165845]">
+              <span class="block font-semibold">Familles connectées</span>
+              Préremplissage du compte et des enfants
+            </div>
+            <div class="rounded-2xl border border-[#d9e4f3] bg-[#f4f8ff] px-4 py-3 text-sm text-[#204a87]">
+              <span class="block font-semibold">Nouveaux parents</span>
+              Accès direct sans compte préalable
+            </div>
+          </div>
+
+          <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <button type="button" (click)="chooseFlow('renewal')" class="rounded-[22px] border-2 p-5 text-left transition shadow-sm" [class.border-[#1D9E75]]="selectedFlow === 'renewal'" [class.bg-[#e6f9f2]]="selectedFlow === 'renewal'" [class.border-slate-200]="selectedFlow !== 'renewal'" [class.bg-white]="selectedFlow !== 'renewal'">
+              <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[#0F6E56]">Je renouvelle</div>
+              <div class="mt-2 text-xl font-black text-[#10312a]">Réinscrire mes enfants aux cours</div>
+              <p class="mt-2 text-sm text-slate-600">Nécessite une connexion pour récupérer le parent et les enfants déjà connus.</p>
+            </button>
+
+            <button type="button" (click)="chooseFlow('new')" class="rounded-[22px] border-2 p-5 text-left transition shadow-sm" [class.border-[#1D9E75]]="selectedFlow === 'new'" [class.bg-[#e6f9f2]]="selectedFlow === 'new'" [class.border-slate-200]="selectedFlow !== 'new'" [class.bg-white]="selectedFlow !== 'new'">
+              <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[#0F6E56]">Nouvelle demande</div>
+              <div class="mt-2 text-xl font-black text-[#10312a]">Inscription pour la prochaine année</div>
+              <p class="mt-2 text-sm text-slate-600">Pour les familles qui n'ont pas encore de dossier cette année.</p>
+            </button>
+          </div>
+        </div>
+
+        <div class="rounded-[24px] border border-[#d9eadf] bg-gradient-to-br from-[#f4fbf7] to-white p-6 shadow-inner">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#0F6E56]">Mode de saisie</p>
+              <p class="mt-1 text-xl font-bold text-[#10312a]">
+                {{ hasConnectedProfile ? 'Compte connecté' : 'Accès public' }}
+              </p>
+            </div>
+            <div class="rounded-2xl bg-[#e6f9f2] px-4 py-3 text-center text-[#0F6E56]">
+              <div class="text-2xl font-black">{{ children.length }}</div>
+              <div class="text-xs font-semibold uppercase tracking-[0.18em]">Enfant(s)</div>
+            </div>
+          </div>
+
+          <div class="mt-5 space-y-3 text-sm text-slate-600">
+            <div class="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm">
+              <span class="mt-0.5 text-[#1D9E75]">●</span>
+              <p>Les informations du parent sont reprises depuis votre profil quand vous êtes connecté.</p>
+            </div>
+            <div class="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm">
+              <span class="mt-0.5 text-[#1D9E75]">●</span>
+              <p>Chaque enfant peut être modifié avant l'envoi final.</p>
+            </div>
+            <div class="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm">
+              <span class="mt-0.5 text-[#1D9E75]">●</span>
+              <p>La validation reste possible pour les familles qui ne sont pas encore inscrites cette année.</p>
+            </div>
+          </div>
+
+          <div *ngIf="requiresLogin" class="mt-4 rounded-[20px] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <div class="font-semibold">Vous avez déjà un compte ? Connectez-vous avant de continuer.</div>
+            <p class="mt-1 leading-6">La connexion permet de récupérer automatiquement les informations du parent et des enfants déjà inscrits, pour éviter de tout ressaisir.</p>
+            <a routerLink="/login" class="mt-3 inline-flex items-center rounded-full bg-amber-600 px-4 py-2 font-semibold text-white no-underline hover:bg-amber-700 transition">
+              Se connecter
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section *ngIf="loadingProfile" class="rounded-[24px] border border-[#d9eadf] bg-white p-6 text-sm text-slate-600 shadow-sm">
+      Préremplissage du profil en cours...
+    </section>
+
+    <section *ngIf="selectedFlow === 'renewal' && !hasConnectedProfile && !loadingProfile" class="rounded-[24px] border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <h2 class="text-2xl font-bold text-amber-900">Connexion requise pour la réinscription</h2>
+      <p class="mt-2 text-sm leading-7 text-amber-900/80">
+        Pour renouveler l'inscription aux cours, vous devez vous connecter afin de retrouver automatiquement vos informations parent et la liste de vos enfants déjà inscrits.
+      </p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <a routerLink="/login" [queryParams]="{ returnUrl: '/reinscription?mode=renewal', mode: 'renewal' }" class="inline-flex items-center rounded-full bg-amber-600 px-5 py-3 font-semibold text-white no-underline hover:bg-amber-700 transition">
+          Se connecter pour continuer
+        </a>
+        <button type="button" (click)="chooseFlow('new')" class="inline-flex items-center rounded-full border border-amber-300 bg-white px-5 py-3 font-semibold text-amber-900 transition hover:bg-amber-100">
+          Je suis une nouvelle famille
+        </button>
+      </div>
+    </section>
+
+    <ng-container *ngIf="!submitted; else successState">
+      <form *ngIf="selectedFlow && !(selectedFlow === 'renewal' && !hasConnectedProfile)" [formGroup]="form" (ngSubmit)="submit()" class="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+        <div class="space-y-8">
+          <section class="rounded-[24px] border border-[#e8eceb] bg-white p-6 shadow-sm md:p-8">
+            <div class="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <h2 class="text-2xl font-bold text-[#10312a]">Informations du parent</h2>
+                <p class="mt-1 text-sm text-slate-500">Vérifiez les informations du compte parent utilisées pour la réinscription aux cours.</p>
+              </div>
+              <div class="rounded-full bg-[#f5fdf8] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#0F6E56]">
+                {{ profileMode === 'connected' ? 'Prérempli' : 'Saisie manuelle' }}
+              </div>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+              <label class="space-y-2 md:col-span-2">
+                <span class="text-sm font-semibold text-slate-700">Nom complet *</span>
+                <input formControlName="fullName" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none transition focus:border-[#1D9E75] focus:bg-white" placeholder="Prénom et nom" />
+                <span *ngIf="form.get('fullName')?.touched && form.get('fullName')?.invalid" class="text-sm text-red-600">Le nom complet est obligatoire.</span>
+              </label>
+
+              <label class="space-y-2">
+                <span class="text-sm font-semibold text-slate-700">Email *</span>
+                <input formControlName="email" type="email" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none transition focus:border-[#1D9E75] focus:bg-white" placeholder="vous@exemple.com" />
+                <span *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')" class="text-sm text-red-600">L'email est obligatoire.</span>
+                <span *ngIf="form.get('email')?.touched && form.get('email')?.hasError('email')" class="text-sm text-red-600">Format d'email invalide.</span>
+              </label>
+
+              <label class="space-y-2">
+                <span class="text-sm font-semibold text-slate-700">Téléphone *</span>
+                <input formControlName="phone" type="tel" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none transition focus:border-[#1D9E75] focus:bg-white" placeholder="06 12 34 56 78" />
+                <span *ngIf="form.get('phone')?.touched && form.get('phone')?.hasError('required')" class="text-sm text-red-600">Le téléphone est obligatoire.</span>
+                <span *ngIf="form.get('phone')?.touched && form.get('phone')?.hasError('invalidPhone')" class="text-sm text-red-600">Numéro français invalide.</span>
+              </label>
+            </div>
+          </section>
+
+          <section formArrayName="children" class="rounded-[24px] border border-[#e8eceb] bg-white p-6 shadow-sm md:p-8">
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 class="text-2xl font-bold text-[#10312a]">Enfants à réinscrire aux cours</h2>
+                <p class="mt-1 text-sm text-slate-500">Les enfants connus du compte sont préremplis. Si vous n'êtes pas connecté, cliquez sur se connecter pour récupérer vos enfants.</p>
+              </div>
+              <button type="button" (click)="addChild()" class="inline-flex items-center rounded-full bg-[#1D9E75] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F6E56]">
+                + Ajouter un enfant
+              </button>
+            </div>
+
+            <div class="space-y-5">
+              <div *ngFor="let child of children.controls; let i = index" [formGroupName]="i" class="rounded-[22px] border border-slate-200 bg-[#fafcfb] p-5 md:p-6">
+                <div class="mb-5 flex items-start justify-between gap-4">
+                  <div>
+                    <div class="inline-flex rounded-full bg-[#e6f9f2] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#0F6E56]">
+                      Enfant {{ i + 1 }}
+                    </div>
+                    <p class="mt-2 text-sm text-slate-500">Confirmez les données de cet enfant pour la liste des cours 2026/2027.</p>
+                  </div>
+                  <button *ngIf="children.length > 1" type="button" (click)="removeChild(i)" class="rounded-full border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50">
+                    Retirer
+                  </button>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <label class="space-y-2">
+                    <span class="text-sm font-semibold text-slate-700">Prénom *</span>
+                    <input formControlName="firstName" type="text" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#1D9E75]" placeholder="Prénom" />
+                  </label>
+
+                  <label class="space-y-2">
+                    <span class="text-sm font-semibold text-slate-700">Nom *</span>
+                    <input formControlName="lastName" type="text" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#1D9E75]" placeholder="Nom" />
+                  </label>
+
+                  <label class="space-y-2">
+                    <span class="text-sm font-semibold text-slate-700">Date de naissance *</span>
+                    <input formControlName="birthDate" type="date" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#1D9E75]" />
+                    <span *ngIf="child.get('birthDate')?.touched && child.get('birthDate')?.hasError('tooYoung')" class="text-sm text-red-600">L'enfant doit avoir au moins 4 ans.</span>
+                  </label>
+
+                  <label class="space-y-2">
+                    <span class="text-sm font-semibold text-slate-700">Niveau d'arabe *</span>
+                    <select formControlName="arabicLevel" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#1D9E75]">
+                      <option *ngFor="let level of arabicLevels" [value]="level.value">{{ level.label }}</option>
+                    </select>
+                    <span *ngIf="profileMode === 'connected' && child.get('sourceChildId')?.value" class="text-xs text-slate-500">
+                      Niveau actuel prérempli depuis le dossier de l'enfant.
+                    </span>
+                  </label>
+                </div>
+
+                <div class="mt-5 rounded-[20px] border border-dashed border-[#cfe7d9] bg-white p-4">
+                  <p class="text-sm font-semibold text-[#0F6E56]">Contraintes horaires / activités extrascolaires</p>
+                  <div class="mt-3 flex flex-wrap gap-3">
+                    <label class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700">
+                      <input type="checkbox" formControlName="hasActivityOnWednesday" />
+                      Mercredi
+                    </label>
+                    <label class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700">
+                      <input type="checkbox" formControlName="hasActivityOnSaturday" />
+                      Samedi
+                    </label>
+                    <label class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700">
+                      <input type="checkbox" formControlName="hasActivityOnSunday" />
+                      Dimanche
+                    </label>
+                  </div>
+
+                  <label class="mt-4 block space-y-2">
+                    <span class="text-sm font-semibold text-slate-700">Précisez les horaires exacts si besoin</span>
+                    <textarea formControlName="activityDetails" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#1D9E75]" placeholder="Ex. Mercredi 13h-14h, Samedi 10h-11h..."></textarea>
+                  </label>
+
+                  <span *ngIf="child.hasError('activityDetailsRequired')" class="mt-2 block text-sm text-red-600">Les créneaux exacts sont requis si une activité est cochée.</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="rounded-[24px] border border-[#e8eceb] bg-white p-6 shadow-sm md:p-8">
+            <div class="grid gap-5 md:grid-cols-[1fr_auto] md:items-start">
+              <div>
+                <h2 class="text-2xl font-bold text-[#10312a]">Validation finale</h2>
+                <p class="mt-1 text-sm text-slate-500">Confirmez l'envoi de la demande de réinscription aux cours.</p>
+              </div>
+
+              <label class="flex cursor-pointer items-start gap-3 rounded-[18px] border border-slate-200 bg-[#fafcfb] p-4 text-sm text-slate-700">
+                <input formControlName="acceptedConditions" type="checkbox" class="mt-1" />
+                <span>
+                  J'autorise l'association à utiliser les données saisies pour traiter la réinscription aux cours et je confirme que les informations fournies sont exactes.
+                </span>
+              </label>
+            </div>
+
+            <span *ngIf="form.get('acceptedConditions')?.touched && form.get('acceptedConditions')?.invalid" class="mt-3 block text-sm text-red-600">Vous devez accepter les conditions pour continuer.</span>
+          </section>
+
+          <div *ngIf="errorMessage" class="rounded-[20px] border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
+            {{ errorMessage }}
+          </div>
+
+          <div class="flex flex-wrap gap-4">
+            <button type="submit" [disabled]="submitting" class="inline-flex items-center justify-center rounded-full bg-[#10312a] px-6 py-3 text-base font-semibold text-white transition hover:bg-[#0F6E56] disabled:cursor-not-allowed disabled:opacity-60">
+              {{ submitting ? 'Envoi en cours...' : 'Envoyer la réinscription' }}
+            </button>
+            <a href="/" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-base font-semibold text-slate-700 transition hover:border-[#1D9E75] hover:text-[#0F6E56]">
+              Retour à l'accueil
+            </a>
+          </div>
+        </div>
+
+        <aside class="space-y-6">
+          <div class="rounded-[24px] border border-[#d9eadf] bg-[#f5fdf8] p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#0F6E56]">À retenir</p>
+            <h3 class="mt-2 text-2xl font-bold text-[#10312a]">Réinscription des enfants aux cours</h3>
+            <p class="mt-3 text-sm leading-7 text-slate-600">
+              Les parents déjà inscrits retrouvent leurs informations et celles de leurs enfants connectés. Les nouvelles familles peuvent déposer une demande, mais pour récupérer des enfants déjà connus, il faut se connecter.
+            </p>
+          </div>
+
+          <div class="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Contrôle rapide</p>
+            <div class="mt-4 space-y-3 text-sm text-slate-600">
+              <div class="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 px-4 py-3">
+                <span>Parent connecté</span>
+                <span class="font-semibold text-[#0F6E56]">{{ hasConnectedProfile ? 'Oui' : 'Non' }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 px-4 py-3">
+                <span>Nombre d'enfants</span>
+                <span class="font-semibold text-[#0F6E56]">{{ children.length }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 px-4 py-3">
+                <span>Validation des données</span>
+                <span class="font-semibold text-[#0F6E56]">Obligatoire</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </form>
+    </ng-container>
+
+    <ng-template #successState>
+      <section class="mx-auto max-w-3xl rounded-[28px] border border-[#d9eadf] bg-white p-8 text-center shadow-[0_25px_80px_rgba(15,23,42,.10)]">
+        <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#e6f9f2] text-4xl text-[#0F6E56]">✓</div>
+        <h2 class="mt-6 text-3xl font-black text-[#10312a]">Réinscription envoyée</h2>
+        <p class="mt-4 text-base leading-7 text-slate-600">{{ successMessage }}</p>
+        <div class="mt-8 flex flex-wrap justify-center gap-4">
+          <a href="/" class="inline-flex items-center justify-center rounded-full bg-[#10312a] px-6 py-3 text-base font-semibold text-white transition hover:bg-[#0F6E56]">
+            Retour à l'accueil
+          </a>
+          <a href="/mon-compte" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-base font-semibold text-slate-700 transition hover:border-[#1D9E75] hover:text-[#0F6E56]">
+            Ouvrir mon compte
+          </a>
+        </div>
+      </section>
+    </ng-template>
+  </div>
+</div>

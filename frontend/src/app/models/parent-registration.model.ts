@@ -15,6 +15,7 @@ export interface ParentRegistration {
   email: string;
   phone: string;
   acceptedConditions: boolean;
+  wasRegisteredLastYear?: boolean;
   previousInscription?: boolean;
   children: Child[];
 }

@@ -74,6 +74,18 @@ export const routes: Routes = [
             (m) => m.ContactComponent
           ),
       },
+      {
+        path: 'reinscription',
+        loadComponent: () =>
+          import('./reinscription/reinscription.component').then(
+            (m) => m.ReinscriptionComponent
+          ),
+      },
+      {
+        path: 'inscription-annee-prochaine',
+        redirectTo: 'reinscription',
+        pathMatch: 'full',
+      },
 
       // {
       //   path: 'matières',

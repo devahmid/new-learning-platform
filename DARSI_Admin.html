@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DARSI — Administration</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f1;min-height:100vh}
+/* Header */
+.topbar{background:#1D9E75;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-logo{width:34px;height:34px;background:rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px}
+.topbar-title{color:#fff;font-weight:700;font-size:16px}
+.topbar-sub{color:rgba(255,255,255,.7);font-size:12px;margin-left:4px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.save-btn{background:#fff;color:#1D9E75;border:none;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.save-btn:hover{background:#e6f9f2}
+.reset-btn{background:transparent;color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.4);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.reset-btn:hover{background:rgba(255,255,255,.1)}
+/* Layout */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px)}
+/* Sidebar */
+.sidebar{background:#fff;border-right:1px solid #e8e8e8;padding:1.5rem 0}
+.sidebar-section{margin-bottom:0.5rem}
+.sidebar-label{font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.08em;padding:0 1.25rem;margin-bottom:6px}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:10px 1.25rem;cursor:pointer;font-size:14px;color:#555;font-weight:500;transition:all .15s}
+.sidebar-item:hover{background:#f5f5f5;color:#1a2e1a}
+.sidebar-item.active{background:#e6f9f2;color:#1D9E75;font-weight:700;border-right:3px solid #1D9E75}
+.sidebar-icon{font-size:16px;width:20px;text-align:center}
+/* Main */
+.main{padding:2rem;overflow-y:auto}
+.page{display:none}.page.active{display:block}
+.page-title{font-size:20px;font-weight:800;color:#1a2e1a;margin-bottom:6px}
+.page-sub{font-size:13px;color:#888;margin-bottom:2rem}
+/* Cards */
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:1.5rem;overflow:hidden}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid #f0f0f0}
+.card-title{font-size:14px;font-weight:700;color:#1a2e1a}
+.card-body{padding:1.25rem}
+/* Classe row */
+.classe-row{display:grid;grid-template-columns:60px 140px 1fr 120px 120px 90px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5}
+.classe-row:last-child{border-bottom:none}
+.classe-row.header{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.05em;padding-bottom:8px}
+.tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700}
+.tag-arabe{background:#e1f0ff;color:#1a5cb5}
+.tag-croyance{background:#f3e8ff;color:#7c3aed}
+/* Capacité bar */
+.cap-wrap{display:flex;align-items:center;gap:6px}
+.cap-bar{flex:1;height:6px;background:#e0e0e0;border-radius:99px;overflow:hidden}
+.cap-fill{height:100%;border-radius:99px;background:#1D9E75;transition:width .3s}
+.cap-fill.warn{background:#f0a030}.cap-fill.full{background:#e05050}
+.cap-txt{font-size:12px;font-weight:700;white-space:nowrap}
+.cap-txt.ok{color:#1D9E75}.cap-txt.warn{color:#f0a030}.cap-txt.full{color:#e05050}
+/* Toggle switch */
+.toggle{position:relative;width:38px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:#ccc;border-radius:99px;cursor:pointer;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-slider{background:#1D9E75}
+.toggle input:checked+.toggle-slider:before{transform:translateX(16px)}
+/* Form controls */
+.f-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:10px;flex-wrap:wrap}
+.f-group{display:flex;flex-direction:column;gap:4px}
+.f-group label{font-size:12px;font-weight:600;color:#666}
+.f-group input,.f-group select{padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;background:#fafafa;color:#1a2e1a;outline:none}
+.f-group input:focus,.f-group select:focus{border-color:#1D9E75}
+/* Buttons */
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;border:none;transition:all .15s}
+.btn-green{background:#1D9E75;color:#fff}.btn-green:hover{background:#0F6E56}
+.btn-red{background:#fdeaea;color:#c0392b;border:1px solid #f5b5b5}.btn-red:hover{background:#f8d0d0}
+.btn-gray{background:#f2f2f2;border:1.5px solid #ddd;color:#666}.btn-gray:hover{background:#e8e8e8}
+.btn-sm{padding:5px 10px;font-size:12px}
+/* Créneau pills */
+.creneau-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.creneau-pill{display:inline-flex;align-items:center;gap:8px;background:#f5f5f5;border:1.5px solid #ddd;border-radius:8px;padding:6px 12px;font-size:12px}
+.creneau-pill.actif{border-color:#1D9E75;background:#e6f9f2}
+.creneau-pill.inactif{border-color:#ddd;background:#f5f5f5;color:#aaa}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:2rem}
+.stat-card{background:#fff;border-radius:12px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center}
+.stat-num{font-size:28px;font-weight:800;color:#1D9E75}
+.stat-label{font-size:12px;color:#888;margin-top:4px}
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:1.5rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:700;color:#1a2e1a;margin-bottom:1.25rem}
+.modal-row{margin-bottom:12px}
+.modal-row label{display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px}
+.modal-row input,.modal-row select{width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;background:#fafafa;color:#1a2e1a;outline:none}
+.modal-row input:focus,.modal-row select:focus{border-color:#1D9E75}
+.modal-btns{display:flex;gap:8px;margin-top:1.25rem}
+/* Toast */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1a2e1a;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:300;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+/* Alert */
+.alert-info{background:#e6f9f2;border:1px solid #a7e0cb;border-radius:8px;padding:10px 14px;font-size:13px;color:#0F6E56;margin-bottom:1rem}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{display:none}.stats-grid{grid-template-columns:1fr 1fr}.classe-row{grid-template-columns:1fr 1fr;gap:6px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">D</div>
+    <div class="topbar-title">DARSI Admin</div>
+    <span class="topbar-sub">— Gestion des inscriptions</span>
+  </div>
+  <div class="topbar-right">
+    <button class="reset-btn" onclick="resetConfig()">↺ Réinitialiser</button>
+    <button class="save-btn" onclick="sauvegarder()">💾 Sauvegarder</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Tableau de bord</div>
+      <div class="sidebar-item active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="sidebar-icon">📊</span> Vue d'ensemble</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Gestion</div>
+      <div class="sidebar-item" onclick="showPage('classes')" id="nav-classes"><span class="sidebar-icon">🏫</span> Classes & niveaux</div>
+      <div class="sidebar-item" onclick="showPage('creneaux')" id="nav-creneaux"><span class="sidebar-icon">📅</span> Créneaux</div>
+      <div class="sidebar-item" onclick="showPage('capacites')" id="nav-capacites"><span class="sidebar-icon">👥</span> Capacités</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">Vue d'ensemble</div>
+      <div class="page-sub">État actuel de toutes les classes DARSI</div>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">État des classes</span></div>
+        <div class="card-body" id="dashboard-classes"></div>
+      </div>
+    </div>
+
+    <!-- CLASSES & NIVEAUX -->
+    <div class="page" id="page-classes">
+      <div class="page-title">Classes & niveaux</div>
+      <div class="page-sub">Modifiez les associations entre classes et niveaux pédagogiques.</div>
+      <div class="alert-info">💡 Chaque classe est associée à un niveau. Le formulaire d'inscription affiche automatiquement les créneaux selon le niveau choisi par le parent.</div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Association Classes → Niveaux</span>
+          <button class="btn btn-green btn-sm" onclick="ouvrirModalClasse()">+ Ajouter une classe</button>
+        </div>
+        <div class="card-body" id="classes-list"></div>
+      </div>
+    </div>
+
+    <!-- CRÉNEAUX -->
+    <div class="page" id="page-creneaux">
+      <div class="page-title">Gestion des créneaux</div>
+      <div class="page-sub">Activez, désactivez ou modifiez les créneaux de chaque classe.</div>
+      <div id="creneaux-list"></div>
+    </div>
+
+    <!-- CAPACITÉS -->
+    <div class="page" id="page-capacites">
+      <div class="page-title">Capacités & places</div>
+      <div class="page-sub">Ajustez le nombre de places et le nombre d'inscrits actuels par classe.</div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Gestion des places</span></div>
+        <div class="card-body" id="capacites-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- Modal Classe -->
+<div class="modal-bg" id="modal-classe">
+  <div class="modal">
+    <div class="modal-title" id="modal-classe-title">Modifier la classe</div>
+    <input type="hidden" id="mc-id"/>
+    <div class="modal-row"><label>Nom de la classe</label><input type="text" id="mc-nom" placeholder="Ex : Classe A"/></div>
+    <div class="modal-row"><label>Matière</label>
+      <select id="mc-matiere">
+        <option value="arabe">Section Arabe</option>
+        <option value="croyance">Section Croyance (Aqida)</option>
+      </select>
+    </div>
+    <div class="modal-row"><label>Niveau associé</label><select id="mc-niveau"></select></div>
+    <div class="modal-btns">
+      <button class="btn btn-green" style="flex:1" onclick="sauvegarderClasse()">Enregistrer</button>
+      <button class="btn btn-gray" onclick="fermerModal('modal-classe')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Créneau -->
+<div class="modal-bg" id="modal-creneau">
+  <div class="modal">
+    <div class="modal-title">Ajouter un créneau</div>
+    <input type="hidden" id="mcr-classeId"/>
+    <div class="modal-row"><label>Jour</label><input type="text" id="mcr-jour" placeholder="Ex : Samedi matin"/></div>
+    <div class="modal-row"><label>Heure</label><input type="text" id="mcr-heure" placeholder="Ex : 9h00 – 10h30"/></div>
+    <div class="modal-btns">
+      <button class="btn btn-green" style="flex:1" onclick="sauvegarderCreneau()">Ajouter</button>
+      <button class="btn btn-gray" onclick="fermerModal('modal-creneau')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY="darsi_config_v1";
+const CONFIG_DEFAUT={
+  classes:[
+    {id:"A",nom:"Classe A",matiere:"arabe",niveauId:"arabe-debutant",capacite:12,inscrits:7,creneaux:[{id:"A1",jour:"Samedi matin",heure:"9h00 – 10h30",actif:true},{id:"A2",jour:"Samedi matin",heure:"10h45 – 12h15",actif:true}]},
+    {id:"B",nom:"Classe B",matiere:"arabe",niveauId:"arabe-1",capacite:12,inscrits:9,creneaux:[{id:"B1",jour:"Dimanche matin",heure:"9h00 – 10h30",actif:true}]},
+    {id:"C",nom:"Classe C",matiere:"arabe",niveauId:"arabe-2",capacite:10,inscrits:10,creneaux:[{id:"C1",jour:"Mercredi",heure:"14h00 – 15h30",actif:true}]},
+    {id:"D",nom:"Classe D",matiere:"croyance",niveauId:"croyance-1",capacite:15,inscrits:6,creneaux:[{id:"D1",jour:"Samedi après-midi",heure:"14h00 – 15h30",actif:true},{id:"D2",jour:"Dimanche soir",heure:"19h00 – 20h30",actif:true}]},
+    {id:"E",nom:"Classe E",matiere:"arabe",niveauId:"arabe-3",capacite:10,inscrits:4,creneaux:[{id:"E1",jour:"Lundi soir",heure:"20h00 – 21h30",actif:true}]},
+    {id:"F",nom:"Classe F",matiere:"arabe",niveauId:"arabe-4",capacite:10,inscrits:2,creneaux:[{id:"F1",jour:"Vendredi soir",heure:"19h00 – 20h30",actif:true}]},
+    {id:"G",nom:"Classe G",matiere:"croyance",niveauId:"croyance-2",capacite:12,inscrits:5,creneaux:[{id:"G1",jour:"Samedi soir",heure:"17h00 – 18h30",actif:true}]},
+    {id:"H",nom:"Classe H",matiere:"croyance",niveauId:"croyance-34",capacite:12,inscrits:3,creneaux:[{id:"H1",jour:"Dimanche matin",heure:"10h30 – 12h00",actif:true}]}
+  ],
+  niveaux:{
+    arabe:[
+      {id:"arabe-debutant",badge:"Débutant",nom:"Niveau Débutant",public:"Enfants ne sachant pas encore lire l'arabe.",objectifs:["Apprentissage de la lecture","Apprentissage de l'écriture","Reconnaissance des lettres","Lecture avec voyelles (harakat)","Écriture progressive","Introduction aux bases de la croyance islamique"],themes:[],competences:[],exemples:[]},
+      {id:"arabe-1",badge:"Niveau 1",nom:"Arabe — Niveau 1",public:"Enfants ayant acquis les bases de la lecture arabe.",objectifs:["Acquisition du vocabulaire de base","Compréhension et expression simples"],themes:["Le corps humain","Les vêtements","La cuisine","L'habitation","Les objets du quotidien"],competences:["Répondre à des questions simples","Construire des phrases nominales simples"],exemples:["Qu'est-ce que c'est ? — C'est une chaise.","Est-ce que c'est une chaise ? — Non, c'est un bureau."]},
+      {id:"arabe-2",badge:"Niveau 2",nom:"Arabe — Niveau 2",public:"Enfants maîtrisant les phrases nominales simples.",objectifs:["Développer davantage le vocabulaire","Utiliser des phrases plus complètes","Introduction aux notions d'espace et de position"],themes:[],competences:["Répondre à des questions plus développées","Utiliser les prépositions et repères spatiaux"],exemples:["Où est la chaise ? — La chaise est sous le bureau.","Où est le stylo ? — Le stylo est sur la table."]},
+      {id:"arabe-3",badge:"Niveau 3",nom:"Arabe — Niveau 3",public:"Enfants maîtrisant l'expression nominale et les repères spatiaux.",objectifs:["Introduction à la conjugaison","Étude des phrases verbales","Développement de l'expression orale et écrite"],themes:[],competences:["Utilisation des verbes","Construction de phrases verbales","Introduction aux différents pronoms"],exemples:[]},
+      {id:"arabe-4",badge:"Niveau 4",nom:"Arabe — Niveau 4",public:"Enfants maîtrisant la conjugaison de base.",objectifs:["Continuité de la conjugaison","Étude et compréhension de textes","Développement de la lecture autonome","Expression plus fluide"],themes:[],competences:["Lecture de textes adaptés","Compréhension écrite","Réponses complètes","Production de phrases élaborées"],exemples:[]}
+    ],
+    croyance:[
+      {id:"croyance-1",badge:"Croyance N1",nom:"Croyance — Niveau 1",public:"Enfants débutant dans l'apprentissage de la foi islamique.",objectifs:["Connaître les piliers de l'Islam","Connaître les piliers de la foi","Comprendre qui est Allah","Introduction à la vie du Prophète ﷺ"],themes:["Les 5 piliers de l'Islam","Les 6 piliers de la foi","Les attributs d'Allah","La Shahada"],competences:["Réciter les piliers de l'Islam","Expliquer simplement ce qu'est la foi"],exemples:[]},
+      {id:"croyance-2",badge:"Croyance N2",nom:"Croyance — Niveau 2",public:"Enfants connaissant les bases des piliers.",objectifs:["Approfondir la connaissance des attributs d'Allah","Étudier les anges et les livres révélés"],themes:["Les anges","Les livres révélés","Les messagers","Le Jour du Jugement","Al-Qadar"],competences:["Distinguer les piliers de l'Islam et de la foi","Nommer les principaux messagers et leurs livres"],exemples:[]},
+      {id:"croyance-3",badge:"Croyance N3",nom:"Croyance — Niveau 3",public:"Enfants ayant une base solide en croyance islamique.",objectifs:["Étude approfondie du Tawhid","Comprendre les catégories du Tawhid"],themes:["Tawhid Ar-Rububiyya","Tawhid Al-Uluhiyya","Tawhid Al-Asma wa Sifat","Le Shirk et ses formes"],competences:["Expliquer les 3 catégories du Tawhid","Identifier ce qui contredit la foi islamique"],exemples:[]},
+      {id:"croyance-34",badge:"Croyance N3/4",nom:"Croyance — Niveaux 3 & 4",public:"Enfants maîtrisant les fondements du Tawhid.",objectifs:["Étude de textes classiques d'Aqida","Comprendre la méthodologie des savants","Approfondir les questions de l'au-delà"],themes:["Textes d'Aqida classiques","Al-Barzakh","Signes du Jour du Jugement","Le Paradis et l'Enfer"],competences:["Lire et comprendre des textes d'Aqida simples","Argumenter la foi de manière structurée"],exemples:[]}
+    ]
+  }
+};
+
+let cfg=loadConfig();
+
+function loadConfig(){
+  try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}
+  return JSON.parse(JSON.stringify(CONFIG_DEFAUT));
+}
+function saveConfig(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(cfg));
+}
+function sauvegarder(){
+  // Lire les valeurs des inputs de capacités
+  cfg.classes.forEach(cl=>{
+    const capEl=document.getElementById('cap-'+cl.id);
+    const insEl=document.getElementById('ins-'+cl.id);
+    if(capEl) cl.capacite=parseInt(capEl.value)||cl.capacite;
+    if(insEl) cl.inscrits=parseInt(insEl.value)||cl.inscrits;
+  });
+  saveConfig();
+  toast('Configuration sauvegardée ✓');
+  renderAll();
+}
+function resetConfig(){
+  if(!confirm('Réinitialiser toute la configuration aux valeurs par défaut ?')) return;
+  cfg=JSON.parse(JSON.stringify(CONFIG_DEFAUT));
+  saveConfig();
+  toast('Configuration réinitialisée');
+  renderAll();
+}
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  renderPage(id);
+}
+function renderPage(id){
+  if(id==='dashboard') renderDashboard();
+  else if(id==='classes') renderClasses();
+  else if(id==='creneaux') renderCreneaux();
+  else if(id==='capacites') renderCapacites();
+}
+function renderAll(){
+  const active=document.querySelector('.page.active');
+  if(active) renderPage(active.id.replace('page-',''));
+}
+
+// ================================================================
+// DASHBOARD
+// ================================================================
+function renderDashboard(){
+  const totalEleves=cfg.classes.reduce((s,c)=>s+c.inscrits,0);
+  const totalPlaces=cfg.classes.reduce((s,c)=>s+c.capacite,0);
+  const complet=cfg.classes.filter(c=>c.inscrits>=c.capacite).length;
+  const dispos=cfg.classes.filter(c=>c.inscrits<c.capacite).length;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${cfg.classes.length}</div><div class="stat-label">Classes actives</div></div>
+    <div class="stat-card"><div class="stat-num">${totalEleves}</div><div class="stat-label">Élèves inscrits</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#f0a030">${totalPlaces-totalEleves}</div><div class="stat-label">Places disponibles</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#e05050">${complet}</div><div class="stat-label">Classes complètes</div></div>`;
+
+  let html='<div class="classe-row header"><span>Classe</span><span>Matière</span><span>Niveau</span><span>Capacité</span><span>Places</span><span>État</span></div>';
+  cfg.classes.forEach(cl=>{
+    const nv=findNiveau(cl.matiere,cl.niveauId);
+    const places=cl.capacite-cl.inscrits;
+    const pct=Math.round((cl.inscrits/cl.capacite)*100);
+    const cls=pct>=100?'full':pct>=80?'warn':'';
+    const etat=places<=0?'<span class="tag" style="background:#fdeaea;color:#c0392b">Complet</span>':'<span class="tag" style="background:#e6f9f2;color:#1D9E75">Ouvert</span>';
+    html+=`<div class="classe-row">
+      <strong>${cl.nom}</strong>
+      <span class="tag ${cl.matiere==='arabe'?'tag-arabe':'tag-croyance'}">${cl.matiere==='arabe'?'Arabe':'Croyance'}</span>
+      <span style="font-size:13px">${nv?nv.badge:'—'}</span>
+      <div class="cap-wrap"><div class="cap-bar"><div class="cap-fill ${cls}" style="width:${Math.min(pct,100)}%"></div></div><span class="cap-txt ${cls}">${cl.inscrits}/${cl.capacite}</span></div>
+      <span class="cap-txt ${cls}">${places<=0?0:places} place${places!==1?'s':''}</span>
+      ${etat}
+    </div>`;
+  });
+  document.getElementById('dashboard-classes').innerHTML=html;
+}
+
+function findNiveau(matiere,id){
+  return (cfg.niveaux[matiere]||[]).find(n=>n.id===id);
+}
+
+// ================================================================
+// CLASSES
+// ================================================================
+function renderClasses(){
+  const allNiveaux=[...cfg.niveaux.arabe.map(n=>({...n,matiere:'arabe'})),...cfg.niveaux.croyance.map(n=>({...n,matiere:'croyance'}))];
+  let html='<div class="classe-row header"><span>Classe</span><span>Matière</span><span style="grid-column:span 2">Niveau associé</span><span>Places</span><span>Actions</span></div>';
+  cfg.classes.forEach((cl,ci)=>{
+    const nv=findNiveau(cl.matiere,cl.niveauId);
+    const places=cl.capacite-cl.inscrits;
+    const pct=Math.round((cl.inscrits/cl.capacite)*100);
+    const cls=pct>=100?'full':pct>=80?'warn':'';
+    html+=`<div class="classe-row">
+      <strong>${cl.nom}</strong>
+      <span class="tag ${cl.matiere==='arabe'?'tag-arabe':'tag-croyance'}">${cl.matiere==='arabe'?'Arabe':'Croyance'}</span>
+      <span style="font-size:13px;grid-column:span 2">${nv?nv.nom:'—'}</span>
+      <span class="cap-txt ${cls}">${places<=0?'Complet':places+' place'+(places!==1?'s':'')}</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-gray btn-sm" onclick="ouvrirModalClasse('${cl.id}')">✏️</button>
+        <button class="btn btn-red btn-sm" onclick="supprimerClasse('${cl.id}')">🗑</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('classes-list').innerHTML=html;
+}
+
+function ouvrirModalClasse(id){
+  const isEdit=!!id;
+  document.getElementById('modal-classe-title').textContent=isEdit?'Modifier la classe':'Nouvelle classe';
+  document.getElementById('mc-id').value=id||'';
+  const cl=isEdit?cfg.classes.find(c=>c.id===id):null;
+  document.getElementById('mc-nom').value=cl?cl.nom:'';
+  const matiereEl=document.getElementById('mc-matiere');
+  matiereEl.value=cl?cl.matiere:'arabe';
+  updateNiveauSelect(matiereEl.value,cl?cl.niveauId:'');
+  matiereEl.onchange=function(){updateNiveauSelect(this.value,'');};
+  document.getElementById('modal-classe').classList.add('show');
+}
+
+function updateNiveauSelect(matiere,selected){
+  const niveaux=cfg.niveaux[matiere]||[];
+  const el=document.getElementById('mc-niveau');
+  el.innerHTML=niveaux.map(n=>`<option value="${n.id}" ${n.id===selected?'selected':''}>${n.nom}</option>`).join('');
+}
+
+function sauvegarderClasse(){
+  const id=document.getElementById('mc-id').value;
+  const nom=document.getElementById('mc-nom').value.trim();
+  const matiere=document.getElementById('mc-matiere').value;
+  const niveauId=document.getElementById('mc-niveau').value;
+  if(!nom){alert('Le nom est obligatoire.');return;}
+  if(id){
+    const cl=cfg.classes.find(c=>c.id===id);
+    if(cl){cl.nom=nom;cl.matiere=matiere;cl.niveauId=niveauId;}
+  } else {
+    const newId=String.fromCharCode(65+cfg.classes.length);
+    cfg.classes.push({id:newId,nom,matiere,niveauId,capacite:12,inscrits:0,creneaux:[]});
+  }
+  saveConfig();fermerModal('modal-classe');toast('Classe enregistrée ✓');renderAll();
+}
+
+function supprimerClasse(id){
+  if(!confirm('Supprimer cette classe ?')) return;
+  cfg.classes=cfg.classes.filter(c=>c.id!==id);
+  saveConfig();toast('Classe supprimée');renderAll();
+}
+
+// ================================================================
+// CRÉNEAUX
+// ================================================================
+function renderCreneaux(){
+  let html='';
+  cfg.classes.forEach(cl=>{
+    const nv=findNiveau(cl.matiere,cl.niveauId);
+    html+=`<div class="card" style="margin-bottom:1rem">
+      <div class="card-header">
+        <div>
+          <span class="card-title">${cl.nom}</span>
+          <span class="tag ${cl.matiere==='arabe'?'tag-arabe':'tag-croyance'}" style="margin-left:8px">${nv?nv.badge:'—'}</span>
+        </div>
+        <button class="btn btn-green btn-sm" onclick="ouvrirModalCreneau('${cl.id}')">+ Ajouter</button>
+      </div>
+      <div class="card-body">
+        <div class="creneau-list" id="crl-${cl.id}">`;
+    if(cl.creneaux.length===0){html+='<span style="font-size:13px;color:#aaa">Aucun créneau</span>';}
+    cl.creneaux.forEach(cr=>{
+      html+=`<div class="creneau-pill ${cr.actif?'actif':'inactif'}">
+        <span><strong>${cr.jour}</strong> · ${cr.heure}</span>
+        <label class="toggle" title="${cr.actif?'Désactiver':'Activer'}">
+          <input type="checkbox" ${cr.actif?'checked':''} onchange="toggleCreneau('${cl.id}','${cr.id}',this.checked)"/>
+          <span class="toggle-slider"></span>
+        </label>
+        <button class="btn btn-red btn-sm" onclick="supprimerCreneau('${cl.id}','${cr.id}')">✕</button>
+      </div>`;
+    });
+    html+=`</div></div></div>`;
+  });
+  document.getElementById('creneaux-list').innerHTML=html;
+}
+
+function toggleCreneau(classeId,crId,val){
+  const cl=cfg.classes.find(c=>c.id===classeId);
+  if(!cl)return;
+  const cr=cl.creneaux.find(c=>c.id===crId);
+  if(cr){cr.actif=val;saveConfig();renderCreneaux();toast(val?'Créneau activé':'Créneau désactivé');}
+}
+
+function supprimerCreneau(classeId,crId){
+  if(!confirm('Supprimer ce créneau ?'))return;
+  const cl=cfg.classes.find(c=>c.id===classeId);
+  if(cl){cl.creneaux=cl.creneaux.filter(c=>c.id!==crId);saveConfig();renderCreneaux();toast('Créneau supprimé');}
+}
+
+function ouvrirModalCreneau(classeId){
+  document.getElementById('mcr-classeId').value=classeId;
+  document.getElementById('mcr-jour').value='';
+  document.getElementById('mcr-heure').value='';
+  document.getElementById('modal-creneau').classList.add('show');
+}
+
+function sauvegarderCreneau(){
+  const classeId=document.getElementById('mcr-classeId').value;
+  const jour=document.getElementById('mcr-jour').value.trim();
+  const heure=document.getElementById('mcr-heure').value.trim();
+  if(!jour||!heure){alert('Remplissez le jour et l\'heure.');return;}
+  const cl=cfg.classes.find(c=>c.id===classeId);
+  if(cl){
+    const newId=classeId+(Date.now()%10000);
+    cl.creneaux.push({id:newId,jour,heure,actif:true});
+    saveConfig();fermerModal('modal-creneau');toast('Créneau ajouté ✓');renderCreneaux();
+  }
+}
+
+// ================================================================
+// CAPACITÉS
+// ================================================================
+function renderCapacites(){
+  let html='';
+  cfg.classes.forEach(cl=>{
+    const nv=findNiveau(cl.matiere,cl.niveauId);
+    const places=cl.capacite-cl.inscrits;
+    const pct=Math.round((cl.inscrits/cl.capacite)*100);
+    const cls=pct>=100?'full':pct>=80?'warn':'';
+    html+=`<div style="display:grid;grid-template-columns:100px 120px 1fr 140px 140px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f0">
+      <strong>${cl.nom}</strong>
+      <span class="tag ${cl.matiere==='arabe'?'tag-arabe':'tag-croyance'}" style="text-align:center">${nv?nv.badge:'—'}</span>
+      <div class="cap-wrap"><div class="cap-bar"><div class="cap-fill ${cls}" style="width:${Math.min(pct,100)}%"></div></div><span class="cap-txt ${cls}">${cl.inscrits}/${cl.capacite} — ${places<=0?'<span style="color:#e05050;font-weight:700">Complet</span>':places+' place'+(places!==1?'s':'')+' libre'+(places!==1?'s':'')}</span></div>
+      <div class="f-group"><label>Capacité max</label><input type="number" id="cap-${cl.id}" value="${cl.capacite}" min="1" max="100" style="width:80px" onchange="majPlaces('${cl.id}')"/></div>
+      <div class="f-group"><label>Inscrits actuels</label><input type="number" id="ins-${cl.id}" value="${cl.inscrits}" min="0" style="width:80px" onchange="majPlaces('${cl.id}')"/></div>
+    </div>`;
+  });
+  document.getElementById('capacites-list').innerHTML=html;
+}
+
+function majPlaces(classeId){
+  const cl=cfg.classes.find(c=>c.id===classeId);
+  if(!cl)return;
+  const capEl=document.getElementById('cap-'+classeId);
+  const insEl=document.getElementById('ins-'+classeId);
+  if(capEl) cl.capacite=parseInt(capEl.value)||cl.capacite;
+  if(insEl) cl.inscrits=parseInt(insEl.value)||cl.inscrits;
+  if(cl.inscrits>cl.capacite) cl.inscrits=cl.capacite;
+  saveConfig();
+}
+
+// ================================================================
+// UTILITAIRES
+// ================================================================
+function fermerModal(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');}));
+
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// Init
+renderDashboard();
+</script>
+</body>
+</html>

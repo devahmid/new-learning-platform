@@ -63,6 +63,16 @@
           <i class="fa-solid fa-user-plus mr-1"></i>S'inscrire
         </button>
         <button
+          (click)="navigate('/reinscription')"
+          class="w-full sm:w-auto px-4 py-2 rounded-full
+                 bg-white border border-emerald-500
+                 text-emerald-700 font-medium
+                 hover:bg-emerald-50 hover:text-emerald-900
+                 shadow transition text-sm"
+        >
+          <i class="fa-solid fa-rotate-right mr-1"></i>Réinscription
+        </button>
+        <button
           (click)="navigate('/login')"
           class="w-full sm:w-auto px-4 py-2 rounded-full
                  bg-white border border-green-500

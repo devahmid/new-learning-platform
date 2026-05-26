@@ -11,6 +11,7 @@ export const ApiPaths = {
   schedules: `${environment.apiUrl}/schedules`,
   notifications: `${environment.apiUrl}/notifications`,
   registration: `${environment.apiUrl}/registration`,
+  reinscriptions: `${environment.apiUrl}/reinscriptions`,
   lessonProgress: `${environment.apiUrl}/lesson-progress`,
   enrollments: `${environment.apiUrl}/enrollments`,
 };

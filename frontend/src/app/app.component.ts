@@ -1,21 +1,11 @@
-import { Component, effect, inject, OnInit, Signal } from '@angular/core';
+import { Component, effect, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { HeaderComponent } from './pages/home/header/header.component';
-import { FooterComponent } from './pages/home/footer/footer.component';
-import { FeaturesComponent } from './pages/home/features/features.component';
-import { CtaComponent } from './pages/home/cta/cta.component';
-import { AgeGroupsComponent } from './pages/home/age-groups/age-groups.component';
-import { HeroComponent } from './pages/home/hero/hero.component';
-import { TestimonialsComponent } from './pages/home/testimonials/testimonials.component';
-import { LoginComponent } from './auth/login/login.component';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './auth/auth.service';
-import { UserMenuComponent } from './shared/user-menu/user-menu.component';
-import { AppLayoutComponent } from './pages/home/app-layout/app-layout.component';
 import { LoaderComponent } from './shared/loader/loader.component';
 import { LoaderService } from './shared/loader.service';
-import { SubjectGridComponent } from './subject-grid/subject-grid.component';
 // import { AutoLogoutService } from './core/services/auto-logout.service'; // Désactivé pour éviter les déconnexions intempestives
 
 import { ChildSelectionModalComponent } from './shared/child-selection-modal/child-selection-modal.component';
@@ -33,14 +23,6 @@ import { SupportButtonComponent } from './components/support-button/support-butt
     ChildSelectionModalComponent,
     SupportButtonComponent,
     HeaderComponent,
-    FooterComponent,
-    FeaturesComponent,
-    CtaComponent,
-    AgeGroupsComponent,
-    HeroComponent,
-    TestimonialsComponent,
-    LoginComponent,
-    SubjectGridComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -93,6 +75,11 @@ export class AppComponent implements OnInit {
           icon: 'pi pi-user-plus',
           routerLink: '/register',
         },
+        {
+          label: 'Réinscription',
+          icon: 'pi pi-refresh',
+          routerLink: '/reinscription',
+        },
       ];
       return;
     }
@@ -101,7 +88,8 @@ export class AppComponent implements OnInit {
       this.items.push(
         { label: 'Cours', icon: 'pi pi-book', routerLink: '/cours' },
         { label: 'Quiz', icon: 'pi pi-question', routerLink: '/quiz/1' },
-        { label: 'Chat', icon: 'pi pi-comments', routerLink: '/chat' }
+        { label: 'Chat', icon: 'pi pi-comments', routerLink: '/chat' },
+        { label: 'Réinscription', icon: 'pi pi-refresh', routerLink: '/reinscription' }
       );
 
       if (this.userRole === 'admin') {

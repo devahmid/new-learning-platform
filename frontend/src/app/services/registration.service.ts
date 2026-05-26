@@ -9,12 +9,16 @@ import { ParentRegistration } from '../models/parent-registration.model';
 })
 export class RegistrationService {
 
-  private baseUrl = ApiPaths.registration;
+  private baseUrl = ApiPaths.reinscriptions;
 
   constructor(private http: HttpClient) { }
 
   submitRegistration(data: any) {
     return this.http.post(this.baseUrl, data);
+  }
+
+  submitReinscription(data: any) {
+    return this.submitRegistration(data);
   }
 
   getAll(): Observable<ParentRegistration[]> {

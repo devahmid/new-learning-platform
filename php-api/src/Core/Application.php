@@ -32,6 +32,19 @@ class Application {
         $this->routes['POST']['/api/auth/register'] = ['App\Controllers\AuthController', 'register'];
         $this->routes['POST']['/api/auth/request-password-reset'] = ['App\Controllers\AuthController', 'requestPasswordReset'];
         $this->routes['POST']['/api/auth/reset-password'] = ['App\Controllers\AuthController', 'resetPassword'];
+
+        // Routes de réinscription
+        $this->routes['GET']['/api/registration'] = ['App\Controllers\ReinscriptionController', 'findAll'];
+        $this->routes['GET']['/api/registration/{id}'] = ['App\Controllers\ReinscriptionController', 'findById'];
+        $this->routes['POST']['/api/registration'] = ['App\Controllers\ReinscriptionController', 'create'];
+        $this->routes['POST']['/api/registration/reinscription'] = ['App\Controllers\ReinscriptionController', 'create'];
+        $this->routes['GET']['/api/reinscriptions'] = ['App\Controllers\ReinscriptionController', 'findAll'];
+        $this->routes['GET']['/api/reinscriptions/{id}'] = ['App\Controllers\ReinscriptionController', 'findById'];
+        $this->routes['POST']['/api/reinscriptions'] = ['App\Controllers\ReinscriptionController', 'create'];
+        $this->routes['PATCH']['/api/reinscriptions/{id}/status'] = ['App\Controllers\ReinscriptionController', 'updateStatus'];
+        $this->routes['GET']['/api/admin/reinscriptions'] = ['App\Controllers\ReinscriptionController', 'findAll'];
+        $this->routes['GET']['/api/admin/reinscriptions/{id}'] = ['App\Controllers\ReinscriptionController', 'findById'];
+        $this->routes['PATCH']['/api/admin/reinscriptions/{id}/status'] = ['App\Controllers\ReinscriptionController', 'updateStatus'];
         
         // Routes utilisateurs
         $this->routes['GET']['/api/users'] = ['App\Controllers\UserController', 'findAll'];

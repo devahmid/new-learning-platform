@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DARSI — Inscription aux cours</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f1;min-height:100vh;padding:2rem 1rem}
+.app{background:#fff;border-radius:18px;box-shadow:0 4px 40px rgba(0,0,0,.10);max-width:660px;width:100%;padding:2rem 2rem 3rem;margin:0 auto}
+.logo-bar{display:flex;align-items:center;gap:12px;margin-bottom:2rem}
+.logo-badge{width:44px;height:44px;border-radius:12px;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;flex-shrink:0}
+.logo-name{font-size:20px;font-weight:800;color:#1a2e1a}
+.logo-sub{font-size:12px;color:#999}
+.progress-strip{display:flex;gap:5px;margin-bottom:2rem}
+.ps{flex:1;height:4px;border-radius:99px;background:#e8e8e8;transition:background .3s}
+.ps.done{background:#1D9E75}.ps.active{background:#a7e0cb}
+.step{display:none}.step.active{display:block}
+.step-label{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.step-title{font-size:20px;font-weight:700;color:#1a2e1a;margin-bottom:1.5rem}
+.type-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem}
+.type-card{border:2px solid #e8e8e8;border-radius:14px;padding:1.5rem 1rem;cursor:pointer;transition:all .15s;text-align:center;background:#fafafa}
+.type-card:hover{border-color:#1D9E75;background:#f0fbf6}
+.type-card.selected{border-color:#1D9E75;background:#e6f9f2}
+.tc-icon{font-size:36px;margin-bottom:8px}
+.tc-title{font-size:15px;font-weight:700;color:#1a2e1a}
+.tc-sub{font-size:12px;color:#888;margin-top:3px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.field label{font-size:13px;color:#555;font-weight:600}
+.field label .req{color:#e05050}
+.input-wrap{position:relative}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:9px;font-size:14px;font-family:inherit;background:#fafafa;color:#1a2e1a;outline:none;transition:border .15s,background .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#1D9E75;background:#fff}
+.field input.valid{border-color:#1D9E75;background:#f6fef9}
+.field input.invalid{border-color:#e05050;background:#fff8f8}
+.field-hint{font-size:11px;color:#aaa;margin-top:2px}
+.field-error{font-size:12px;color:#c0392b;margin-top:3px;display:none;font-weight:500}
+.field-error.show{display:block}
+.valid-icon,.invalid-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:16px;display:none}
+.valid-icon{color:#1D9E75}.invalid-icon{color:#e05050}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn-row{display:flex;gap:10px;margin-top:1.5rem}
+.btn{padding:11px 22px;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .15s;border:none}
+.btn-primary{background:#1D9E75;color:#fff;flex:1}
+.btn-primary:hover{background:#0F6E56}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:#f2f2f2;border:2px solid #e0e0e0;color:#666}
+.btn-ghost:hover{background:#e8e8e8}
+/* Matière */
+.matiere-info{background:#f5f5f5;border-radius:10px;padding:10px 14px;font-size:13px;color:#666;margin-bottom:1.5rem}
+/* Niveau cards */
+.nv-card{border:2px solid #e0e0e0;border-radius:14px;margin-bottom:12px;overflow:hidden;cursor:pointer;transition:border .15s,box-shadow .15s;background:#fafafa}
+.nv-card:hover{border-color:#1D9E75;box-shadow:0 2px 12px rgba(29,158,117,.1)}
+.nv-card.selected{border-color:#1D9E75;background:#f0fbf6;box-shadow:0 2px 16px rgba(29,158,117,.15)}
+.nv-card.complet{opacity:.55;cursor:not-allowed;border-color:#ddd}
+.nv-header{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px 10px}
+.nv-left{flex:1}
+.nv-badge{display:inline-block;background:#1D9E75;color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:99px;margin-bottom:6px}
+.nv-badge.complet-badge{background:#bbb}
+.nv-classe{font-size:11px;color:#aaa;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.nv-nom{font-size:15px;font-weight:700;color:#1a2e1a;margin-bottom:3px}
+.nv-public{font-size:12px;color:#777;line-height:1.4}
+.nv-places{display:flex;align-items:center;gap:6px;margin-top:6px}
+.places-bar{flex:1;height:5px;background:#e0e0e0;border-radius:99px;overflow:hidden}
+.places-fill{height:100%;border-radius:99px;background:#1D9E75;transition:width .3s}
+.places-fill.warn{background:#f0a030}
+.places-fill.full{background:#e05050}
+.places-txt{font-size:11px;font-weight:700;white-space:nowrap}
+.places-txt.ok{color:#1D9E75}.places-txt.warn{color:#f0a030}.places-txt.full{color:#e05050}
+.nv-check{width:26px;height:26px;border-radius:50%;background:#1D9E75;color:#fff;font-size:14px;display:none;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.nv-card.selected .nv-check{display:flex}
+.nv-body{display:none;padding:0 16px 14px;border-top:1px solid #e8e8e8;margin-top:4px}
+.nv-body.open{display:block}
+.nv-section{margin-top:12px}
+.nv-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1D9E75;margin-bottom:6px}
+.nv-list{padding-left:16px;display:flex;flex-direction:column;gap:4px}
+.nv-list li{font-size:13px;color:#444;line-height:1.5}
+.nv-toggle{display:block;width:100%;padding:8px;background:#f0f0f0;border:none;font-size:12px;color:#777;cursor:pointer;font-family:inherit;font-weight:600;transition:background .1s;text-align:center}
+.nv-toggle:hover{background:#e4e4e4}
+.nv-card.selected .nv-toggle{background:#d8f5ea;color:#0F6E56}
+/* Slot card intégré dans nv */
+.nv-slots{padding:10px 16px 14px;border-top:1px solid #e8e8e8;background:#f8fdf9}
+.nv-slots-title{font-size:11px;font-weight:700;color:#1D9E75;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.slot-pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #1D9E75;border-radius:8px;padding:6px 12px;margin:4px 4px 0 0;cursor:pointer;transition:all .15s;font-size:13px}
+.slot-pill:hover{background:#e6f9f2}
+.slot-pill.selected{background:#1D9E75;color:#fff}
+.slot-pill.complet{border-color:#ccc;color:#aaa;cursor:not-allowed;background:#f5f5f5}
+.slot-pill-time{font-weight:700}
+.slot-pill-places{font-size:11px;opacity:.8}
+/* Résultat confirm */
+.result-card{border:2px solid #d0eed8;border-radius:14px;padding:1.25rem;margin-bottom:1.5rem;background:#f6fef9}
+.result-badge{display:inline-block;background:#1D9E75;color:#fff;font-size:12px;font-weight:700;padding:4px 16px;border-radius:99px;margin-bottom:8px}
+.result-level{font-size:20px;font-weight:800;color:#1D9E75;margin-bottom:4px}
+.result-sub{font-size:13px;color:#555}
+.confirm-block{background:#f5fdf8;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;border:1.5px solid #c8ecd8}
+.confirm-row{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid #ddf0e4}
+.confirm-row:last-child{border-bottom:none}
+.confirm-row .clabel{color:#888}
+.confirm-row .cval{font-weight:700;color:#1a2e1a;text-align:right;max-width:62%}
+.success-wrap{text-align:center;padding:2.5rem 1rem}
+.success-icon{width:70px;height:70px;border-radius:50%;background:#e6f9f2;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:36px}
+.success-title{font-size:22px;font-weight:800;color:#1a2e1a;margin-bottom:10px}
+.success-sub{font-size:14px;color:#666;line-height:1.7}
+.alert{padding:11px 14px;border-radius:9px;font-size:13px;margin-top:10px;font-weight:500;display:none}
+.alert.error{background:#fdeaea;color:#c0392b;border:1px solid #f5b5b5;display:block}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.9);display:none;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:14px}
+.overlay.show{display:flex}
+.spinner{width:38px;height:38px;border:3px solid #e0e0e0;border-top-color:#1D9E75;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.phone-wrap{display:flex;gap:8px}
+.phone-prefix{width:90px;flex-shrink:0}
+.no-slots{background:#fff8e8;border:1px solid #f0d090;border-radius:10px;padding:14px;font-size:13px;color:#996600;text-align:center;margin-top:8px}
+@media(max-width:500px){.type-cards,.grid2{grid-template-columns:1fr}.app{padding:1.25rem 1rem 2rem}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="logo-bar">
+    <div class="logo-badge">D</div>
+    <div><div class="logo-name">DARSI</div><div class="logo-sub">darsi.fr — Inscription aux cours</div></div>
+  </div>
+  <div class="progress-strip">
+    <div class="ps active" id="ps1"></div>
+    <div class="ps" id="ps2"></div>
+    <div class="ps" id="ps3"></div>
+    <div class="ps" id="ps4"></div>
+    <div class="ps" id="ps5"></div>
+  </div>
+
+  <!-- ÉTAPE 1 -->
+  <div class="step active" id="step1">
+    <div class="step-label">Étape 1 sur 5</div>
+    <div class="step-title">Pour qui est l'inscription ?</div>
+    <div class="type-cards">
+      <div class="type-card" id="card-enfant" onclick="selectType('enfant')">
+        <div class="tc-icon">🧒</div><div class="tc-title">Mon enfant</div><div class="tc-sub">6 à 14 ans</div>
+      </div>
+      <div class="type-card" id="card-adulte" onclick="selectType('adulte')">
+        <div class="tc-icon">👤</div><div class="tc-title">Moi-même</div><div class="tc-sub">Adulte (13 ans et +)</div>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" id="btn1" disabled onclick="goStep(2)">Continuer →</button></div>
+  </div>
+
+  <!-- ÉTAPE 2 -->
+  <div class="step" id="step2">
+    <div class="step-label">Étape 2 sur 5</div>
+    <div class="step-title" id="step2-title">Vos informations</div>
+    <div id="form-fields"></div>
+    <div id="err2" class="alert"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(1)">← Retour</button>
+      <button class="btn btn-primary" onclick="validerEtape2()">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3 : Matière -->
+  <div class="step" id="step3">
+    <div class="step-label">Étape 3 sur 5</div>
+    <div class="step-title">Choisissez la section</div>
+    <p style="font-size:14px;color:#777;margin-bottom:1.25rem">Sélectionnez la matière dans laquelle vous souhaitez inscrire votre enfant.</p>
+    <div class="type-cards">
+      <div class="type-card" id="card-arabe" onclick="selectMatiere('arabe')">
+        <div class="tc-icon">📖</div><div class="tc-title">Section Arabe</div><div class="tc-sub">Lecture, écriture, expression</div>
+      </div>
+      <div class="type-card" id="card-croyance" onclick="selectMatiere('croyance')">
+        <div class="tc-icon">🌙</div><div class="tc-title">Section Croyance</div><div class="tc-sub">Aqida — Sciences islamiques</div>
+      </div>
+    </div>
+    <div id="err3" class="alert"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(2)">← Retour</button>
+      <button class="btn btn-primary" id="btn3" disabled onclick="goStep(4)">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 4 : Niveau + Créneau intégré -->
+  <div class="step" id="step4">
+    <div class="step-label">Étape 4 sur 5</div>
+    <div class="step-title" id="step4-title">Choisissez le niveau</div>
+    <p style="font-size:14px;color:#777;margin-bottom:1.25rem">Lisez chaque niveau et sélectionnez celui qui correspond à votre enfant. Les créneaux disponibles s'affichent automatiquement.</p>
+    <div id="niveau-container"></div>
+    <div id="err4" class="alert"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(3)">← Retour</button>
+      <button class="btn btn-primary" id="btn4" disabled onclick="goStep(5)">Confirmer →</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 5 : Confirmation -->
+  <div class="step" id="step5">
+    <div class="step-label">Étape 5 sur 5</div>
+    <div class="step-title">Confirmer l'inscription</div>
+    <div class="result-card">
+      <div class="result-badge" id="res-badge"></div>
+      <div class="result-level" id="res-niveau"></div>
+      <div class="result-sub" id="res-slot"></div>
+    </div>
+    <div class="confirm-block" id="confirm-summary"></div>
+    <div class="field">
+      <label>Message ou remarque <span style="color:#aaa;font-weight:400">(optionnel)</span></label>
+      <textarea id="remarks" rows="3" maxlength="500" placeholder="Ex : disponibilité particulière, question, précision..."></textarea>
+      <span class="field-hint">500 caractères maximum</span>
+    </div>
+    <div id="err5" class="alert"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(4)">← Retour</button>
+      <button class="btn btn-primary" onclick="submitFinal()">Envoyer mon inscription ✓</button>
+    </div>
+  </div>
+
+  <!-- SUCCÈS -->
+  <div class="step" id="step-ok">
+    <div class="success-wrap">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Inscription envoyée !</div>
+      <div class="success-sub" id="success-msg"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div style="font-size:14px;color:#666;font-weight:600">Envoi en cours…</div>
+</div>
+
+<script>
+// ================================================================
+// SOURCE DE DONNÉES — chargée depuis le panneau admin via localStorage
+// ================================================================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMkaEAecRDu1F70KscV_MGT761QIaQ7alkc-i4sBL8UmKfniq9BfepfQd60_Pc6pb4/exec";
+const STORAGE_KEY = "darsi_config_v1";
+
+// Config par défaut (utilisée si pas encore modifiée via l'admin)
+const CONFIG_DEFAUT = {
+  classes: [
+    {
+      id:"A", nom:"Classe A", matiere:"arabe", niveauId:"arabe-debutant",
+      capacite:12, inscrits:7,
+      creneaux:[
+        {id:"A1", jour:"Samedi matin", heure:"9h00 – 10h30", actif:true},
+        {id:"A2", jour:"Samedi matin", heure:"10h45 – 12h15", actif:true}
+      ]
+    },
+    {
+      id:"B", nom:"Classe B", matiere:"arabe", niveauId:"arabe-1",
+      capacite:12, inscrits:9,
+      creneaux:[
+        {id:"B1", jour:"Dimanche matin", heure:"9h00 – 10h30", actif:true}
+      ]
+    },
+    {
+      id:"C", nom:"Classe C", matiere:"arabe", niveauId:"arabe-2",
+      capacite:10, inscrits:10,
+      creneaux:[
+        {id:"C1", jour:"Mercredi", heure:"14h00 – 15h30", actif:true}
+      ]
+    },
+    {
+      id:"D", nom:"Classe D", matiere:"croyance", niveauId:"croyance-1",
+      capacite:15, inscrits:6,
+      creneaux:[
+        {id:"D1", jour:"Samedi après-midi", heure:"14h00 – 15h30", actif:true},
+        {id:"D2", jour:"Dimanche soir", heure:"19h00 – 20h30", actif:true}
+      ]
+    },
+    {
+      id:"E", nom:"Classe E", matiere:"arabe", niveauId:"arabe-3",
+      capacite:10, inscrits:4,
+      creneaux:[
+        {id:"E1", jour:"Lundi soir", heure:"20h00 – 21h30", actif:true}
+      ]
+    },
+    {
+      id:"F", nom:"Classe F", matiere:"arabe", niveauId:"arabe-4",
+      capacite:10, inscrits:2,
+      creneaux:[
+        {id:"F1", jour:"Vendredi soir", heure:"19h00 – 20h30", actif:true}
+      ]
+    },
+    {
+      id:"G", nom:"Classe G", matiere:"croyance", niveauId:"croyance-2",
+      capacite:12, inscrits:5,
+      creneaux:[
+        {id:"G1", jour:"Samedi soir", heure:"17h00 – 18h30", actif:true}
+      ]
+    },
+    {
+      id:"H", nom:"Classe H", matiere:"croyance", niveauId:"croyance-34",
+      capacite:12, inscrits:3,
+      creneaux:[
+        {id:"H1", jour:"Dimanche matin", heure:"10h30 – 12h00", actif:true}
+      ]
+    }
+  ],
+  niveaux: {
+    arabe: [
+      {
+        id:"arabe-debutant", badge:"Débutant", nom:"Niveau Débutant",
+        public:"Enfants ne sachant pas encore lire l'arabe.",
+        objectifs:["Apprentissage de la lecture","Apprentissage de l'écriture","Reconnaissance des lettres","Lecture avec voyelles (harakat)","Écriture progressive","Introduction aux bases de la croyance islamique"],
+        themes:[], competences:[], exemples:[]
+      },
+      {
+        id:"arabe-1", badge:"Niveau 1", nom:"Arabe — Niveau 1",
+        public:"Enfants ayant acquis les bases de la lecture arabe.",
+        objectifs:["Acquisition du vocabulaire de base","Compréhension et expression simples"],
+        themes:["Le corps humain","Les vêtements","La cuisine","L'habitation","Les objets du quotidien"],
+        competences:["Répondre à des questions simples","Construire des phrases nominales simples"],
+        exemples:["Qu'est-ce que c'est ? — C'est une chaise.","Est-ce que c'est une chaise ? — Non, c'est un bureau."]
+      },
+      {
+        id:"arabe-2", badge:"Niveau 2", nom:"Arabe — Niveau 2",
+        public:"Enfants maîtrisant les phrases nominales simples.",
+        objectifs:["Développer davantage le vocabulaire","Utiliser des phrases plus complètes","Introduction aux notions d'espace et de position"],
+        themes:[],
+        competences:["Répondre à des questions plus développées","Utiliser les prépositions et repères spatiaux"],
+        exemples:["Où est la chaise ? — La chaise est sous le bureau.","Où est le stylo ? — Le stylo est sur la table."]
+      },
+      {
+        id:"arabe-3", badge:"Niveau 3", nom:"Arabe — Niveau 3",
+        public:"Enfants maîtrisant l'expression nominale et les repères spatiaux.",
+        objectifs:["Introduction à la conjugaison","Étude des phrases verbales","Développement de l'expression orale et écrite"],
+        themes:[],
+        competences:["Utilisation des verbes","Construction de phrases verbales","Introduction aux différents pronoms"],
+        exemples:[]
+      },
+      {
+        id:"arabe-4", badge:"Niveau 4", nom:"Arabe — Niveau 4",
+        public:"Enfants maîtrisant la conjugaison de base et les phrases verbales.",
+        objectifs:["Continuité de la conjugaison","Étude et compréhension de textes","Développement de la lecture autonome","Expression plus fluide"],
+        themes:[],
+        competences:["Lecture de textes adaptés","Compréhension écrite","Réponses complètes","Production de phrases élaborées"],
+        exemples:[]
+      }
+    ],
+    croyance: [
+      {
+        id:"croyance-1", badge:"Croyance N1", nom:"Croyance — Niveau 1",
+        public:"Enfants débutant dans l'apprentissage de la foi islamique.",
+        objectifs:["Connaître les piliers de l'Islam","Connaître les piliers de la foi (Iman)","Comprendre qui est Allah","Introduction à la vie du Prophète ﷺ"],
+        themes:["Les 5 piliers de l'Islam","Les 6 piliers de la foi","Les attributs d'Allah","La Shahada"],
+        competences:["Réciter les piliers de l'Islam","Expliquer simplement ce qu'est la foi"],
+        exemples:[]
+      },
+      {
+        id:"croyance-2", badge:"Croyance N2", nom:"Croyance — Niveau 2",
+        public:"Enfants connaissant les bases des piliers de l'Islam et de la foi.",
+        objectifs:["Approfondir la connaissance des attributs d'Allah","Étudier les anges et les livres révélés","Introduction à la croyance au Jour du Jugement"],
+        themes:["Les anges","Les livres révélés","Les messagers","Le Jour du Jugement","Al-Qadar"],
+        competences:["Distinguer les piliers de l'Islam et de la foi","Nommer les principaux messagers et leurs livres"],
+        exemples:[]
+      },
+      {
+        id:"croyance-3", badge:"Croyance N3", nom:"Croyance — Niveau 3",
+        public:"Enfants ayant une base solide en croyance islamique.",
+        objectifs:["Étude approfondie du Tawhid","Comprendre les catégories du Tawhid","Étude des actions qui contredisent la foi"],
+        themes:["Tawhid Ar-Rububiyya","Tawhid Al-Uluhiyya","Tawhid Al-Asma wa Sifat","Le Shirk et ses formes"],
+        competences:["Expliquer les 3 catégories du Tawhid","Identifier ce qui contredit la foi islamique"],
+        exemples:[]
+      },
+      {
+        id:"croyance-34", badge:"Croyance N3/4", nom:"Croyance — Niveaux 3 & 4",
+        public:"Enfants maîtrisant les fondements du Tawhid.",
+        objectifs:["Étude de textes classiques d'Aqida","Comprendre la méthodologie des savants","Approfondir les questions de l'au-delà"],
+        themes:["Textes d'Aqida classiques","Al-Barzakh","Les signes du Jour du Jugement","Le Paradis et l'Enfer"],
+        competences:["Lire et comprendre des textes d'Aqida simples","Argumenter la foi de manière structurée"],
+        exemples:[]
+      }
+    ]
+  }
+};
+
+function getConfig(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  } catch(e){}
+  return JSON.parse(JSON.stringify(CONFIG_DEFAUT));
+}
+
+// ================================================================
+// ÉTAT GLOBAL
+// ================================================================
+const state={type:null,matiere:null,niveau:null,classe:null,slot:null,form:{}};
+
+// ================================================================
+// VALIDATION
+// ================================================================
+const DOMAINES_JETABLES=['mailinator','guerrillamail','yopmail','trashmail','10minutemail','tempmail','fakeinbox','sharklasers','dispostable','maildrop'];
+
+function sanitize(str){
+  if(typeof str!=='string') return '';
+  return str.trim().replace(/[<>'"]/g,'').replace(/\s+/g,' ');
+}
+function capitaliser(s){
+  return s.split(/(\s+|-)/).map(w=>w.length>0?w[0].toUpperCase()+w.slice(1).toLowerCase():w).join('');
+}
+function validerNom(v){
+  const s=sanitize(v);
+  if(!s||s.length<2) return {ok:false,msg:"Minimum 2 caractères."};
+  if(s.length>60) return {ok:false,msg:"60 caractères maximum."};
+  if(!/^[a-zA-ZÀ-ÿ\s'\-]+$/.test(s)) return {ok:false,msg:"Lettres, espaces, tirets et apostrophes uniquement."};
+  return {ok:true,val:capitaliser(s)};
+}
+function validerEmail(v){
+  const s=sanitize(v).toLowerCase();
+  if(!s) return {ok:false,msg:"L'adresse email est obligatoire."};
+  const re=/^[a-z0-9._%+\-]{1,64}@[a-z0-9.\-]{1,253}\.[a-z]{2,}$/;
+  if(!re.test(s)) return {ok:false,msg:"Format invalide. Ex : prenom@domaine.fr"};
+  if(/\.\./.test(s)) return {ok:false,msg:"Points consécutifs non autorisés."};
+  const [local]=s.split('@');
+  if(local.startsWith('.')||local.endsWith('.')) return {ok:false,msg:"Format invalide avant le @."};
+  const domaine=s.split('@')[1]||'';
+  if(DOMAINES_JETABLES.some(d=>domaine.includes(d))) return {ok:false,msg:"Adresse email temporaire non acceptée."};
+  const tld=domaine.split('.').pop();
+  if(!tld||tld.length<2) return {ok:false,msg:"Extension de domaine invalide."};
+  return {ok:true,val:s};
+}
+function validerTelephone(v,prefix){
+  // Nettoyage : supprimer espaces, points, tirets, slashes, parenthèses
+  let s=sanitize(v).replace(/[\s.\-\/\(\)]/g,'');
+  if(!s) return {ok:false,msg:"Le numéro de téléphone est obligatoire."};
+  if(/[a-zA-Z]/.test(s)) return {ok:false,msg:"Lettres non autorisées."};
+  if(/[^0-9+]/.test(s)) return {ok:false,msg:"Caractères non autorisés (chiffres et + uniquement)."};
+  if(prefix==='+33'){
+    // Accepter 06..., 07..., 01..., +336..., etc.
+    let n=s.replace(/^\+33/,'').replace(/^0/,'');
+    // Supprimer éventuel 33 en double
+    if(n.startsWith('33')) n=n.slice(2);
+    if(!/^[1-9][0-9]{8}$/.test(n)) return {ok:false,msg:"Numéro français invalide. Ex : 06 12 34 56 78"};
+    const fmt=n.replace(/(\d)(\d{2})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4 $5');
+    return {ok:true,val:'+33 '+fmt};
+  }
+  if(prefix==='+32'){
+    let n=s.replace(/^\+32/,'').replace(/^0/,'');
+    if(!/^[1-9][0-9]{7,8}$/.test(n)) return {ok:false,msg:"Numéro belge invalide. Ex : 0470 12 34 56"};
+    return {ok:true,val:'+32 '+n};
+  }
+  if(prefix==='+212'){
+    let n=s.replace(/^\+212/,'').replace(/^0/,'');
+    if(!/^[5-9][0-9]{8}$/.test(n)) return {ok:false,msg:"Numéro marocain invalide. Ex : 06 12 34 56 78"};
+    return {ok:true,val:'+212 '+n};
+  }
+  if(prefix==='+216'){
+    let n=s.replace(/^\+216/,'').replace(/^0/,'');
+    if(!/^[2-9][0-9]{7}$/.test(n)) return {ok:false,msg:"Numéro tunisien invalide."};
+    return {ok:true,val:'+216 '+n};
+  }
+  if(prefix==='+213'){
+    let n=s.replace(/^\+213/,'').replace(/^0/,'');
+    if(!/^[5-7][0-9]{8}$/.test(n)) return {ok:false,msg:"Numéro algérien invalide."};
+    return {ok:true,val:'+213 '+n};
+  }
+  // International générique
+  const full=s.startsWith('+')?s:prefix+s.replace(/^0/,'');
+  if(!/^\+[1-9][0-9]{6,14}$/.test(full)) return {ok:false,msg:"Numéro international invalide."};
+  return {ok:true,val:full};
+}
+function validerDateNaissance(v,typeInscription){
+  if(!v) return {ok:false,msg:"La date de naissance est obligatoire."};
+  const d=new Date(v);
+  if(isNaN(d.getTime())) return {ok:false,msg:"Date invalide."};
+  const now=new Date();
+  if(d>now) return {ok:false,msg:"La date ne peut pas être dans le futur."};
+  const age=Math.floor((now-d)/(365.25*24*3600*1000));
+  if(age>120) return {ok:false,msg:"Date de naissance irréaliste."};
+  if(typeInscription==='enfant'){if(age<4) return {ok:false,msg:"L'enfant doit avoir au moins 4 ans."};if(age>14) return {ok:false,msg:"Les cours enfants sont pour les 4-14 ans."};} 
+  else {if(age<13) return {ok:false,msg:"13 ans minimum."}}
+  return {ok:true,val:v,age};
+}
+function validerRemarque(v){
+  const s=sanitize(v||'');
+  if(s.length>500) return {ok:false,msg:"500 caractères maximum."};
+  return {ok:true,val:s};
+}
+function dateMax(){return new Date().toISOString().split('T')[0];}
+
+// ================================================================
+// ÉTAPE 1
+// ================================================================
+function selectType(t){
+  state.type=t;
+  document.getElementById('card-enfant').classList.toggle('selected',t==='enfant');
+  document.getElementById('card-adulte').classList.toggle('selected',t==='adulte');
+  document.getElementById('btn1').disabled=false;
+}
+
+// ================================================================
+// ÉTAPE 2 — Formulaire
+// ================================================================
+function buildForm(){
+  const c=document.getElementById('form-fields');
+  document.getElementById('step2-title').textContent=state.type==='enfant'?"Informations sur l'enfant":"Vos informations";
+  const pfx=`<option value="+33">🇫🇷 +33</option><option value="+32">🇧🇪 +32</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="+213">🇩🇿 +213</option><option value="+44">🇬🇧 +44</option><option value="+1">🇺🇸 +1</option>`;
+  if(state.type==='enfant'){
+    c.innerHTML=`
+      <div class="grid2">
+        <div class="field"><label>Prénom de l'enfant <span class="req">*</span></label><div class="input-wrap"><input type="text" id="f_prenom" placeholder="Prénom" maxlength="60" oninput="vlive('f_prenom','nom')"/><span class="valid-icon" id="vi_f_prenom">✓</span><span class="invalid-icon" id="ii_f_prenom">✗</span></div><span class="field-error" id="fe_f_prenom"></span></div>
+        <div class="field"><label>Nom <span class="req">*</span></label><div class="input-wrap"><input type="text" id="f_nom" placeholder="Nom" maxlength="60" oninput="vlive('f_nom','nom')"/><span class="valid-icon" id="vi_f_nom">✓</span><span class="invalid-icon" id="ii_f_nom">✗</span></div><span class="field-error" id="fe_f_nom"></span></div>
+      </div>
+      <div class="field"><label>Date de naissance <span class="req">*</span></label><div class="input-wrap"><input type="date" id="f_ddn" max="${dateMax()}" onchange="vlive('f_ddn','date')"/><span class="valid-icon" id="vi_f_ddn">✓</span><span class="invalid-icon" id="ii_f_ddn">✗</span></div><span class="field-error" id="fe_f_ddn"></span><span class="field-hint">Entre 4 et 14 ans</span></div>
+      <div class="field"><label>Prénom du parent / tuteur <span class="req">*</span></label><div class="input-wrap"><input type="text" id="f_parent" placeholder="Votre prénom" maxlength="60" oninput="vlive('f_parent','nom')"/><span class="valid-icon" id="vi_f_parent">✓</span><span class="invalid-icon" id="ii_f_parent">✗</span></div><span class="field-error" id="fe_f_parent"></span></div>
+      <div class="field"><label>Email du parent <span class="req">*</span></label><div class="input-wrap"><input type="email" id="f_email" placeholder="votre@email.fr" maxlength="100" oninput="vlive('f_email','email')"/><span class="valid-icon" id="vi_f_email">✓</span><span class="invalid-icon" id="ii_f_email">✗</span></div><span class="field-error" id="fe_f_email"></span></div>
+      <div class="field"><label>Téléphone du parent <span class="req">*</span></label><div class="phone-wrap"><select class="phone-prefix" id="f_tel_prefix">${pfx}</select><div class="input-wrap" style="flex:1"><input type="tel" id="f_tel" placeholder="06 12 34 56 78" maxlength="20" onblur="vlive('f_tel','tel')" oninput="clearTelError()"/><span class="valid-icon" id="vi_f_tel">✓</span><span class="invalid-icon" id="ii_f_tel">✗</span></div></div><span class="field-error" id="fe_f_tel"></span></div>`;
+  } else {
+    c.innerHTML=`
+      <div class="grid2">
+        <div class="field"><label>Prénom <span class="req">*</span></label><div class="input-wrap"><input type="text" id="f_prenom" placeholder="Prénom" maxlength="60" oninput="vlive('f_prenom','nom')"/><span class="valid-icon" id="vi_f_prenom">✓</span><span class="invalid-icon" id="ii_f_prenom">✗</span></div><span class="field-error" id="fe_f_prenom"></span></div>
+        <div class="field"><label>Nom <span class="req">*</span></label><div class="input-wrap"><input type="text" id="f_nom" placeholder="Nom" maxlength="60" oninput="vlive('f_nom','nom')"/><span class="valid-icon" id="vi_f_nom">✓</span><span class="invalid-icon" id="ii_f_nom">✗</span></div><span class="field-error" id="fe_f_nom"></span></div>
+      </div>
+      <div class="field"><label>Date de naissance <span class="req">*</span></label><div class="input-wrap"><input type="date" id="f_ddn" max="${dateMax()}" onchange="vlive('f_ddn','date')"/><span class="valid-icon" id="vi_f_ddn">✓</span><span class="invalid-icon" id="ii_f_ddn">✗</span></div><span class="field-error" id="fe_f_ddn"></span><span class="field-hint">13 ans minimum</span></div>
+      <div class="field"><label>Email <span class="req">*</span></label><div class="input-wrap"><input type="email" id="f_email" placeholder="votre@email.fr" maxlength="100" oninput="vlive('f_email','email')"/><span class="valid-icon" id="vi_f_email">✓</span><span class="invalid-icon" id="ii_f_email">✗</span></div><span class="field-error" id="fe_f_email"></span></div>
+      <div class="field"><label>Téléphone <span class="req">*</span></label><div class="phone-wrap"><select class="phone-prefix" id="f_tel_prefix">${pfx}</select><div class="input-wrap" style="flex:1"><input type="tel" id="f_tel" placeholder="06 12 34 56 78" maxlength="20" onblur="vlive('f_tel','tel')" oninput="clearTelError()"/><span class="valid-icon" id="vi_f_tel">✓</span><span class="invalid-icon" id="ii_f_tel">✗</span></div></div><span class="field-error" id="fe_f_tel"></span></div>
+      <div class="field"><label>Pays / Ville <span style="color:#aaa;font-weight:400">(optionnel)</span></label><input type="text" id="f_ville" placeholder="Paris, France" maxlength="80"/></div>`;
+  }
+}
+
+function vlive(id,type){
+  const el=document.getElementById(id);
+  if(!el||el.value.trim()===''){
+    if(el) el.className='';
+    ['vi_','ii_'].forEach(p=>{const x=document.getElementById(p+id);if(x)x.style.display='none';});
+    const fe=document.getElementById('fe_'+id);if(fe){fe.textContent='';fe.classList.remove('show');}
+    return;
+  }
+  let res;
+  if(type==='nom') res=validerNom(el.value);
+  else if(type==='email') res=validerEmail(el.value);
+  else if(type==='tel'){const p=document.getElementById('f_tel_prefix')?.value||'+33';res=validerTelephone(el.value,p);}
+  else if(type==='date') res=validerDateNaissance(el.value,state.type);
+  else return;
+  const vi=document.getElementById('vi_'+id),ii=document.getElementById('ii_'+id),fe=document.getElementById('fe_'+id);
+  if(res.ok){el.classList.add('valid');el.classList.remove('invalid');if(vi)vi.style.display='block';if(ii)ii.style.display='none';if(fe){fe.textContent='';fe.classList.remove('show');}}
+  else{el.classList.add('invalid');el.classList.remove('valid');if(vi)vi.style.display='none';if(ii)ii.style.display='block';if(fe){fe.textContent=res.msg;fe.classList.add('show');}}
+}
+
+function clearTelError(){
+  // Pendant la saisie : effacer l'erreur sans revalider
+  const fe=document.getElementById('fe_f_tel');
+  const el=document.getElementById('f_tel');
+  const vi=document.getElementById('vi_f_tel');
+  const ii=document.getElementById('ii_f_tel');
+  if(el&&el.value.trim()===''){
+    el.classList.remove('valid','invalid');
+    if(vi)vi.style.display='none';if(ii)ii.style.display='none';
+    if(fe){fe.textContent='';fe.classList.remove('show');}
+  } else if(el&&el.classList.contains('invalid')){
+    // Effacer l'erreur rouge pendant la frappe
+    if(fe){fe.textContent='';fe.classList.remove('show');}
+  }
+}
+
+function validerEtape2(){
+  const errEl=document.getElementById('err2');errEl.className='alert';errEl.textContent='';
+  const champs=state.type==='enfant'?[['f_prenom','nom'],['f_nom','nom'],['f_ddn','date'],['f_parent','nom'],['f_email','email'],['f_tel','tel']]:[['f_prenom','nom'],['f_nom','nom'],['f_ddn','date'],['f_email','email'],['f_tel','tel']];
+  let err=false;
+  champs.forEach(([id,type])=>{
+    const el=document.getElementById(id);if(!el)return;
+    let res;
+    if(type==='nom')res=validerNom(el.value);else if(type==='email')res=validerEmail(el.value);else if(type==='tel'){const p=document.getElementById('f_tel_prefix')?.value||'+33';res=validerTelephone(el.value,p);}else if(type==='date')res=validerDateNaissance(el.value,state.type);
+    if(!res||!res.ok){err=true;el.classList.add('invalid');el.classList.remove('valid');const fe=document.getElementById('fe_'+id);if(fe&&res){fe.textContent=res.msg;fe.classList.add('show');}}
+  });
+  if(err){errEl.textContent='Veuillez corriger les erreurs ci-dessus.';errEl.className='alert error';return;}
+  const prefix=document.getElementById('f_tel_prefix')?.value||'+33';
+  const telRes=validerTelephone(document.getElementById('f_tel').value,prefix);
+  state.form={prenom:validerNom(document.getElementById('f_prenom').value).val||'',nom:validerNom(document.getElementById('f_nom').value).val||'',email:validerEmail(document.getElementById('f_email').value).val||'',telephone:telRes.ok?telRes.val:'',dateNaissance:document.getElementById('f_ddn')?.value||'',prenomParent:state.type==='enfant'?(validerNom(document.getElementById('f_parent').value).val||''):'',ville:sanitize(document.getElementById('f_ville')?.value||'')};
+  goStep(3);
+}
+
+// ================================================================
+// ÉTAPE 3 — Matière
+// ================================================================
+function selectMatiere(m){
+  state.matiere=m;state.niveau=null;state.classe=null;state.slot=null;
+  document.getElementById('card-arabe').classList.toggle('selected',m==='arabe');
+  document.getElementById('card-croyance').classList.toggle('selected',m==='croyance');
+  document.getElementById('btn3').disabled=false;
+}
+
+// ================================================================
+// ÉTAPE 4 — Niveaux + créneaux intégrés
+// ================================================================
+function buildNiveaux(){
+  const cfg=getConfig();
+  const niveaux=cfg.niveaux[state.matiere]||[];
+  state.niveau=null;state.classe=null;state.slot=null;
+  document.getElementById('btn4').disabled=true;
+  document.getElementById('step4-title').textContent=state.matiere==='arabe'?"Section Arabe — Choisissez le niveau":"Section Croyance — Choisissez le niveau";
+  let html='';
+  niveaux.forEach((nv,ni)=>{
+    // Trouver la classe liée à ce niveau
+    const classe=cfg.classes.find(c=>c.niveauId===nv.id&&c.matiere===state.matiere);
+    const places=classe?classe.capacite-classe.inscrits:0;
+    const complet=!classe||places<=0;
+    const pct=classe?Math.round((classe.inscrits/classe.capacite)*100):100;
+    const placesCls=pct>=100?'full':pct>=80?'warn':'';
+    const placesLabel=complet?'Complet':(places===1?'1 place restante':places+' places restantes');
+
+    let details='';
+    if(nv.objectifs&&nv.objectifs.length){details+=`<div class="nv-section"><div class="nv-section-title">Objectifs</div><ul class="nv-list">`;nv.objectifs.forEach(o=>{details+=`<li>${sanitize(o)}</li>`;});details+=`</ul></div>`;}
+    if(nv.themes&&nv.themes.length){details+=`<div class="nv-section"><div class="nv-section-title">Thèmes étudiés</div><ul class="nv-list">`;nv.themes.forEach(t=>{details+=`<li>${sanitize(t)}</li>`;});details+=`</ul></div>`;}
+    if(nv.competences&&nv.competences.length){details+=`<div class="nv-section"><div class="nv-section-title">Compétences</div><ul class="nv-list">`;nv.competences.forEach(c=>{details+=`<li>${sanitize(c)}</li>`;});details+=`</ul></div>`;}
+    if(nv.exemples&&nv.exemples.length){details+=`<div class="nv-section"><div class="nv-section-title">Exemples</div><ul class="nv-list">`;nv.exemples.forEach(e=>{details+=`<li>${sanitize(e)}</li>`;});details+=`</ul></div>`;}
+
+    // Créneaux actifs de la classe
+    let slotsHtml='';
+    if(classe&&!complet){
+      const creneaux=classe.creneaux.filter(cr=>cr.actif);
+      if(creneaux.length){
+        slotsHtml+=`<div class="nv-slots"><div class="nv-slots-title">📅 Créneaux disponibles — ${sanitize(classe.nom)}</div>`;
+        creneaux.forEach(cr=>{
+          slotsHtml+=`<span class="slot-pill" id="pill-${cr.id}" onclick="selectSlot('${cr.id}',${ni})">
+            <span class="slot-pill-time">${sanitize(cr.jour)} · ${sanitize(cr.heure)}</span>
+            <span class="slot-pill-places">${placesLabel}</span>
+          </span>`;
+        });
+        slotsHtml+=`</div>`;
+      }
+    }
+
+    const cardCls="nv-card"+(complet?" complet":"");
+    const clickAttr=complet?"":`onclick="selectNiveau(${ni})"`;
+    const badgeCls="nv-badge"+(complet?" complet-badge":"");
+
+    html+=`<div class="${cardCls}" id="nv-${ni}" ${clickAttr}>
+      <div class="nv-header">
+        <div class="nv-left">
+          ${classe?`<div class="nv-classe">${sanitize(classe.nom)}</div>`:''}
+          <span class="${badgeCls}">${sanitize(nv.badge)}</span>
+          <div class="nv-nom">${sanitize(nv.nom)}</div>
+          <div class="nv-public">${sanitize(nv.public)}</div>
+          <div class="nv-places">
+            <div class="places-bar"><div class="places-fill ${placesCls}" style="width:${Math.min(pct,100)}%"></div></div>
+            <span class="places-txt ${placesCls}">${complet?'Complet':placesLabel}</span>
+          </div>
+        </div>
+        <div class="nv-check" id="nvc-${ni}">✓</div>
+      </div>
+      <div class="nv-body" id="nvb-${ni}">${details}</div>
+      <button class="nv-toggle" onclick="toggleNiveau(event,${ni})" id="nvt-${ni}">Voir le programme ▾</button>
+      ${slotsHtml}
+    </div>`;
+  });
+  document.getElementById('niveau-container').innerHTML=html;
+}
+
+function toggleNiveau(e,i){
+  e.stopPropagation();
+  const body=document.getElementById('nvb-'+i),btn=document.getElementById('nvt-'+i);
+  const open=body.classList.toggle('open');
+  btn.textContent=open?'Masquer ▴':'Voir le programme ▾';
+}
+
+function selectNiveau(ni){
+  const cfg=getConfig();
+  const niveaux=cfg.niveaux[state.matiere]||[];
+  const nv=niveaux[ni];
+  const classe=cfg.classes.find(c=>c.niveauId===nv.id&&c.matiere===state.matiere);
+  if(!classe||classe.capacite-classe.inscrits<=0) return;
+  state.niveau=nv;state.classe=classe;state.slot=null;
+  document.querySelectorAll('.nv-card').forEach((el,idx)=>{
+    el.classList.toggle('selected',idx===ni);
+    const chk=document.getElementById('nvc-'+idx);if(chk)chk.style.display=idx===ni?'flex':'none';
+  });
+  document.querySelectorAll('.slot-pill').forEach(p=>p.classList.remove('selected'));
+  document.getElementById('btn4').disabled=true; // forcer choix créneau
+}
+
+function selectSlot(crId,ni){
+  const cfg=getConfig();
+  const niveaux=cfg.niveaux[state.matiere]||[];
+  const nv=niveaux[ni];
+  const classe=cfg.classes.find(c=>c.niveauId===nv.id&&c.matiere===state.matiere);
+  if(!classe) return;
+  const cr=classe.creneaux.find(c=>c.id===crId);
+  if(!cr||!cr.actif) return;
+  // Sélectionner le niveau si pas encore fait
+  if(!state.niveau||state.niveau.id!==nv.id) selectNiveau(ni);
+  state.slot=cr;
+  document.querySelectorAll('.slot-pill').forEach(p=>p.classList.remove('selected'));
+  document.getElementById('pill-'+crId).classList.add('selected');
+  document.getElementById('btn4').disabled=false;
+  document.getElementById('err4').className='alert';
+}
+
+// ================================================================
+// ÉTAPE 5 — Confirmation
+// ================================================================
+function buildConfirm(){
+  document.getElementById('res-badge').textContent=state.niveau?state.niveau.badge:'';
+  document.getElementById('res-niveau').textContent=state.niveau?state.niveau.nom:'';
+  document.getElementById('res-slot').textContent=state.slot?`${state.slot.jour} · ${state.slot.heure}`:'À confirmer par DARSI';
+  const t=state.type==='enfant'?'Cours enfant':'Cours adulte';
+  const inscrit=state.type==='enfant'?`${state.form.prenom} ${state.form.nom} (parent : ${state.form.prenomParent})`:`${state.form.prenom} ${state.form.nom}`;
+  const rows=[["Type",t],["Inscrit(e)",inscrit],["Email",state.form.email],["Téléphone",state.form.telephone],["Section",state.matiere==='arabe'?"Arabe":"Croyance (Aqida)"],["Classe",state.classe?state.classe.nom:'—'],["Niveau",state.niveau?state.niveau.nom:'—'],["Créneau",state.slot?`${state.slot.jour} · ${state.slot.heure}`:'À confirmer']];
+  let html='';rows.forEach(([l,v])=>{html+=`<div class="confirm-row"><span class="clabel">${l}</span><span class="cval">${v}</span></div>`;});
+  document.getElementById('confirm-summary').innerHTML=html;
+}
+
+// ================================================================
+// ENVOI
+// ================================================================
+async function submitFinal(){
+  const rq=validerRemarque(document.getElementById('remarks').value);
+  if(!rq.ok){const e=document.getElementById('err5');e.textContent=rq.msg;e.className='alert error';return;}
+  const eq=validerEmail(state.form.email);
+  if(!eq.ok){const e=document.getElementById('err5');e.textContent="Email invalide, retournez à l'étape 2.";e.className='alert error';return;}
+  document.getElementById('overlay').classList.add('show');
+  const payload={
+    type:state.type,prenom:state.form.prenom,nom:state.form.nom,email:state.form.email,telephone:state.form.telephone,
+    dateNaissance:state.form.dateNaissance,prenomParent:state.form.prenomParent,ville:state.form.ville,
+    matiere:state.matiere==='arabe'?'Section Arabe':'Section Croyance (Aqida)',
+    classe:state.classe?state.classe.nom:'',
+    niveauNom:state.niveau?state.niveau.nom:'',niveauBadge:state.niveau?state.niveau.badge:'',
+    slotJour:state.slot?state.slot.jour:'À confirmer',slotHeure:state.slot?state.slot.heure:'',
+    remarque:rq.val,timestamp:new Date().toISOString()
+  };
+  try{
+    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    document.getElementById('overlay').classList.remove('show');
+    document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
+    document.getElementById('step-ok').classList.add('active');
+    document.querySelectorAll('.ps').forEach(el=>el.classList.add('done'));
+    const m=state.type==='enfant'
+      ?`La demande pour <strong>${state.form.prenom} ${state.form.nom}</strong> a bien été envoyée. Un email de confirmation sera adressé à <strong>${state.form.email}</strong> sous 24h avec les informations de connexion Zoom.`
+      :`Votre demande a bien été envoyée. Un email de confirmation sera adressé à <strong>${state.form.email}</strong> sous 24h.`;
+    document.getElementById('success-msg').innerHTML=m;
+  }catch(err){
+    document.getElementById('overlay').classList.remove('show');
+    const e=document.getElementById('err5');e.textContent='Erreur de connexion. Vérifiez votre accès internet.';e.className='alert error';
+  }
+}
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+function goStep(n){
+  document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.ps').forEach((el,i)=>{el.classList.remove('done','active');if(i<n-1)el.classList.add('done');else if(i===n-1)el.classList.add('active');});
+  if(n===2)buildForm();
+  if(n===4)buildNiveaux();
+  if(n===5)buildConfirm();
+  const t=document.getElementById('step'+n);
+  if(t){t.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+}
+</script>
+</body>
+</html>

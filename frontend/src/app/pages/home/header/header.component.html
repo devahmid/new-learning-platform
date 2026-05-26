@@ -35,6 +35,11 @@
             <i class="fa-solid fa-user-plus"></i>
             Inscription
           </a>
+          <a routerLink="/reinscription" 
+             class="px-4 py-2 text-sm font-medium text-emerald-700 border border-emerald-200 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline">
+            <i class="fa-solid fa-rotate-right"></i>
+            Réinscription
+          </a>
         </ng-container>
 
         <ng-container *ngIf="isLoggedIn()">
@@ -74,6 +79,12 @@
             <i class="fa-solid fa-headset text-emerald-500"></i>
             Support
           </button>
+
+          <a routerLink="/reinscription" 
+             class="px-4 py-2 text-sm font-medium text-emerald-700 border border-emerald-200 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline">
+            <i class="fa-solid fa-rotate-right"></i>
+            Réinscription
+          </a>
           
           <a *ngIf="role() === 'admin'" 
              [routerLink]="validationService.isMenuItemDisabled('admin') ? null : '/admin'"
@@ -221,6 +232,13 @@
           </div>
           <span class="text-sm font-medium">Inscription</span>
         </a>
+        <a (click)="navigate('/reinscription')" 
+           class="flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline">
+          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
+            <i class="fa-solid fa-rotate-right text-emerald-600 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Réinscription</span>
+        </a>
       </ng-container>
 
       <ng-container *ngIf="isLoggedIn()">
@@ -264,6 +282,14 @@
           </div>
           <span class="text-sm font-medium">Support</span>
         </button>
+
+        <a (click)="navigate('/reinscription')" 
+           class="w-full flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline">
+          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
+            <i class="fa-solid fa-rotate-right text-emerald-600 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Réinscription</span>
+        </a>
         
         <!-- Bouton Zoom mobile -->
         <button (click)="goToZoom()" 
