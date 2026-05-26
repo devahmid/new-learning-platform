@@ -18,4 +18,9 @@ export interface ParentRegistration {
   wasRegisteredLastYear?: boolean;
   previousInscription?: boolean;
   children: Child[];
+  // Optional fields used by admin UI / backend
+  requestType?: 'new' | 'renewal' | string;
+  schoolYear?: string;
+  status?: string;
+  notes?: string;
 }

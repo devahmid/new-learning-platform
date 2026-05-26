@@ -420,6 +420,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'reinscriptions',
+        loadComponent: () =>
+          import('./admin/reinscription-admin/reinscription-admin.component').then(
+            (m) => m.ReinscriptionAdminComponent
+          ),
+      },
+      {
         path: 'courses/populaires',
         loadComponent: () =>
           import('./admin/courses/populaires/populaires.component').then(

@@ -1,0 +1,160 @@
+<div class="admin-shell">
+  <div class="admin-top">
+    <h2>Réinscriptions — Administration</h2>
+    <div class="actions">
+      <button class="btn" (click)="load()">Rafraîchir</button>
+      <button class="btn" (click)="exportCSV()">Exporter CSV</button>
+      <button class="btn" (click)="exportChildren()">Exporter enfants</button>
+    </div>
+  </div>
+
+    <!-- Overview stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">{{ totalParents }}</div><div class="stat-label">Parents</div></div>
+      <div class="stat-card"><div class="stat-num">{{ totalChildren }}</div><div class="stat-label">Enfants</div></div>
+      <div class="stat-card"><div class="stat-num">{{ pendingCount }}</div><div class="stat-label">En attente</div></div>
+      <div class="stat-card"><div class="stat-num">{{ schoolYears.length }}</div><div class="stat-label">Années</div></div>
+    </div>
+
+    <div class="filters">
+    <div style="display:flex;gap:8px">
+      <button class="btn" [class.active]="viewMode==='parents'" (click)="viewMode='parents'">Parents + enfants</button>
+      <button class="btn" [class.active]="viewMode==='children'" (click)="viewMode='children'">Enfants seuls</button>
+    </div>
+    <input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="Recherche par parent/enfant/email..." />
+    <select [(ngModel)]="filterStatus" (change)="applyFilters()">
+      <option value="">Tous les statuts</option>
+      <option value="pending">Pending</option>
+      <option value="in_review">In review</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+    </select>
+    <select [(ngModel)]="filterRequestType" (change)="applyFilters()">
+      <option value="">Tous</option>
+      <option value="new">Nouvelle</option>
+      <option value="renewal">Réinscription</option>
+    </select>
+    <select [(ngModel)]="filterYear" (change)="applyFilters()">
+      <option value="">Année scolaire</option>
+      <option *ngFor="let y of schoolYears" [value]="y">{{y}}</option>
+    </select>
+      <select [(ngModel)]="filterLevel" (change)="applyFilters()">
+        <option value="">Niveau enfant</option>
+        <option *ngFor="let l of levels" [value]="l">Niveau {{l}}</option>
+      </select>
+    <button class="btn btn-clear" (click)="clearFilters()">Effacer</button>
+  </div>
+
+    <div class="overview-and-table">
+      <div class="card summary-card">
+        <div class="card-header"><span class="card-title">Par niveau</span></div>
+        <div class="card-body">
+          <div *ngIf="levels.length===0">Aucun enfant enregistré.</div>
+          <div *ngFor="let s of levelStats" class="classe-row" (click)="filterLevel = s.level; applyFilters()" style="cursor:pointer">
+            <div><strong>Niveau {{s.level}}</strong></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="cap-wrap" style="flex:1">
+                <div class="cap-bar"><div class="cap-fill {{s.cls}}" [style.width.%]="s.percent"></div></div>
+                <div class="cap-txt {{s.cls}}">{{s.children}} / {{s.capacity}}</div>
+              </div>
+            </div>
+            <div>Parents: {{s.parents}}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+    <!-- Parents view -->
+    <table *ngIf="viewMode==='parents'" class="admin-table">
+      <thead>
+        <tr>
+          <th>Parent</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Type</th>
+          <th>Année</th>
+          <th>Enfants</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let r of filtered">
+          <tr>
+            <td>
+              <button class="btn btn-sm" (click)="$event.stopPropagation(); toggleExpand(r.id)">
+                {{ isExpanded(r.id) ? '▾' : '▸' }}
+              </button>
+              {{r.fullName}}
+            </td>
+            <td>{{r.email}}</td>
+            <td>{{r.phone}}</td>
+            <td>{{r.requestType}}</td>
+            <td>{{r.schoolYear}}</td>
+            <td>{{r.children.length}}</td>
+            <td>{{r.status}}</td>
+            <td class="actions-col">
+              <button class="btn" (click)="setStatus(r.id,'approved')">Approuver</button>
+              <button class="btn" (click)="setStatus(r.id,'rejected')">Rejeter</button>
+            </td>
+          </tr>
+          <tr *ngIf="isExpanded(r.id)">
+            <td colspan="8" class="children-row">
+              <div *ngIf="r.children.length===0" class="empty">Aucun enfant renseigné</div>
+              <div *ngIf="r.children.length>0">
+                <table style="width:100%;border-collapse:collapse">
+                  <thead>
+                    <tr><th>Prénom</th><th>Nom</th><th>Date de naissance</th><th>Niveau</th><th>Détails activité</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let c of r.children">
+                      <td style="padding:6px">{{c.firstName}}</td>
+                      <td style="padding:6px">{{c.lastName}}</td>
+                      <td style="padding:6px">{{c.birthDate}}</td>
+                      <td style="padding:6px">{{c.arabicLevel}}</td>
+                      <td style="padding:6px">{{c.activityDetails}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- debug removed: raw JSON hidden in production UI -->
+            </td>
+          </tr>
+        </ng-container>
+        <tr *ngIf="filtered.length===0">
+          <td colspan="8" class="empty">Aucune réinscription trouvée.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Children-only view -->
+    <table *ngIf="viewMode==='children'" class="admin-table">
+      <thead>
+        <tr>
+          <th (click)="sortChildren('parentName')">Parent</th>
+          <th (click)="sortChildren('parentEmail')">Email</th>
+          <th (click)="sortChildren('childFirstName')">Prénom</th>
+          <th (click)="sortChildren('childLastName')">Nom</th>
+          <th (click)="sortChildren('childBirthDate')">Naissance</th>
+          <th (click)="sortChildren('childArabicLevel')">Niveau</th>
+          <th (click)="sortChildren('schoolYear')">Année</th>
+          <th (click)="sortChildren('status')">Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of filteredChildren">
+          <td>{{c.parentName}}</td>
+          <td>{{c.parentEmail}}</td>
+          <td>{{c.childFirstName}}</td>
+          <td>{{c.childLastName}}</td>
+          <td>{{c.childBirthDate}}</td>
+          <td>{{c.childArabicLevel}}</td>
+          <td>{{c.schoolYear}}</td>
+          <td>{{c.status}}</td>
+        </tr>
+        <tr *ngIf="filteredChildren.length===0"><td colspan="8" class="empty">Aucun enfant trouvé.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

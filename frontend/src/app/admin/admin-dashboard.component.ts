@@ -229,6 +229,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       route: '/admin/settings',
       permission: 'canManageSystem',
     },
+    {
+      label: 'Gérer les réinscriptions',
+      icon: 'fa-solid fa-rotate-right',
+      type: 'primary',
+      route: '/admin/reinscriptions',
+    },
   ];
 
   // Nouvelles fonctionnalités
@@ -476,7 +482,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       this.router.navigate([action.route]);
       return;
     }
-    if (!this.hasPermission(action.permission)) {
+    if (action.permission && !this.hasPermission(action.permission)) {
       this.showError('Permission insuffisante pour cette action');
       return;
     }
@@ -555,8 +561,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // 🔒 Vérifier les permissions
   hasPermission(permission: string): boolean {
-    const permissions = this.permissions;
-    return permissions ? permissions[permission] : false;
+    const permissions = this.permissions as any;
+    if (!permissions) return false;
+    // Super-admin fallbacks
+    if (permissions.isAdmin === true) return true;
+    if (permissions.role === 'admin') return true;
+    if (Array.isArray(permissions.roles) && permissions.roles.includes('admin')) return true;
+    // Default check by key
+    return permission ? !!permissions[permission] : false;
   }
 
   // 🚨 Afficher une erreur
