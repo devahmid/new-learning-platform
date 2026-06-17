@@ -182,8 +182,8 @@ export class ReinscriptionComponent implements OnInit {
         this.submitting = false;
         this.submitted = true;
         this.successMessage = this.profileMode === 'connected'
-          ? 'Votre réinscription a bien été envoyée. Vos informations ont été reprises depuis votre compte et restent modifiables avant validation.'
-          : 'Votre demande de réinscription a bien été envoyée. Nous reviendrons vers vous pour la validation.';
+          ? 'Votre réinscription a bien été envoyée. Un email de récapitulatif a été envoyé à votre adresse et vos informations ont été reprises depuis votre compte.'
+          : 'Votre demande de réinscription a bien été envoyée. Un email de récapitulatif a été envoyé à votre adresse.';
       },
       error: () => {
         this.submitting = false;

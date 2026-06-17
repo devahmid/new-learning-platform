@@ -13,6 +13,7 @@ use App\Utils\Validator;
 class ReinscriptionController {
     private const ALLOWED_STATUSES = ['pending', 'in_review', 'approved', 'rejected', 'archived'];
     private const ALLOWED_REQUEST_TYPES = ['new', 'renewal'];
+    private const ADMIN_RECIPIENT_EMAIL = 'centre.culturel.olivier@gmail.com';
 
     /**
      * Liste les dossiers de réinscription
@@ -212,22 +213,77 @@ class ReinscriptionController {
     private function sendConfirmationEmail(array $reinscription) {
         try {
             $emailService = new EmailService();
-            $childrenSummary = '';
+            $childrenCards = '';
 
-            foreach ($reinscription['children'] as $child) {
-                $childrenSummary .= '<li>' . htmlspecialchars($child['firstName']) . ' ' . htmlspecialchars($child['lastName']) . ' - niveau ' . (int) $child['arabicLevel'] . '</li>';
+            foreach (($reinscription['children'] ?? []) as $index => $child) {
+                $activityFlags = [];
+
+                if (!empty($child['hasActivityOnWednesday'])) {
+                    $activityFlags[] = 'Mercredi';
+                }
+
+                if (!empty($child['hasActivityOnSaturday'])) {
+                    $activityFlags[] = 'Samedi';
+                }
+
+                if (!empty($child['hasActivityOnSunday'])) {
+                    $activityFlags[] = 'Dimanche';
+                }
+
+                $childrenCards .= '
+                    <div style="margin-top:16px;padding:16px;border:1px solid #e5e7eb;border-radius:14px;background:#ffffff;">
+                        <h3 style="margin:0 0 10px;font-size:16px;color:#10312a;">Enfant ' . ($index + 1) . '</h3>
+                        <p style="margin:0 0 6px;"><strong>Nom :</strong> ' . htmlspecialchars($child['firstName']) . ' ' . htmlspecialchars($child['lastName']) . '</p>
+                        <p style="margin:0 0 6px;"><strong>Date de naissance :</strong> ' . htmlspecialchars($child['birthDate']) . '</p>
+                        <p style="margin:0 0 6px;"><strong>Niveau d’arabe :</strong> ' . (int) $child['arabicLevel'] . '</p>
+                        <p style="margin:0 0 6px;"><strong>Créneaux signalés :</strong> ' . (!empty($activityFlags) ? htmlspecialchars(implode(', ', $activityFlags)) : 'Aucun') . '</p>
+                        <p style="margin:0;"><strong>Détails :</strong> ' . (!empty($child['activityDetails']) ? nl2br(htmlspecialchars($child['activityDetails'])) : 'Aucun détail ajouté') . '</p>
+                    </div>
+                ';
             }
 
+            $requestTypeLabel = $reinscription['requestType'] === 'renewal' ? 'Réinscription' : 'Nouvelle demande';
+            $acceptedConditionsLabel = !empty($reinscription['acceptedConditions']) ? 'Oui' : 'Non';
+            $notesHtml = !empty($reinscription['notes']) ? nl2br(htmlspecialchars($reinscription['notes'])) : 'Aucune note ajoutée';
+
             $content = '
-                <h2>Confirmation de votre demande de réinscription</h2>
-                <p>Bonjour ' . htmlspecialchars($reinscription['fullName']) . ',</p>
-                <p>Nous avons bien reçu votre demande de ' . ($reinscription['requestType'] === 'renewal' ? 'réinscription' : 'nouvelle demande') . ' pour l\'année ' . htmlspecialchars($reinscription['schoolYear']) . '.</p>
-                <p><strong>Enfants concernés :</strong></p>
-                <ul>' . $childrenSummary . '</ul>
-                <p>Notre équipe vérifiera votre dossier et reviendra vers vous si nécessaire.</p>
+                <div style="font-family:Arial,sans-serif;line-height:1.6;color:#1f2937;background:#f8faf9;padding:24px;">
+                    <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #dbe7df;border-radius:20px;overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#10312a,#1D9E75);color:#fff;padding:28px 32px;">
+                            <h2 style="margin:0;font-size:26px;line-height:1.2;">Récapitulatif de votre demande de réinscription</h2>
+                            <p style="margin:10px 0 0;opacity:0.95;">Votre formulaire a bien été reçu pour l’année ' . htmlspecialchars($reinscription['schoolYear']) . '.</p>
+                        </div>
+                        <div style="padding:32px;">
+                            <p style="margin-top:0;">Bonjour ' . htmlspecialchars($reinscription['fullName']) . ',</p>
+                            <p>Voici le récapitulatif des informations transmises lors de l’envoi de votre formulaire.</p>
+
+                            <div style="margin-top:24px;padding:18px;border-radius:16px;background:#f5fdf8;border:1px solid #d9eadf;">
+                                <p style="margin:0 0 8px;"><strong>Type de demande :</strong> ' . htmlspecialchars($requestTypeLabel) . '</p>
+                                <p style="margin:0 0 8px;"><strong>Parent :</strong> ' . htmlspecialchars($reinscription['fullName']) . '</p>
+                                <p style="margin:0 0 8px;"><strong>Email :</strong> ' . htmlspecialchars($reinscription['email']) . '</p>
+                                <p style="margin:0 0 8px;"><strong>Téléphone :</strong> ' . htmlspecialchars($reinscription['phone']) . '</p>
+                                <p style="margin:0 0 8px;"><strong>Année scolaire :</strong> ' . htmlspecialchars($reinscription['schoolYear']) . '</p>
+                                <p style="margin:0;"><strong>Conditions acceptées :</strong> ' . htmlspecialchars($acceptedConditionsLabel) . '</p>
+                            </div>
+
+                            <h3 style="margin:28px 0 8px;font-size:18px;color:#10312a;">Enfants concernés</h3>
+                            ' . $childrenCards . '
+
+                            <h3 style="margin:28px 0 8px;font-size:18px;color:#10312a;">Informations complémentaires</h3>
+                            <div style="padding:18px;border-radius:16px;background:#fafcfb;border:1px solid #e5e7eb;">
+                                <p style="margin:0;"><strong>Notes :</strong><br>' . $notesHtml . '</p>
+                            </div>
+
+                            <p style="margin-top:28px;">Notre équipe va vérifier votre dossier et reviendra vers vous si nécessaire.</p>
+                            <p style="margin-bottom:0;">Si vous constatez une erreur dans ce récapitulatif, merci de nous contacter rapidement.</p>
+                        </div>
+                    </div>
+                </div>
             ';
 
-            $emailService->sendEmail($reinscription['email'], 'Confirmation de votre demande de réinscription', $content, true);
+            $subject = 'Récapitulatif de votre demande de réinscription';
+            $emailService->sendEmail($reinscription['email'], $subject, $content, true);
+            $emailService->sendEmail(self::ADMIN_RECIPIENT_EMAIL, '[Copie admin] ' . $subject, $content, true);
         } catch (\Exception $e) {
             error_log('Reinscription confirmation email error: ' . $e->getMessage());
         }

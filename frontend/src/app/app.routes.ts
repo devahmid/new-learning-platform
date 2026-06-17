@@ -204,6 +204,13 @@ export const routes: Routes = [
         canActivate: [childGuard],
       },
       {
+        path: 'evaluation',
+        loadComponent: () =>
+          import('./evaluation/evaluation.component').then(
+            (m) => m.EvaluationComponent
+          ),
+      },
+      {
         path: 'mon-compte',
         loadComponent: () =>
           import('./user/user-dashboard/user-dashboard.component').then(
