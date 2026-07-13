@@ -15,6 +15,10 @@ import { ChildContextService } from '../../../_children-context/_children-contex
 import { User } from '../../../models/user.model';
 import { ChildSelectionModalService } from '../../../shared/child-selection-modal/child-selection-modal.service';
 import { UserValidationService } from '../../../services/user-validation.service';
+import {
+  REGISTRATIONS_CLOSED,
+  REGISTRATIONS_CLOSED_MESSAGE,
+} from '../../../config/registration.config';
 
 @Component({
   selector: 'app-header',
@@ -68,6 +72,9 @@ import { UserValidationService } from '../../../services/user-validation.service
   ],
 })
 export class HeaderComponent implements OnInit {
+  readonly registrationsClosed = REGISTRATIONS_CLOSED;
+  readonly registrationsClosedMessage = REGISTRATIONS_CLOSED_MESSAGE;
+
   isLoggedIn = signal(false);
   role = signal<string | null>(null);
   fullName = signal<string | null>(null);

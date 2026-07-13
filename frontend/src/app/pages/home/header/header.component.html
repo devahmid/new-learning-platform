@@ -30,12 +30,12 @@
             <i class="fa-solid fa-sign-in-alt"></i>
             Connexion
           </a>
-          <a routerLink="/register" 
+          <a *ngIf="!registrationsClosed" routerLink="/register" 
              class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md no-underline">
             <i class="fa-solid fa-user-plus"></i>
             Inscription
           </a>
-          <a routerLink="/reinscription" 
+          <a *ngIf="!registrationsClosed" routerLink="/reinscription" 
              class="px-4 py-2 text-sm font-medium text-emerald-700 border border-emerald-200 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline">
             <i class="fa-solid fa-rotate-right"></i>
             Réinscription
@@ -87,9 +87,11 @@
           </button>
 
           <a routerLink="/reinscription" 
-             class="px-4 py-2 text-sm font-medium text-emerald-700 border border-emerald-200 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline">
-            <i class="fa-solid fa-rotate-right"></i>
-            Réinscription
+             [class]="registrationsClosed
+               ? 'px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 no-underline text-amber-700 border border-amber-200 hover:bg-amber-50'
+               : 'px-4 py-2 text-sm font-medium text-emerald-700 border border-emerald-200 hover:bg-emerald-50 rounded-lg transition-all duration-200 flex items-center gap-2 no-underline'">
+            <i class="fa-solid fa-rotate-right" [class.text-amber-500]="registrationsClosed" [class.text-emerald-500]="!registrationsClosed"></i>
+            {{ registrationsClosed ? 'Inscriptions closes' : 'Réinscription' }}
           </a>
           
           <a *ngIf="role() === 'admin'" 
@@ -231,14 +233,14 @@
           </div>
           <span class="text-sm font-medium">Connexion</span>
         </a>
-        <a (click)="navigate('/register')" 
+        <a *ngIf="!registrationsClosed" (click)="navigate('/register')" 
            class="flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline">
           <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
             <i class="fa-solid fa-user-plus text-emerald-600 text-xs"></i>
           </div>
           <span class="text-sm font-medium">Inscription</span>
         </a>
-        <a (click)="navigate('/reinscription')" 
+        <a *ngIf="!registrationsClosed" (click)="navigate('/reinscription')" 
            class="flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline">
           <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
             <i class="fa-solid fa-rotate-right text-emerald-600 text-xs"></i>
@@ -298,11 +300,15 @@
         </button>
 
         <a (click)="navigate('/reinscription')" 
-           class="w-full flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline">
-          <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200">
-            <i class="fa-solid fa-rotate-right text-emerald-600 text-xs"></i>
+           [class]="registrationsClosed
+             ? 'w-full flex items-center gap-2 p-2 rounded-lg transition-all duration-200 group no-underline text-amber-800 hover:bg-amber-50'
+             : 'w-full flex items-center gap-2 p-2 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 group no-underline'">
+          <div [class]="registrationsClosed
+                 ? 'w-6 h-6 rounded flex items-center justify-center transition-colors duration-200 bg-amber-100 group-hover:bg-amber-200'
+                 : 'w-6 h-6 bg-emerald-100 rounded flex items-center justify-center group-hover:bg-emerald-200 transition-colors duration-200'">
+            <i class="fa-solid fa-rotate-right text-xs" [class.text-amber-600]="registrationsClosed" [class.text-emerald-600]="!registrationsClosed"></i>
           </div>
-          <span class="text-sm font-medium">Réinscription</span>
+          <span class="text-sm font-medium">{{ registrationsClosed ? 'Inscriptions closes' : 'Réinscription' }}</span>
         </a>
         
         <!-- Bouton Zoom mobile -->

@@ -15,6 +15,10 @@ import { AuthService } from '../auth/auth.service';
 import { ParentService } from '../_children-context/_children-context/parent.service';
 import { RegistrationService } from '../services/registration.service';
 import { User } from '../models/user.model';
+import {
+  REGISTRATIONS_CLOSED,
+  REGISTRATIONS_CLOSED_MESSAGE,
+} from '../config/registration.config';
 
 interface ReinscriptionChildValue {
   sourceChildId?: number | null;
@@ -36,6 +40,9 @@ interface ReinscriptionChildValue {
   styleUrl: './reinscription.component.scss',
 })
 export class ReinscriptionComponent implements OnInit {
+  readonly registrationsClosed = REGISTRATIONS_CLOSED;
+  readonly registrationsClosedMessage = REGISTRATIONS_CLOSED_MESSAGE;
+
   form!: FormGroup;
   loadingProfile = true;
   submitting = false;
@@ -148,6 +155,11 @@ export class ReinscriptionComponent implements OnInit {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.errorMessage = 'Veuillez compléter les champs obligatoires avant l’envoi.';
+      return;
+    }
+
+    if (this.registrationsClosed) {
+      this.errorMessage = this.registrationsClosedMessage;
       return;
     }
 

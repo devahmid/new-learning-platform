@@ -49,10 +49,19 @@
 
       <!-- Call to Actions -->
       <div
+        *ngIf="registrationsClosed"
+        class="w-full mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+      >
+        <strong>Inscriptions closes.</strong>
+        {{ registrationsClosedMessage }}
+      </div>
+
+      <div
         id="hero-main-buttons"
         class="flex flex-col sm:flex-row items-center sm:items-stretch justify-center lg:justify-start gap-3 mb-4"
       >
         <button
+          *ngIf="!registrationsClosed"
           (click)="navigate('/register')"
           class="w-full sm:w-auto px-4 py-2 rounded-full
                  bg-gradient-to-br from-green-500 to-blue-500
@@ -63,6 +72,7 @@
           <i class="fa-solid fa-user-plus mr-1"></i>S'inscrire
         </button>
         <button
+          *ngIf="!registrationsClosed"
           (click)="navigate('/reinscription')"
           class="w-full sm:w-auto px-4 py-2 rounded-full
                  bg-white border border-emerald-500

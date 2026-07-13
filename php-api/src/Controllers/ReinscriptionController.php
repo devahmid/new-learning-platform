@@ -14,6 +14,7 @@ class ReinscriptionController {
     private const ALLOWED_STATUSES = ['pending', 'in_review', 'approved', 'rejected', 'archived'];
     private const ALLOWED_REQUEST_TYPES = ['new', 'renewal'];
     private const ADMIN_RECIPIENT_EMAIL = 'centre.culturel.olivier@gmail.com';
+    private const REGISTRATIONS_CLOSED = true;
 
     /**
      * Liste les dossiers de réinscription
@@ -61,6 +62,11 @@ class ReinscriptionController {
      */
     public function create() {
         try {
+            if (self::REGISTRATIONS_CLOSED) {
+                Response::error('Les inscriptions et réinscriptions sont actuellement closes.', 403);
+                return;
+            }
+
             $data = json_decode(file_get_contents('php://input'), true);
 
             if (!$data || !is_array($data)) {

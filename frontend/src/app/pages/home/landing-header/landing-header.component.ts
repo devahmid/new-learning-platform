@@ -2,6 +2,10 @@ import { Component, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../auth/auth.service';
+import {
+  REGISTRATIONS_CLOSED,
+  REGISTRATIONS_CLOSED_MESSAGE,
+} from '../../../config/registration.config';
 
 @Component({
     selector: 'app-landing-header',
@@ -11,6 +15,9 @@ import { AuthService } from '../../../auth/auth.service';
     styleUrls: ['./landing-header.component.scss']
 })
 export class LandingHeaderComponent {
+  readonly registrationsClosed = REGISTRATIONS_CLOSED;
+  readonly registrationsClosedMessage = REGISTRATIONS_CLOSED_MESSAGE;
+
   menuOpen = false;
   isLoggedIn = signal(false);
 
