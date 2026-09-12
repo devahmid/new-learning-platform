@@ -1,0 +1,22 @@
+.nps-btn {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgb(226 232 240);
+  background: rgb(248 250 252);
+  font-weight: 800;
+  color: rgb(15 23 42);
+  transition: 120ms ease;
+}
+
+.nps-btn:hover {
+  border-color: rgb(16 185 129);
+  background: rgb(240 253 250);
+}
+
+.nps-btn.active {
+  border-color: rgb(16 185 129);
+  background: rgb(16 185 129);
+  color: white;
+}
+

@@ -12,6 +12,7 @@ export const ApiPaths = {
   notifications: `${environment.apiUrl}/notifications`,
   registration: `${environment.apiUrl}/registration`,
   reinscriptions: `${environment.apiUrl}/reinscriptions`,
+  feedback: `${environment.apiUrl}/feedback`,
   lessonProgress: `${environment.apiUrl}/lesson-progress`,
   enrollments: `${environment.apiUrl}/enrollments`,
 };

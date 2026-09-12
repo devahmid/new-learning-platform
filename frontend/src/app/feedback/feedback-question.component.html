@@ -1,0 +1,32 @@
+<section class="rounded-2xl border border-slate-200 bg-white p-5">
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h2 class="text-lg font-bold text-slate-900">
+        {{ title }}
+        <span *ngIf="required" class="text-red-500">*</span>
+      </h2>
+      <p class="mt-1 text-sm text-slate-600">{{ description }}</p>
+    </div>
+    <div class="hidden sm:block text-xs font-semibold text-slate-500">
+      {{ value ? labelFor(value) : '—' }}
+    </div>
+  </div>
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    <button
+      type="button"
+      *ngFor="let v of scale"
+      (click)="rate.emit(v)"
+      class="rate-btn"
+      [class.active]="value === v"
+      [attr.aria-label]="title + ' : ' + labelFor(v)"
+    >
+      {{ v }}
+    </button>
+  </div>
+
+  <div class="mt-2 text-xs text-slate-500 sm:hidden">
+    {{ value ? labelFor(value) : '—' }}
+  </div>
+</section>
+

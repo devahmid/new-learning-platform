@@ -1,0 +1,22 @@
+.rate-btn {
+  min-width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 1px solid rgb(226 232 240);
+  background: rgb(248 250 252);
+  font-weight: 800;
+  color: rgb(15 23 42);
+  transition: 120ms ease;
+}
+
+.rate-btn:hover {
+  border-color: rgb(16 185 129);
+  background: rgb(240 253 250);
+}
+
+.rate-btn.active {
+  border-color: rgb(16 185 129);
+  background: rgb(16 185 129);
+  color: white;
+}
+

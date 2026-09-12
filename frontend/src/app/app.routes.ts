@@ -82,6 +82,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'avis',
+        loadComponent: () =>
+          import('./feedback/feedback.component').then(
+            (m) => m.FeedbackComponent
+          ),
+      },
+      {
         path: 'inscription-annee-prochaine',
         redirectTo: 'reinscription',
         pathMatch: 'full',
