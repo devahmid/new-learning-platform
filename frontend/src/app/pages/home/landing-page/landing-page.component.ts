@@ -20,6 +20,39 @@ import {
         HeroComponent,
     ],
     template: `
+    <!-- Popup avis (arrivée sur le site) -->
+    <div *ngIf="showSurveyPopup" class="fixed inset-0 z-50 bg-black/50 px-4 py-10 flex items-center justify-center">
+      <div class="w-full max-w-xl rounded-[28px] bg-white shadow-[0_30px_90px_rgba(15,23,42,.25)] border border-slate-200 overflow-hidden">
+        <div class="p-6 md:p-8">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="inline-flex rounded-full bg-emerald-100 px-4 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+                Votre avis compte
+              </div>
+              <h2 class="mt-3 text-2xl md:text-3xl font-black text-slate-900 leading-tight">
+                Aidez-nous à améliorer le site
+              </h2>
+              <p class="mt-3 text-sm md:text-base text-slate-600">
+                1 minute, anonyme, et très utile pour améliorer l’expérience pour le plus grand nombre.
+              </p>
+            </div>
+            <button (click)="closeSurveyPopup()" class="h-10 w-10 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+            <button (click)="closeSurveyPopup()" class="rounded-full border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-700 hover:border-emerald-300 hover:text-emerald-700 transition">
+              Plus tard
+            </button>
+            <a routerLink="/avis" (click)="closeSurveyPopup()" class="rounded-full bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700 transition no-underline text-center">
+              Donner mon avis
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <section class="mx-auto max-w-6xl px-4 pt-24 md:pt-28">
       <div *ngIf="registrationsClosed" class="rounded-[28px] border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-amber-50 p-5 md:p-6 shadow-[0_20px_60px_rgba(15,23,42,.10)]">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -90,9 +123,33 @@ export class LandingPageComponent implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
 
+  showSurveyPopup = false;
+
   ngOnInit(): void {
     if (this.auth.isLoggedIn()) {
       this.router.navigate(['/cours']);
+      return;
+    }
+
+    try {
+      const key = 'darsi_survey_popup_v1';
+      const alreadyClosed = localStorage.getItem(key) === '1';
+      if (!alreadyClosed) {
+        // small delay to avoid being too aggressive on initial render
+        setTimeout(() => (this.showSurveyPopup = true), 700);
+      }
+    } catch {
+      // ignore storage issues
+      setTimeout(() => (this.showSurveyPopup = true), 700);
+    }
+  }
+
+  closeSurveyPopup() {
+    this.showSurveyPopup = false;
+    try {
+      localStorage.setItem('darsi_survey_popup_v1', '1');
+    } catch {
+      // ignore
     }
   }
 }
