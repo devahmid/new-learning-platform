@@ -20,7 +20,7 @@ Header always set X-XSS-Protection "1; mode=block"
 
 # Headers CORS - Configuration sécurisée
 # Autoriser les domaines spécifiques
-SetEnvIf Origin "^https?://(localhost:4200|arrisala\.fr|www\.arrisala\.fr)$" CORS_ORIGIN=$0
+SetEnvIf Origin "^https?://(localhost:4200|arrisala\.fr|www\.arrisala\.fr|centre-culturel-olivier\.fr|www\.centre-culturel-olivier\.fr)$" CORS_ORIGIN=$0
 Header always set Access-Control-Allow-Origin "%{CORS_ORIGIN}e" env=CORS_ORIGIN
 Header always set Access-Control-Allow-Credentials "true"
 Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"
