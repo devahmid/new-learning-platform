@@ -441,6 +441,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'feedback',
+        loadComponent: () =>
+          import('./admin/feedback/admin-feedback.component').then(
+            (m) => m.AdminFeedbackComponent
+          ),
+      },
+      {
         path: 'courses/populaires',
         loadComponent: () =>
           import('./admin/courses/populaires/populaires.component').then(

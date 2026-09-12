@@ -235,6 +235,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       type: 'primary',
       route: '/admin/reinscriptions',
     },
+    {
+      label: 'Consulter les avis',
+      icon: 'fa-solid fa-comments',
+      type: 'info',
+      route: '/admin/feedback',
+      permission: 'canViewStats',
+    },
   ];
 
   // Nouvelles fonctionnalités
