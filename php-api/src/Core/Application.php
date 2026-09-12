@@ -263,6 +263,10 @@ class Application {
         // Routes de contact
         $this->routes['POST']['/api/contact/send'] = ['App\Controllers\ContactControllerSimple', 'sendMessage'];
         $this->routes['GET']['/api/contact/info'] = ['App\Controllers\ContactControllerSimple', 'getContactInfo'];
+
+        // Routes feedback (avis public)
+        $this->routes['POST']['/api/feedback'] = ['App\Controllers\FeedbackController', 'create'];
+        $this->routes['GET']['/api/admin/feedback'] = ['App\Controllers\FeedbackController', 'findAll'];
         
         $this->routes['GET']['/api/health'] = ['App\Controllers\HealthController', 'check'];
         
